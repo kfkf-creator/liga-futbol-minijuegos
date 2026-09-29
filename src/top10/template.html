@@ -418,21 +418,20 @@ function suggest(L, raw, found){
 //__UI__
 /* ============================ INTERFAZ ============================ */
 const $=id=>document.getElementById(id);
-const STORE_KEY="top10futbol.v3";
+const STORE_KEY="top10futbol.v4";
 
 let progress={done:{}};
 try{
   const raw=localStorage.getItem(STORE_KEY);
   if(raw){ const p=JSON.parse(raw); if(p&&p.done) progress=p; }
   else{
-    /* v2 -> v3: los niveles se reordenaron por dificultad; oid es el número antiguo */
-    const v2=localStorage.getItem("top10futbol.v2");
-    if(v2){ const p=JSON.parse(v2); if(p&&p.done) LEVELS.forEach(L=>{ if(p.done[L.oid]) progress.done[L.id]=p.done[L.oid]; }); }
-    else{
-      /* migra el progreso de la versión de 20 niveles (índice 0 = nivel 1) */
-      const old=localStorage.getItem("top10futbol.v1");
-      if(old){ const p=JSON.parse(old); if(p&&p.done) Object.keys(p.done).forEach(k=>{ const L=LEVELS.find(x=>x.oid===+k+1); if(L) progress.done[L.id]=p.done[k]; }); }
-    }
+    /* el progreso se guarda por clave estable del nivel (key). Se migra de versiones anteriores, que usaban números */
+    const read=k=>{ try{ const p=JSON.parse(localStorage.getItem(k)); return p&&p.done?p.done:null; }catch(e){ return null; } };
+    const v3=read("top10futbol.v3"), v2=read("top10futbol.v2"), v1=read("top10futbol.v1");
+    const put=(L,s)=>{ if(s && (!progress.done[L.key]||progress.done[L.key]<s)) progress.done[L.key]=s; };
+    if(v3) LEVELS.forEach(L=>{ if(L.v3) put(L,v3[L.v3]); });
+    else if(v2) LEVELS.forEach(L=>{ if(L.oid<=100) put(L,v2[L.oid]); });
+    else if(v1) Object.keys(v1).forEach(k=>{ const L=LEVELS.find(x=>x.oid===+k+1); if(L) put(L,v1[k]); });
     localStorage.setItem(STORE_KEY,JSON.stringify(progress));
   }
 }catch(e){}
@@ -485,15 +484,15 @@ function renderFilters(){
 }
 
 function firstPending(list){
-  for(const i of list) if(!progress.done[LEVELS[i].id]) return i;
+  for(const i of list) if(!progress.done[LEVELS[i].key]) return i;
   return list.length?list[0]:0;
 }
 
 function renderMenu(){
   const total=LEVELS.length;
-  const done=LEVELS.filter(L=>progress.done[L.id]).length;
+  const done=LEVELS.filter(L=>progress.done[L.key]).length;
   const list=visible();
-  const doneVis=list.filter(i=>progress.done[LEVELS[i].id]).length;
+  const doneVis=list.filter(i=>progress.done[LEVELS[i].key]).length;
   $("sub").textContent=total+" niveles de fútbol europeo: ligas, selecciones, jugadores, equipos, entrenadores, estadios y curiosidades.";
   $("summary").textContent=done+" de "+total+" superados"+(list.length<total?" ("+doneVis+" de "+list.length+" en este filtro)":"");
   $("playNext").textContent=doneVis===0?"Empezar":(doneVis>=list.length?"Jugar otra vez":"Continuar");
@@ -507,13 +506,13 @@ function renderMenu(){
     const L=LEVELS[i];
     const b=document.createElement("button");
     b.type="button";
-    b.className="lvl"+(progress.done[L.id]?" done":"");
+    b.className="lvl"+(progress.done[L.key]?" done":"");
     const num=document.createElement("span"); num.className="num"; num.textContent=L.id;
     const bd=document.createElement("span"); bd.className="badge "+L.diff; bd.textContent=DIFF_NAME[L.diff];
     const meta=document.createElement("span"); meta.className="meta";
     meta.textContent=(L.cur?"Curiosidad · ":"")+TYPE_NAME[L.type]+" · "+L.tag+" · "+yrsText(L);
     const st=document.createElement("span"); st.className="st";
-    st.textContent=progress.done[L.id]?starText(progress.done[L.id]):"Pendiente";
+    st.textContent=progress.done[L.key]?starText(progress.done[L.key]):"Pendiente";
     b.append(num,bd,meta,st);
     b.addEventListener("click",()=>startLevel(i,list));
     grid.appendChild(b);
@@ -619,7 +618,7 @@ function endGame(won){
   const L=LEVELS[state.idx];
   if(won){
     const s=starsFor(errors);
-    if(!progress.done[L.id] || progress.done[L.id]<s) progress.done[L.id]=s;
+    if(!progress.done[L.key] || progress.done[L.key]<s) progress.done[L.key]=s;
     saveProgress();
     $("resStars").textContent=starText(s);
     $("resTitle").textContent="Nivel superado";

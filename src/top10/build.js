@@ -11,10 +11,16 @@ levels.forEach(L=>{ if(OVERRIDE[L.id]) L.diff=OVERRIDE[L.id]; });
 /* orden de juego: por tramo (fácil, medio, difícil, leyenda), conservando el orden original dentro de cada uno */
 const RANK={facil:0,medio:1,dificil:2,leyenda:3};
 levels.forEach(L=>{ L.oid=L.id; });
+/* v3: numeración de la versión de 100 niveles (solo para migrar progreso antiguo) */
+levels.filter(L=>L.oid<=100).map((L,i)=>({L,i})).sort((a,b)=>RANK[a.L.diff]-RANK[b.L.diff]||a.i-b.i).forEach((x,k)=>{ x.L.v3=k+1; });
+/* clave estable para guardar el progreso: no cambia aunque se añadan niveles */
+const slug=s=>s.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+levels.forEach(L=>{ L.key=slug(L.title); });
+if(new Set(levels.map(L=>L.key)).size!==levels.length) throw new Error("claves de nivel repetidas");
 levels=levels.map((L,i)=>({L,i})).sort((a,b)=>RANK[a.L.diff]-RANK[b.L.diff]||a.i-b.i).map(x=>x.L);
 levels.forEach((L,i)=>{ L.id=i+1; });
 const YEARS=require("./data/years.js");
-levels.forEach(L=>{ if(!YEARS[L.title]) throw new Error("Sin rango de años: "+L.title); L.yrs=YEARS[L.title]; });
+levels.forEach(L=>{ L.yrs=YEARS[L.title]||L.yrs; if(!L.yrs) throw new Error("Sin rango de años: "+L.title); });
 const extra=require("./data/extra.js");
 const data="const LEVELS = "+JSON.stringify(levels,null,1)+";\nconst EXTRA = "+JSON.stringify(extra)+";";
 const out=fs.readFileSync("template.html","utf8").replace("/*__DATA__*/",()=>data);
