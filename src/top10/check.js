@@ -48,3 +48,12 @@ LEVELS.forEach(L=>L.answers.forEach(a=>{
 console.log("niveles:",LEVELS.length,JSON.stringify(tally));
 console.log("pools:",Object.entries(api.POOLS).map(([k,v])=>k+"="+v.length).join(" "));
 console.log(problems.length?("PROBLEMAS:\n"+problems.join("\n")):"0 problemas");
+
+/* épocas: cada nivel debe traer un rango de años válido */
+(function(){
+  const t=require("fs").readFileSync("../../top10/index.html","utf8");
+  const L=JSON.parse(t.match(/const LEVELS = (\[[\s\S]*?\]);\nconst EXTRA/)[1]);
+  let bad=0;
+  L.forEach(l=>{ if(!Array.isArray(l.yrs)||l.yrs.length!==2||!(l.yrs[0]<=l.yrs[1])||l.yrs[0]<1850||l.yrs[1]>2030){ console.log("rango de años inválido:",l.id,l.title,l.yrs); bad++; } });
+  console.log("épocas:",bad?bad+" problemas":"0 problemas");
+})();

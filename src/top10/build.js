@@ -13,6 +13,8 @@ const RANK={facil:0,medio:1,dificil:2,leyenda:3};
 levels.forEach(L=>{ L.oid=L.id; });
 levels=levels.map((L,i)=>({L,i})).sort((a,b)=>RANK[a.L.diff]-RANK[b.L.diff]||a.i-b.i).map(x=>x.L);
 levels.forEach((L,i)=>{ L.id=i+1; });
+const YEARS=require("./data/years.js");
+levels.forEach(L=>{ if(!YEARS[L.title]) throw new Error("Sin rango de años: "+L.title); L.yrs=YEARS[L.title]; });
 const extra=require("./data/extra.js");
 const data="const LEVELS = "+JSON.stringify(levels,null,1)+";\nconst EXTRA = "+JSON.stringify(extra)+";";
 const out=fs.readFileSync("template.html","utf8").replace("/*__DATA__*/",()=>data);

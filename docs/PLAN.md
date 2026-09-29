@@ -44,3 +44,8 @@ Web instalable (PWA) con minijuegos diarios de futbol en castellano, con ligas p
 - Cuentas con correo o alias y codigo de liga.
 - Nombre del producto (evitar marcas de competiciones).
 - Cuando retomar la automatizacion de contenido.
+
+## Filtro de epocas (HECHO 2026-09-30)
+- Casillas que se suman: Mediados s. XX (hasta 1979), Finales s. XX (1980-1999), Primera decada s. XXI (2000-2009), Segunda decada s. XXI (2010-2019), Actualidad (2020 en adelante). Sin nada marcado = todos.
+- Regla: un nivel se ve si todo su rango de anos queda cubierto por las epocas marcadas. Rangos en `src/top10/data/years.js` (clave = titulo del nivel); obligatorio para cada nivel nuevo (build.js falla si falta).
+- Reparto con la regla estricta: 3 / 3 / 5 / 15 / 29 niveles por epoca y 45 que abarcan varias. Pendiente: crear niveles de las epocas flojas (sobre todo mediados y finales s. XX, primera decada s. XXI).
