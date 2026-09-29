@@ -408,16 +408,22 @@ function suggest(L, raw, found){
 //__UI__
 /* ============================ INTERFAZ ============================ */
 const $=id=>document.getElementById(id);
-const STORE_KEY="top10futbol.v2";
+const STORE_KEY="top10futbol.v3";
 
 let progress={done:{}};
 try{
   const raw=localStorage.getItem(STORE_KEY);
   if(raw){ const p=JSON.parse(raw); if(p&&p.done) progress=p; }
   else{
-    /* migra el progreso de la versión de 20 niveles (índice 0 = nivel 1) */
-    const old=localStorage.getItem("top10futbol.v1");
-    if(old){ const p=JSON.parse(old); if(p&&p.done) Object.keys(p.done).forEach(k=>{ progress.done[+k+1]=p.done[k]; }); }
+    /* v2 -> v3: los niveles se reordenaron por dificultad; oid es el número antiguo */
+    const v2=localStorage.getItem("top10futbol.v2");
+    if(v2){ const p=JSON.parse(v2); if(p&&p.done) LEVELS.forEach(L=>{ if(p.done[L.oid]) progress.done[L.id]=p.done[L.oid]; }); }
+    else{
+      /* migra el progreso de la versión de 20 niveles (índice 0 = nivel 1) */
+      const old=localStorage.getItem("top10futbol.v1");
+      if(old){ const p=JSON.parse(old); if(p&&p.done) Object.keys(p.done).forEach(k=>{ const L=LEVELS.find(x=>x.oid===+k+1); if(L) progress.done[L.id]=p.done[k]; }); }
+    }
+    localStorage.setItem(STORE_KEY,JSON.stringify(progress));
   }
 }catch(e){}
 function saveProgress(){

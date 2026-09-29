@@ -10,7 +10,8 @@ const {chromium}=require(require("child_process").execSync("npm root -g").toStri
   await p.click("button.chipbtn:text-is(\"Todas\")");
   await p.click("button.chipbtn:text-is(\"Curiosidades\")");
   const cur=await p.locator(".lvl").count();
-  await p.click(".lvl");
+  const ci=await p.evaluate(()=>LEVELS.filter(L=>L.cur).findIndex(L=>/asiáticos/.test(L.title)));
+  await p.locator(".lvl").nth(ci).click();
   // Curiosidad: escribir "son h" y ver desplegable
   await p.fill("#input","hun");
   const acAfter=await p.locator("#ac li").allTextContents();
