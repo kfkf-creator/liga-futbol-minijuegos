@@ -132,6 +132,10 @@ form.guess input:disabled{opacity:.5}
 .slot .name{font-weight:700;font-size:17px;overflow-wrap:anywhere}
 .slot .det{font-size:13px;color:var(--muted)}
 .slot.hidden .name{color:#3b5a4a;letter-spacing:.3em}
+.slot.hinted .name{color:var(--gold)}
+.slot.hinted .det{color:var(--gold)}
+.gu .btn.hint{border-color:var(--gold);color:var(--gold)}
+.gu .btn.hint:disabled{opacity:.45;cursor:not-allowed}
 .slot.found{border-color:var(--accent);background:linear-gradient(90deg,#15412c,var(--panel))}
 .slot.found .rank{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .slot.found.pop{animation:pop .35s}
@@ -191,6 +195,7 @@ textarea{width:100%;background:var(--bg);color:var(--text);border:1px solid var(
         En cada nivel hay <b>10 respuestas</b> ocultas. Escribe una y elige del <b>desplegable</b> o pulsa Enter.
         Cada fallo te quita <b>una vida</b> de las <b>5</b> que tienes. Si se acaban, se muestran las respuestas que faltaban.
         Si escribes mal un nombre, el juego te propone <b>"¿Querías decir…?"</b> sin quitarte vida.
+        Con <b>💡 Pista</b> ves la primera letra de una respuesta, a cambio de una vida (y nunca con tu última vida).
         No hay límite de tiempo. Los acentos y las mayúsculas no importan.
       </p>
       <div class="stats" id="stats"></div>
@@ -243,6 +248,7 @@ textarea{width:100%;background:var(--bg);color:var(--text);border:1px solid var(
       <p class="feedback" id="feedback" aria-live="polite"></p>
       <div class="prog"><span id="progFound"></span><span id="progLives"></span>
         <span class="gu" id="gu">
+          <button class="btn hint" id="hintBtn" type="button">💡 Pista (−1 vida)</button>
           <button class="btn" id="giveUpBtn" type="button" aria-label="Rendirse y ver las respuestas">🏳️ Rendirse</button>
           <span id="giveUpAsk" hidden>
             <span class="ask">¿Ver las respuestas? El nivel cuenta como fallido.</span>
@@ -489,7 +495,7 @@ function saveProgress(){
 }
 
 const flt={diff:"all",type:"all",cur:false,eras:new Set()};
-const state={idx:0,list:[],found:new Set(),wrong:new Set(),near:new Set(),lives:MAX_LIVES,over:false,won:false};
+const state={idx:0,list:[],hints:new Set(),found:new Set(),wrong:new Set(),near:new Set(),lives:MAX_LIVES,over:false,won:false};
 
 const HEART='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
 
@@ -582,6 +588,7 @@ function startLevel(i,list){
   else if(!state.list.includes(i)) state.list=visible().includes(i)?visible():[i];
   state.idx=i;
   state.found=new Set();
+  state.hints=new Set();
   state.wrong=new Set();
   state.near=new Set();
   state.lives=MAX_LIVES;
@@ -623,6 +630,39 @@ function renderLives(hitIndex){
   }
 }
 
+
+/* ---- Pistas ----
+   Punto único de "pago": hoy una pista cuesta una vida. Cuando haya vídeo con recompensa (ver docs/PLAN.md),
+   basta con cambiar canPayHint/payHint para ofrecer "ver vídeo" en lugar de gastar vida.
+   Las estrellas salen de los errores (vidas perdidas), así que una pista cuenta como un fallo. */
+const HINT_COST_LIVES=1;
+function hintTarget(){
+  const L=LEVELS[state.idx];
+  for(let i=0;i<L.answers.length;i++) if(!state.found.has(i) && !state.hints.has(i)) return i;
+  return -1;
+}
+function canPayHint(){ return !state.over && state.lives>HINT_COST_LIVES && hintTarget()>=0; }
+function payHint(){ if(!canPayHint()) return false; state.lives-=HINT_COST_LIVES; return true; }
+function hintMask(name){
+  const s=String(name); let out=""; let first=true;
+  for(const ch of s){ if(/[\p{L}\p{N}]/u.test(ch)){ out+=first?ch:"?"; first=false; } else out+=ch; }
+  return out;
+}
+function useHint(){
+  if(state.over) return;
+  if(state.lives<=HINT_COST_LIVES){ say("No puedes pedir una pista con tu última vida.","info"); return; }
+  const i=hintTarget();
+  if(i<0){ say("No quedan respuestas para dar pista.","info"); return; }
+  if(!payHint()) return;
+  state.hints.add(i);
+  const L=LEVELS[state.idx];
+  (state.log||(state.log=[])).push({t:"(pista)",v:"pista de la respuesta "+(i+1)});
+  renderLives(state.lives);
+  render();
+  say("Pista: la respuesta n.º "+(i+1)+" empieza por «"+hintMask(L.answers[i].n).charAt(0).toUpperCase()+"». Te ha costado una vida.","info");
+  $("input").focus();
+}
+
 function render(popIdx){
   const L=LEVELS[state.idx];
   renderLives(-1);
@@ -633,18 +673,24 @@ function render(popIdx){
     const li=document.createElement("li");
     const isFound=state.found.has(i);
     const isMissed=state.over && !state.won && !isFound;
-    li.className="slot "+(isFound?"found":(isMissed?"missed":"hidden"))+(popIdx===i?" pop":"");
+    const isHint=!isFound && !isMissed && state.hints.has(i);
+    li.className="slot "+(isFound?"found":(isMissed?"missed":"hidden"))+(isHint?" hinted":"")+(popIdx===i?" pop":"");
     const rank=document.createElement("span"); rank.className="rank"; rank.textContent=i+1;
     const txt=document.createElement("div"); txt.className="txt";
     const name=document.createElement("div"); name.className="name";
     const det=document.createElement("div"); det.className="det";
     if(isFound||isMissed){ name.textContent=a.n; det.textContent=a.d; }
+    else if(isHint){ name.textContent=hintMask(a.n); det.textContent="Pista"; }
     else { name.textContent="?????"; det.textContent=""; }
     txt.append(name,det);
     li.append(rank,txt);
     ol.appendChild(li);
   });
+  const hb=$("hintBtn");
+  hb.disabled=!canPayHint();
+  hb.title=state.lives<=HINT_COST_LIVES?"Necesitas al menos 2 vidas":"Descubre la primera letra de una respuesta. Cuesta una vida";
 }
+$("hintBtn").addEventListener("click",useHint);
 
 function say(msg,kind,suggestion){
   const f=$("feedback");

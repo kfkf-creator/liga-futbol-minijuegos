@@ -61,3 +61,8 @@ Web instalable (PWA) con minijuegos diarios de futbol en castellano, con ligas p
 - Copia de seguridad por codigo de texto (`T1.<niveles>.<racha>.<control>`): guarda estrellas y racha, se recupera sumando y quedandose con lo mejor. Los ids de nivel son un hash de 5 caracteres de `key` (build.js comprueba que no haya repetidos).
 - Estadisticas en el menu: niveles superados, estrellas, perfectos, racha actual y mejor racha (dias seguidos con algun nivel superado).
 - Pendientes de la lista: PWA instalable (mejora 2), pistas opcionales, medir dificultad real con datos (necesita servidor).
+
+## Pistas y video con recompensa (pistas HECHAS 2026-09-30, video PENDIENTE)
+- Pista: boton en cada nivel, cuesta 1 vida, descubre la primera letra de una respuesta (la primera sin acertar ni pista), nunca con la ultima vida. Las estrellas salen de los errores, asi que una pista cuenta como un fallo (una pista y nada mas sigue dando 3 estrellas).
+- Punto de enganche para video: `canPayHint`/`payHint` en template.html. Cuando haya video con recompensa: ofrecer "ver video" en lugar de gastar vida, y anadir vida extra (maximo 1 por nivel, solo sin vidas, estrellas por errores reales).
+- Requisitos a confirmar antes: programa H5 Games Ads de Google (requisitos sin confirmar), probable dominio propio (~10 EUR/ano), alta de autonomo si se cobra en Espana (consultar gestor). Ingreso orientativo: ~30 EUR/mes por cada 1.000 jugadores diarios (4 USD CPM, 25% ve 1 video). No integrar hasta tener audiencia.
