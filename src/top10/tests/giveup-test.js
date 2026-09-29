@@ -1,0 +1,35 @@
+const {chromium}=require(require("child_process").execSync("npm root -g").toString().trim()+"/playwright");
+(async()=>{
+  const b=await chromium.launch({executablePath:"/opt/pw-browsers/chromium"});
+  const p=await b.newPage({viewport:{width:900,height:900}});
+  const errs=[]; p.on("pageerror",e=>errs.push(e.message)); p.on("console",m=>{if(m.type()==="error")errs.push(m.text())});
+  await p.goto("file://"+process.cwd()+"/../../top10/index.html");
+  await p.click("#playNext");
+  const r={};
+  r.flagVisible=await p.isVisible("#giveUpBtn");
+  await p.click("#giveUpBtn");
+  r.askVisible=await p.isVisible("#giveUpAsk"); r.flagHiddenWhileAsking=!(await p.isVisible("#giveUpBtn"));
+  await p.click("#giveUpNo");
+  r.backToFlag=await p.isVisible("#giveUpBtn"); r.askGone=!(await p.isVisible("#giveUpAsk"));
+  // acierta una y luego se rinde
+  const first=await p.evaluate(()=>LEVELS[state.idx].answers[0].n);
+  await p.fill("#input",first); await p.click("#sendBtn");
+  await p.click("#giveUpBtn"); await p.click("#giveUpYes");
+  r.title=await p.innerText("#resTitle");
+  r.resText=await p.innerText("#resText");
+  r.missedRows=await p.locator("li.slot.missed").count();
+  r.foundRows=await p.locator("li.slot.found").count();
+  r.hiddenRows=await p.locator("li.slot.hidden").count();
+  r.inputDisabled=await p.isDisabled("#input");
+  r.flagGoneAfter=!(await p.isVisible("#gu"));
+  r.progressSaved=await p.evaluate(()=>JSON.stringify(progress.done));
+  r.retryText=await p.innerText("#retryBtn");
+  await p.click("#retryBtn");
+  r.retryFlag=await p.isVisible("#giveUpBtn"); r.retryAskHidden=!(await p.isVisible("#giveUpAsk"));
+  r.retryLives=await p.innerText("#progLives");
+  await p.setViewportSize({width:390,height:800});
+  await p.click("#giveUpBtn"); await p.screenshot({path:"/tmp/giveup-mobile.png"});
+  r.errs=errs;
+  console.log(JSON.stringify(r,null,1));
+  await b.close();
+})();

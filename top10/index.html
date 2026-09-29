@@ -112,7 +112,11 @@ form.guess input:disabled{opacity:.5}
   border-radius:999px;padding:3px 12px;font-weight:700;
 }
 .sug:hover{background:var(--gold);color:#2a1d00}
-.prog{display:flex;gap:14px;color:var(--muted);font-size:14px;margin:0 0 12px}
+.prog{display:flex;flex-wrap:wrap;align-items:center;gap:14px;color:var(--muted);font-size:14px;margin:0 0 12px}
+.gu{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.gu .btn{padding:6px 12px;font-size:14px}
+.gu .btn.danger{border-color:var(--danger);color:var(--danger)}
+.gu .ask{color:var(--gold);font-weight:600}
 .slots{display:grid;grid-template-columns:1fr;gap:8px;margin:0;padding:0;list-style:none}
 @media(min-width:680px){.slots{grid-template-columns:1fr 1fr}}
 .slot{
@@ -203,7 +207,16 @@ form.guess input:disabled{opacity:.5}
         <button class="btn primary" type="submit" id="sendBtn">Enviar</button>
       </form>
       <p class="feedback" id="feedback" aria-live="polite"></p>
-      <div class="prog"><span id="progFound"></span><span id="progLives"></span></div>
+      <div class="prog"><span id="progFound"></span><span id="progLives"></span>
+        <span class="gu" id="gu">
+          <button class="btn" id="giveUpBtn" type="button" aria-label="Rendirse y ver las respuestas">🏳️ Rendirse</button>
+          <span id="giveUpAsk" hidden>
+            <span class="ask">¿Ver las respuestas? El nivel cuenta como fallido.</span>
+            <button class="btn danger" id="giveUpYes" type="button">Sí, rendirme</button>
+            <button class="btn" id="giveUpNo" type="button">Cancelar</button>
+          </span>
+        </span>
+      </div>
 
       <ol class="slots" id="slots"></ol>
 
@@ -9891,6 +9904,8 @@ function startLevel(i,list){
   state.lives=MAX_LIVES;
   state.over=false;
   state.won=false;
+  state.gaveUp=false;
+  giveUpReset();
   const L=LEVELS[i];
   $("menu").hidden=true;
   $("game").hidden=false;
@@ -9979,9 +9994,10 @@ function endGame(won){
       : "Las 10 respuestas con "+errors+(errors===1?" fallo.":" fallos.");
   }else{
     $("resStars").textContent="";
-    $("resTitle").textContent="Te has quedado sin vidas";
+    $("resTitle").textContent=state.gaveUp?"Te has rendido":"Te has quedado sin vidas";
     $("resText").textContent="Acertaste "+state.found.size+" de "+L.answers.length+". Las que faltaban aparecen marcadas en rojo.";
   }
+  $("gu").hidden=true;
   say("","");
   const pos=state.list.indexOf(state.idx);
   const hasNext=pos>=0 && pos<state.list.length-1;
@@ -10078,6 +10094,25 @@ $("form").addEventListener("submit",e=>{
   const v=$("input").value;
   $("input").value="";
   submitGuess(v);
+});
+
+/* ---- rendirse: pide confirmación y cuenta como nivel fallido (no guarda progreso) ---- */
+function giveUpReset(){
+  $("gu").hidden=false;
+  $("giveUpBtn").hidden=false;
+  $("giveUpAsk").hidden=true;
+}
+$("giveUpBtn").addEventListener("click",()=>{
+  if(state.over) return;
+  $("giveUpBtn").hidden=true;
+  $("giveUpAsk").hidden=false;
+  $("giveUpNo").focus();
+});
+$("giveUpNo").addEventListener("click",()=>{ giveUpReset(); $("input").focus(); });
+$("giveUpYes").addEventListener("click",()=>{
+  if(state.over) return;
+  state.gaveUp=true;
+  endGame(false);
 });
 
 $("backBtn").addEventListener("click",showMenu);

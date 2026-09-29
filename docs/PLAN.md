@@ -19,10 +19,12 @@ Web instalable (PWA) con minijuegos diarios de futbol en castellano, con ligas p
 | Datos por reto | Trayectoria, Rejilla y Wordle guardan solo los datos de cada reto, revisados a mano |
 | Wordle | Solo jugadores actuales |
 | Contenido diario | Tandas revisadas por Marc, con memoria de temas y preguntas para no repetir |
+| Boton de rendirse | Pide confirmacion, muestra todas las respuestas y cuenta como nivel fallido (no guarda estrellas); se puede repetir |
+| Base de nombres | Amplia: cinco grandes ligas, otras ligas europeas, selecciones, equipos, entrenadores y estadios |
 
 ## Orden de trabajo
 
-1. Top 10 perfecto: boton de rendirse, base de nombres amplia con sugerencias al escribir, revision de dificultad de los 100 niveles.
+1. Top 10 perfecto: boton de rendirse (HECHO), base de nombres amplia con sugerencias al escribir, revision de dificultad de los 100 niveles.
 2. Base comun y minijuegos de datos cerrados: Verdadero o falso, Linea del tiempo (arrastrar), Reconstruye la tabla (arrastrar), Quiz de momentos clave, Marcador exacto, El intruso (con modo inverso), Bingo con preguntas variadas, Conexiones, Mas o menos.
 3. Minijuegos con escritura libre: Trayectoria (con variante de traspasos solo con cantidades), Rejilla de clubes, Wordle de actuales, Once oculto, Camino a la final (partidos que salen uno a uno, escritura libre, 10 puntos menos 1 por partido destapado mas 3 por el ano).
 4. Modo diario en beta cerrada, sin servidor.
