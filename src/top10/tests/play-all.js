@@ -3,7 +3,7 @@ const {chromium}=require(require("child_process").execSync("npm root -g").toStri
   const b=await chromium.launch({executablePath:"/opt/pw-browsers/chromium"});
   const p=await b.newPage({viewport:{width:390,height:800}});
   const errs=[]; p.on("pageerror",e=>errs.push(e.message));
-  await p.goto("file://"+process.cwd()+"/../../top10/index.html");
+  await p.goto((process.env.URL||"file://"+process.cwd()+"/../../top10/index.html"));
   const html=require("fs").readFileSync("../../top10/index.html","utf8");
   const code=html.match(/<script>([\s\S]*)<\/script>/)[1].split("//__UI__")[0];
   const LEVELS=new Function(code+";return LEVELS")();

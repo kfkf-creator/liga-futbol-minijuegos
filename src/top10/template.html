@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
 <title>Top 10 Fútbol</title>
 <style>
 :root{
@@ -356,22 +357,52 @@ function buildPools(){
 }
 const POOLS=buildPools();
 
+/* Base de nombres enorme (Reep v0, CC0 + capa propia): se carga aparte y solo alimenta las sugerencias.
+   Si no carga, el juego sigue con las reservas de los niveles. Los alias enlazan cada respuesta con su nombre en la base. */
+const DB_TYPES=["jugadores","equipos","entrenadores","estadios","selecciones"];
+const DB={};      /* tipo -> [{n,nk,keys,sub,f}] */
+let dbState="idle";
+function subLabel(nat,y){ return [nat,y||""].filter(Boolean).join(" · "); }
+async function loadEntities(){
+  if(dbState!=="idle") return;
+  dbState="loading";
+  try{
+    const [al,...lists]=await Promise.all(["curated-aliases"].concat(DB_TYPES).map(f=>fetch("entidades/"+f+".json").then(r=>{ if(!r.ok) throw new Error(f); return r.json(); })));
+    /* alias de la base para las respuestas de los niveles */
+    LEVELS.forEach(L=>{
+      const m=al[L.type]||{};
+      L.answers.forEach(a=>{
+        (m[a.n]||[]).forEach(x=>{ const k=norm(x); if(k && !a.keys.includes(k)) a.keys.push(k); });
+      });
+    });
+    DB_TYPES.forEach((t,i)=>{
+      DB[t]=lists[i].map(r=>({n:r[0],nk:norm(r[0]),keys:null,sub:subLabel(r[1],r[2]),f:r[3]}));
+    });
+    dbState="ready";
+  }catch(e){ dbState="failed"; }
+}
+loadEntities();
+
 function suggest(L, raw, found){
   const q=norm(raw);
   if(q.length<2) return [];
   const foundNames=new Set([...found].map(i=>norm(L.answers[i].n)));
   const out=[];
-  (POOLS[L.type]||[]).forEach(e=>{
+  const scan=(e,src)=>{
     if(foundNames.has(e.nk)) return;
     let s=-1;
     if(e.nk.startsWith(q)) s=0;
-    else if(e.keys.some(k=>k.startsWith(q))) s=1;
-    else if(e.nk.split(" ").some(w=>w.startsWith(q))) s=2;
+    else if(e.keys && e.keys.some(k=>k.startsWith(q))) s=1;
+    else if(e.nk.indexOf(" "+q)>=0) s=2;
     else if(q.length>=3 && e.nk.includes(q)) s=3;
-    if(s>=0) out.push({e,s});
-  });
-  out.sort((x,y)=>x.s-y.s || x.e.nk.length-y.e.nk.length || x.e.nk.localeCompare(y.e.nk));
-  return out.slice(0,7).map(x=>x.e.n);
+    if(s>=0) out.push({e,s,src});
+  };
+  (POOLS[L.type]||[]).forEach(e=>scan(e,0));
+  const seen=new Set(out.map(x=>x.e.nk));
+  (DB[L.type]||[]).forEach(e=>{ if(!seen.has(e.nk)) scan(e,1); });
+  /* primero mejor coincidencia; dentro de cada una, lo más famoso; a igualdad, nombre corto */
+  out.sort((x,y)=>x.s-y.s || (y.e.f||60)-(x.e.f||60) || x.e.nk.length-y.e.nk.length || x.e.nk.localeCompare(y.e.nk));
+  return out.slice(0,7).map(x=>({n:x.e.n,sub:x.e.sub||""}));
 }
 
 //__UI__
@@ -649,10 +680,12 @@ function openAc(){
   acActive=-1;
   const ul=$("ac"); ul.innerHTML="";
   if(!acItems.length){ ul.hidden=true; $("input").setAttribute("aria-expanded","false"); return; }
-  acItems.forEach((name,k)=>{
+  acItems.forEach((it,k)=>{
+    const name=it.n;
     const li=document.createElement("li");
     li.id="ac"+k; li.setAttribute("role","option"); li.setAttribute("aria-selected","false");
     li.textContent=name;
+    if(it.sub){ const sm=document.createElement("small"); sm.textContent=it.sub; li.appendChild(sm); }
     li.addEventListener("mousedown",e=>{ e.preventDefault(); $("input").value=""; submitGuess(name); });
     ul.appendChild(li);
   });
@@ -667,7 +700,7 @@ $("input").addEventListener("keydown",e=>{
   else if(e.key==="Escape"){ closeAc(); }
   else if(e.key==="Enter" && acActive>=0 && acItems[acActive]){
     e.preventDefault();
-    const name=acItems[acActive];
+    const name=acItems[acActive].n;
     $("input").value="";
     submitGuess(name);
   }

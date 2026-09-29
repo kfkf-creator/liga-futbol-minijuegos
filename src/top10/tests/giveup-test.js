@@ -3,7 +3,7 @@ const {chromium}=require(require("child_process").execSync("npm root -g").toStri
   const b=await chromium.launch({executablePath:"/opt/pw-browsers/chromium"});
   const p=await b.newPage({viewport:{width:900,height:900}});
   const errs=[]; p.on("pageerror",e=>errs.push(e.message)); p.on("console",m=>{if(m.type()==="error")errs.push(m.text())});
-  await p.goto("file://"+process.cwd()+"/../../top10/index.html");
+  await p.goto((process.env.URL||"file://"+process.cwd()+"/../../top10/index.html"));
   await p.click("#playNext");
   const r={};
   r.flagVisible=await p.isVisible("#giveUpBtn");

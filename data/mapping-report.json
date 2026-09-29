@@ -1,0 +1,354 @@
+{
+ "jugadores": [
+  [
+   "Lothar Matthäus",
+   "sin_match"
+  ],
+  [
+   "Santillana",
+   "sin_match"
+  ],
+  [
+   "Pirri",
+   "sin_match"
+  ],
+  [
+   "Migueli",
+   "sin_match"
+  ],
+  [
+   "Eusébio",
+   "sin_match"
+  ],
+  [
+   "Emerson",
+   "sin_match"
+  ],
+  [
+   "Brito",
+   "sin_match"
+  ],
+  [
+   "Tostão",
+   "sin_match"
+  ],
+  [
+   "Rivellino",
+   "sin_match"
+  ],
+  [
+   "Pedro Porro",
+   "sin_match"
+  ],
+  [
+   "Nico González",
+   "sin_match"
+  ],
+  [
+   "Joaquín",
+   "sin_match"
+  ]
+ ],
+ "entrenadores": [
+  [
+   "Luis de la Fuente",
+   "ambiguo: Luis de la Fuente España 1961 f4; Luis de la Fuente México 1914 f1"
+  ],
+  [
+   "Alex Ferguson",
+   "ambiguo: Alex Ferguson Reino Unido 1941 f3; Alex Ferguson Reino Unido 1903 f1"
+  ],
+  [
+   "Marcelino",
+   "sin_match"
+  ],
+  [
+   "Javier Aguirre",
+   "sin_match"
+  ],
+  [
+   "Míchel",
+   "sin_match"
+  ]
+ ],
+ "equipos": [
+  [
+   "Oporto",
+   "ambiguo: FC Porto Portugal 1893 f11; FC Porto B Portugal 1999 f7"
+  ],
+  [
+   "Racing de Santander",
+   "ambiguo: Racing de Santander España 1913 f10; Racing Club Argentina 1903 f7"
+  ],
+  [
+   "Burgos",
+   "ambiguo: Burgos CF España 1922 f6; Burgos CF España 1936 f3"
+  ]
+ ],
+ "estadios": [
+  [
+   "San Siro",
+   "sin_match"
+  ],
+  [
+   "Millennium Stadium",
+   "sin_match"
+  ],
+  [
+   "Estadio Olímpico de Kiev",
+   "sin_match"
+  ],
+  [
+   "Metropolitano",
+   "sin_match"
+  ],
+  [
+   "Stade de France",
+   "sin_match"
+  ],
+  [
+   "Estadio Olímpico Atatürk",
+   "sin_match"
+  ],
+  [
+   "Wembley",
+   "sin_match"
+  ],
+  [
+   "Olympiastadion de Berlín",
+   "sin_match"
+  ],
+  [
+   "Signal Iduna Park",
+   "sin_match"
+  ],
+  [
+   "Stuttgart Arena",
+   "sin_match"
+  ],
+  [
+   "Düsseldorf Arena",
+   "sin_match"
+  ],
+  [
+   "RheinEnergieStadion",
+   "sin_match"
+  ],
+  [
+   "Deutsche Bank Park",
+   "sin_match"
+  ],
+  [
+   "Estadio Azteca",
+   "sin_match"
+  ],
+  [
+   "Estadio Olímpico de Roma",
+   "sin_match"
+  ],
+  [
+   "Rose Bowl",
+   "sin_match"
+  ],
+  [
+   "Estadio Internacional de Yokohama",
+   "sin_match"
+  ],
+  [
+   "Soccer City",
+   "sin_match"
+  ],
+  [
+   "Maracanã",
+   "sin_match"
+  ],
+  [
+   "Luzhniki",
+   "sin_match"
+  ],
+  [
+   "Lusail",
+   "sin_match"
+  ],
+  [
+   "Vitality Stadium",
+   "sin_match"
+  ],
+  [
+   "Amex Stadium",
+   "sin_match"
+  ],
+  [
+   "Gtech Community Stadium",
+   "sin_match"
+  ],
+  [
+   "Camp Nou",
+   "sin_match"
+  ],
+  [
+   "Santiago Bernabéu",
+   "sin_match"
+  ],
+  [
+   "Benito Villamarín",
+   "sin_match"
+  ],
+  [
+   "Balaídos",
+   "sin_match"
+  ],
+  [
+   "Coliseum",
+   "sin_match"
+  ],
+  [
+   "Estadio de Vallecas",
+   "sin_match"
+  ],
+  [
+   "Mestalla",
+   "sin_match"
+  ],
+  [
+   "Reale Arena",
+   "sin_match"
+  ],
+  [
+   "Olympiastadion de Múnich",
+   "sin_match"
+  ],
+  [
+   "Ullevi",
+   "sin_match"
+  ],
+  [
+   "Ernst-Happel-Stadion",
+   "sin_match"
+  ],
+  [
+   "Estadio Olímpico de Atenas",
+   "sin_match"
+  ],
+  [
+   "Europa-Park Stadion",
+   "sin_match"
+  ],
+  [
+   "Highbury",
+   "sin_match"
+  ],
+  [
+   "Upton Park",
+   "sin_match"
+  ],
+  [
+   "White Hart Lane",
+   "sin_match"
+  ],
+  [
+   "Maine Road",
+   "sin_match"
+  ],
+  [
+   "Roker Park",
+   "sin_match"
+  ],
+  [
+   "Filbert Street",
+   "sin_match"
+  ],
+  [
+   "Baseball Ground",
+   "sin_match"
+  ],
+  [
+   "The Dell",
+   "sin_match"
+  ],
+  [
+   "Ayresome Park",
+   "sin_match"
+  ],
+  [
+   "Highfield Road",
+   "sin_match"
+  ],
+  [
+   "Decathlon Arena",
+   "sin_match"
+  ],
+  [
+   "Groupama Stadium",
+   "sin_match"
+  ],
+  [
+   "Stadium de Toulouse",
+   "sin_match"
+  ],
+  [
+   "Neckarstadion",
+   "sin_match"
+  ],
+  [
+   "San Nicola",
+   "sin_match"
+  ],
+  [
+   "Amsterdam ArenA",
+   "sin_match"
+  ],
+  [
+   "Estadio de la Cartuja",
+   "sin_match"
+  ],
+  [
+   "San Mamés",
+   "sin_match"
+  ],
+  [
+   "Ramón Sánchez Pizjuán",
+   "sin_match"
+  ],
+  [
+   "La Cerámica",
+   "sin_match"
+  ],
+  [
+   "Riazor",
+   "sin_match"
+  ],
+  [
+   "El Sadar",
+   "sin_match"
+  ],
+  [
+   "Anoeta",
+   "sin_match"
+  ],
+  [
+   "Ibrox",
+   "sin_match"
+  ],
+  [
+   "Goodison Park",
+   "sin_match"
+  ],
+  [
+   "Maracaná",
+   "sin_match"
+  ],
+  [
+   "Olympiastadion",
+   "sin_match"
+  ],
+  [
+   "Estadio Riazor",
+   "sin_match"
+  ],
+  [
+   "Camp Nou Spotify",
+   "sin_match"
+  ]
+ ]
+}

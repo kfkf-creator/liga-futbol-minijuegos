@@ -12,4 +12,7 @@ const extra=require("./data/extra.js");
 const data="const LEVELS = "+JSON.stringify(levels,null,1)+";\nconst EXTRA = "+JSON.stringify(extra)+";";
 const out=fs.readFileSync("template.html","utf8").replace("/*__DATA__*/",()=>data);
 fs.writeFileSync("../../top10/index.html",out);
+const ed="../../data/entidades",od="../../top10/entidades";
+fs.mkdirSync(od,{recursive:true});
+fs.readdirSync(ed).filter(f=>f.endsWith(".json")).forEach(f=>fs.copyFileSync(ed+"/"+f,od+"/"+f));
 console.log("files:",files.join(","),"levels:",levels.length,"bytes:",out.length);

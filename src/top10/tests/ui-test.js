@@ -3,7 +3,7 @@ const {chromium}=require(require("child_process").execSync("npm root -g").toStri
   const b=await chromium.launch({executablePath:"/opt/pw-browsers/chromium"});
   const p=await b.newPage({viewport:{width:900,height:900}});
   const errs=[]; p.on("pageerror",e=>errs.push(e.message)); p.on("console",m=>{if(m.type()==="error")errs.push(m.text())});
-  await p.goto("file://"+process.cwd()+"/../../top10/index.html");
+  await p.goto((process.env.URL||"file://"+process.cwd()+"/../../top10/index.html"));
   const cards=await p.locator(".lvl").count();
   await p.click("button.chipbtn:text-is(\"Leyenda\")");
   const legend=await p.locator(".lvl").count();
@@ -26,7 +26,7 @@ const {chromium}=require(require("child_process").execSync("npm root -g").toStri
   await p.press("#input","ArrowDown"); await p.press("#input","Enter");
   const found2=await p.textContent("#progFound");
   // fallo real x5
-  for(const w of ["Messi","Xavi","Iniesta","Pedri","Gavi"]){ await p.fill("#input",w); await p.press("#input","Enter"); }
+  for(const w of ["Messi","Xavi","Iniesta","Pedri","Gavi"]){ if(await p.isDisabled("#input")) break; await p.fill("#input",w); await p.press("#input","Enter"); }
   const over=await p.textContent("#resTitle");
   const missed=await p.locator(".slot.missed").count();
   const nextHidden=await p.locator("#nextBtn").isHidden();
