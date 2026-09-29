@@ -1,3 +1,7 @@
 node_modules/
 *.png
 .DS_Store
+
+# iconos de la PWA y logo original
+!top10/*.png
+!src/top10/pwa/*.png

@@ -31,4 +31,8 @@ fs.writeFileSync("../../top10/index.html",out);
 const ed="../../data/entidades",od="../../top10/entidades";
 fs.mkdirSync(od,{recursive:true});
 fs.readdirSync(ed).filter(f=>f.endsWith(".json")).forEach(f=>fs.copyFileSync(ed+"/"+f,od+"/"+f));
+/* PWA: manifiesto y service worker con versión = hash del juego */
+fs.copyFileSync("pwa/manifest.webmanifest","../../top10/manifest.webmanifest");
+const ver=require("crypto").createHash("sha1").update(out).digest("hex").slice(0,10);
+fs.writeFileSync("../../top10/sw.js",fs.readFileSync("pwa/sw.template.js","utf8").replace("__VERSION__",ver));
 console.log("files:",files.join(","),"levels:",levels.length,"bytes:",out.length);

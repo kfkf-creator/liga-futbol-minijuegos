@@ -3,7 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="icon" href="data:,">
+<link rel="icon" type="image/png" sizes="48x48" href="favicon-48.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#08150f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Top 10 Fútbol">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <title>Top 10 Fútbol</title>
 <style>
 :root{
@@ -174,6 +181,10 @@ textarea{width:100%;background:var(--bg);color:var(--text);border:1px solid var(
 .rep{margin-top:18px}
 .rep .panel{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--panel)}
 .rep label{display:block;margin:4px 0}
+.install{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:0 0 14px;padding:10px 14px;border:1px solid var(--gold);border-radius:12px;background:var(--panel)}
+.install .msg{flex:1 1 220px;font-size:14px}
+.install .x{background:none;border:0;color:var(--muted);font-size:18px;padding:2px 6px}
+.upd{position:fixed;left:12px;right:12px;bottom:12px;z-index:50;display:flex;flex-wrap:wrap;align-items:center;gap:10px;justify-content:space-between;padding:12px 14px;border:1px solid var(--accent);border-radius:12px;background:var(--panel2);box-shadow:0 6px 24px #0008}
 .foot{margin-top:34px;color:var(--muted);font-size:13px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -198,6 +209,11 @@ textarea{width:100%;background:var(--bg);color:var(--text);border:1px solid var(
         Con <b>💡 Pista</b> ves la primera letra de una respuesta, a cambio de una vida (y nunca con tu última vida).
         No hay límite de tiempo. Los acentos y las mayúsculas no importan.
       </p>
+      <div class="install" id="install" hidden>
+        <span class="msg" id="installMsg"></span>
+        <button class="btn primary" id="installBtn" type="button" hidden>Instalar</button>
+        <button class="x" id="installX" type="button" aria-label="Cerrar">✕</button>
+      </div>
       <div class="stats" id="stats"></div>
       <div class="filters" id="filters"></div>
       <div class="levels" id="levels"></div>
@@ -288,6 +304,10 @@ textarea{width:100%;background:var(--bg);color:var(--text);border:1px solid var(
       </div>
     </section>
   </main>
+</div>
+<div class="upd" id="upd" hidden role="status">
+  <span>Hay una versión nueva del juego.</span>
+  <button class="btn primary" id="updBtn" type="button">Recargar</button>
 </div>
 <noscript><p style="padding:20px">Este juego necesita JavaScript activado.</p></noscript>
 
@@ -14095,6 +14115,39 @@ $("nextBtn").addEventListener("click",()=>{
 $("playNext").addEventListener("click",()=>{ const list=visible(); if(list.length) startLevel(firstPending(list),list); });
 
 renderMenu();
+
+/* ============ App instalable (PWA) ============ */
+(function(){
+  const isStandalone=()=>(window.matchMedia&&matchMedia("(display-mode: standalone)").matches)||navigator.standalone===true;
+  const KEY="top10.installDismiss";
+  const dismissed=()=>{ try{ return localStorage.getItem(KEY)==="1"; }catch(e){ return false; } };
+  let deferred=null;
+  const bar=$("install"), msg=$("installMsg"), btn=$("installBtn");
+  function show(){ if(!isStandalone()&&!dismissed()) bar.hidden=false; }
+  window.addEventListener("beforeinstallprompt",e=>{
+    e.preventDefault(); deferred=e;
+    msg.textContent="Instala el juego en tu dispositivo: se abre con un toque y funciona sin conexión.";
+    btn.hidden=false; show();
+  });
+  btn.addEventListener("click",async()=>{
+    if(!deferred) return;
+    deferred.prompt();
+    try{ await deferred.userChoice; }catch(e){}
+    deferred=null; bar.hidden=true;
+  });
+  window.addEventListener("appinstalled",()=>{ bar.hidden=true; });
+  $("installX").addEventListener("click",()=>{ bar.hidden=true; try{ localStorage.setItem(KEY,"1"); }catch(e){} });
+  /* iPhone/iPad: no hay aviso automático, se explica el gesto */
+  const ios=/iphone|ipad|ipod/i.test(navigator.userAgent)&&!/crios|fxios/i.test(navigator.userAgent);
+  if(ios){ msg.textContent="Para instalarlo en el iPhone: toca el botón Compartir y elige «Añadir a pantalla de inicio»."; show(); }
+  /* service worker + aviso de nueva versión */
+  if("serviceWorker" in navigator && /^https?:$/.test(location.protocol)){
+    const had=!!navigator.serviceWorker.controller;
+    navigator.serviceWorker.register("sw.js").catch(()=>{});
+    navigator.serviceWorker.addEventListener("controllerchange",()=>{ if(had) $("upd").hidden=false; });
+    $("updBtn").addEventListener("click",()=>location.reload());
+  }
+})();
 </script>
 </body>
 </html>
