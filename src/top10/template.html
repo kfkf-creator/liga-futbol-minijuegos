@@ -154,6 +154,22 @@ form.guess input:disabled{opacity:.5}
 .result .actions{display:flex;flex-wrap:wrap;gap:10px}
 .result.win{border-color:var(--accent)}
 .result.lose{border-color:#a34a4a}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:0 0 16px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.stat b{display:block;font-size:22px;line-height:1.2}
+.stat span{color:var(--muted);font-size:13px}
+.stat.gold b{color:var(--gold)}
+.mine{margin-top:26px;border:1px solid var(--line);border-radius:12px;padding:10px 14px;background:var(--panel)}
+.mine summary{cursor:pointer;font-weight:600}
+.mine .hint,.rep .hint{color:var(--muted);font-size:14px;margin:8px 0}
+.mine .row,.rep .row{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0}
+textarea{width:100%;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px;font:14px/1.4 ui-monospace,Menlo,Consolas,monospace;resize:vertical}
+.linkbtn{background:none;border:0;color:var(--muted);text-decoration:underline;padding:4px 0;font-size:14px}
+.linkbtn:hover{color:var(--text)}
+.rep{margin-top:18px}
+.rep .panel{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--panel)}
+.rep label{display:block;margin:4px 0}
 .foot{margin-top:34px;color:var(--muted);font-size:13px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -177,8 +193,25 @@ form.guess input:disabled{opacity:.5}
         Si escribes mal un nombre, el juego te propone <b>"¿Querías decir…?"</b> sin quitarte vida.
         No hay límite de tiempo. Los acentos y las mayúsculas no importan.
       </p>
+      <div class="stats" id="stats"></div>
       <div class="filters" id="filters"></div>
       <div class="levels" id="levels"></div>
+      <details class="mine" id="mine">
+        <summary>Copia de seguridad de mi progreso</summary>
+        <p class="hint">Tu progreso se guarda solo en este navegador. Si lo borras o cambias de móvil, se pierde. Guarda el código y pégalo en «Recuperar» donde quieras continuar.</p>
+        <div class="row">
+          <button class="btn" id="bkSave" type="button">Guardar mi progreso</button>
+          <button class="btn" id="bkLoad" type="button">Recuperar progreso</button>
+        </div>
+        <div id="bkBox" hidden>
+          <textarea id="bkText" rows="4" spellcheck="false" autocapitalize="off" autocorrect="off" aria-label="Código de progreso"></textarea>
+          <div class="row">
+            <button class="btn primary" id="bkAction" type="button"></button>
+            <button class="btn" id="bkCancel" type="button">Cerrar</button>
+          </div>
+          <p class="hint" id="bkMsg" aria-live="polite"></p>
+        </div>
+      </details>
       <p class="foot">Datos revisados hasta septiembre de 2026. Cada nivel indica el periodo que cubre.</p>
     </section>
 
@@ -220,6 +253,22 @@ form.guess input:disabled{opacity:.5}
       </div>
 
       <ol class="slots" id="slots"></ol>
+
+      <div class="rep">
+        <button class="linkbtn" id="repBtn" type="button">Reportar un problema en este nivel</button>
+        <div class="panel" id="repPanel" hidden>
+          <p class="hint">¿Qué ha pasado?</p>
+          <label><input type="radio" name="repType" value="Mi respuesta era correcta y el juego la dio por mala" checked> Mi respuesta era correcta y el juego la dio por mala</label>
+          <label><input type="radio" name="repType" value="Un dato del nivel es incorrecto"> Un dato del nivel es incorrecto</label>
+          <label><input type="radio" name="repType" value="Otro problema"> Otro problema</label>
+          <textarea id="repText" rows="2" placeholder="Comentario (opcional)" aria-label="Comentario"></textarea>
+          <div class="row">
+            <button class="btn primary" id="repSend" type="button">Enviar reporte</button>
+            <button class="btn" id="repCancel" type="button">Cancelar</button>
+          </div>
+          <p class="hint" id="repMsg" aria-live="polite"></p>
+        </div>
+      </div>
 
       <div class="result" id="result" hidden>
         <div class="stars" id="resStars"></div>
@@ -489,6 +538,7 @@ function firstPending(list){
 }
 
 function renderMenu(){
+  renderStats();
   const total=LEVELS.length;
   const done=LEVELS.filter(L=>progress.done[L.key]).length;
   const list=visible();
@@ -538,6 +588,8 @@ function startLevel(i,list){
   state.over=false;
   state.won=false;
   state.gaveUp=false;
+  state.log=[];
+  $("repPanel").hidden=true; $("repText").value=""; $("repText").rows=2;
   giveUpReset();
   const L=LEVELS[i];
   $("menu").hidden=true;
@@ -619,6 +671,7 @@ function endGame(won){
   if(won){
     const s=starsFor(errors);
     if(!progress.done[L.key] || progress.done[L.key]<s) progress.done[L.key]=s;
+    touchStreak();
     saveProgress();
     $("resStars").textContent=starText(s);
     $("resTitle").textContent="Nivel superado";
@@ -647,6 +700,8 @@ function submitGuess(text){
   closeAc();
   const r=judge(L,text,state.found);
   if(r.t==="empty") return;
+  const logIt=v=>{ (state.log||(state.log=[])).push({t:String(text).trim().slice(0,60),v}); };
+  logIt(r.t==="hit"?"acierto ("+L.answers[r.i].n+")":r.t==="amb"?"ambigua, sin vida":r.t==="also"?"válida pero no cuenta, sin vida":r.t==="dup"?"repetida, sin vida":"fallo");
   if(r.t==="amb"){ say("Eso puede ser más de una respuesta. Sé más específico. No pierdes vida.","info"); return; }
   if(r.t==="also"){ say("Es un estadio válido, pero no está entre los diez de este nivel. No pierdes vida.","info"); return; }
   if(r.t==="dup"){ say("Ya tenías esa respuesta: "+L.answers[r.i].n+". No pierdes vida.","info"); return; }
@@ -663,6 +718,7 @@ function submitGuess(text){
     const ni=nearMiss(L,text,state.found);
     if(ni!==null){
       state.near.add(r.n);
+      { const lg=state.log; if(lg&&lg.length) lg[lg.length-1].v="no encontrada, sugirió ¿Querías decir "+L.answers[ni].n+"? (sin vida)"; }
       say("No encuentro eso. ¿Querías decir "+L.answers[ni].n+"? No pierdes vida.","info",L.answers[ni].n);
       return;
     }
@@ -722,6 +778,100 @@ $("input").addEventListener("keydown",e=>{
     $("input").value="";
     submitGuess(name);
   }
+});
+
+
+/* ============ Estadísticas, racha y copia de seguridad ============ */
+function ymd(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function touchStreak(){
+  const s=progress.streak||(progress.streak={cur:0,best:0,last:""});
+  const now=new Date(), today=ymd(now), yest=ymd(new Date(now.getFullYear(),now.getMonth(),now.getDate()-1));
+  if(s.last===today) return;
+  s.cur=(s.last===yest)?s.cur+1:1;
+  s.last=today; s.best=Math.max(s.best,s.cur);
+}
+function curStreak(){
+  const s=progress.streak; if(!s||!s.last) return 0;
+  const now=new Date(), today=ymd(now), yest=ymd(new Date(now.getFullYear(),now.getMonth(),now.getDate()-1));
+  return (s.last===today||s.last===yest)?s.cur:0;
+}
+function renderStats(){
+  const vals=LEVELS.map(L=>progress.done[L.key]||0);
+  const done=vals.filter(v=>v>0).length, stars=vals.reduce((a,b)=>a+b,0), perfect=vals.filter(v=>v===3).length;
+  const best=(progress.streak&&progress.streak.best)||0, cur=curStreak();
+  const box=$("stats"); box.innerHTML="";
+  [[done+" de "+LEVELS.length,"niveles superados",0],[stars+" de "+LEVELS.length*3,"estrellas",1],[perfect,"niveles perfectos (3 estrellas)",0],
+   [cur+(cur===1?" día":" días"),"racha actual",0],[best+(best===1?" día":" días"),"mejor racha",0]].forEach(([v,l,g])=>{
+    const d=document.createElement("div"); d.className="stat"+(g?" gold":"");
+    const b=document.createElement("b"); b.textContent=v; const s=document.createElement("span"); s.textContent=l;
+    d.append(b,s); box.appendChild(d);
+  });
+}
+function hash32(s){ let h=0x811c9dc5; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,0x01000193)>>>0; } return h; }
+function b36(n,len){ return n.toString(36).padStart(len,"0").slice(-len); }
+function levelId(L){ return b36(hash32(L.key),5); }
+function makeCode(){
+  const entries=LEVELS.filter(L=>progress.done[L.key]>0).sort((a,b)=>a.key<b.key?-1:1).map(L=>levelId(L)+progress.done[L.key]).join("");
+  const s=progress.streak||{cur:0,best:0,last:""};
+  const body="T1."+entries+"."+s.cur+","+s.best+","+(s.last?s.last.replace(/-/g,""):"0");
+  return body+"."+b36(hash32(body),4);
+}
+function applyCode(raw){
+  const code=String(raw||"").replace(/\s+/g,"");
+  const parts=code.split(".");
+  if(parts.length!==4||parts[0]!=="T1") return {ok:false,msg:"Código no válido: comprueba que lo has pegado entero."};
+  const body=parts.slice(0,3).join(".");
+  if(b36(hash32(body),4)!==parts[3]) return {ok:false,msg:"Código no válido: está incompleto o alterado."};
+  const byId={}; LEVELS.forEach(L=>{ byId[levelId(L)]=L; });
+  const e=parts[1]; if(e.length%6!==0) return {ok:false,msg:"Código no válido."};
+  let n=0,skipped=0;
+  for(let i=0;i<e.length;i+=6){
+    const L=byId[e.slice(i,i+5)], st=+e[i+5];
+    if(!L||!(st>=1&&st<=3)){ skipped++; continue; }
+    if(!progress.done[L.key]||progress.done[L.key]<st){ progress.done[L.key]=st; n++; }
+  }
+  const sp=parts[2].split(","); const cur=+sp[0]||0, best=+sp[1]||0, last=sp[2]&&sp[2]!=="0"?sp[2].slice(0,4)+"-"+sp[2].slice(4,6)+"-"+sp[2].slice(6,8):"";
+  const s=progress.streak||(progress.streak={cur:0,best:0,last:""});
+  s.best=Math.max(s.best,best);
+  if(last>s.last||(last&&last===s.last&&cur>s.cur)){ s.cur=cur; s.last=last; }
+  saveProgress(); renderMenu();
+  return {ok:true,msg:"Listo: "+n+(n===1?" nivel recuperado":" niveles recuperados")+(skipped?" ("+skipped+" no existen en esta versión)":"")+"."};
+}
+let bkMode="";
+function bkOpen(mode){
+  bkMode=mode; $("bkBox").hidden=false; $("bkMsg").textContent="";
+  const ta=$("bkText"), act=$("bkAction");
+  if(mode==="save"){ ta.value=makeCode(); ta.readOnly=true; act.textContent="Copiar código"; ta.focus(); ta.select(); }
+  else{ ta.value=""; ta.readOnly=false; act.textContent="Aplicar código"; ta.focus(); }
+}
+$("bkSave").addEventListener("click",()=>bkOpen("save"));
+$("bkLoad").addEventListener("click",()=>bkOpen("load"));
+$("bkCancel").addEventListener("click",()=>{ $("bkBox").hidden=true; });
+$("bkAction").addEventListener("click",async()=>{
+  if(bkMode==="save"){
+    const txt=$("bkText").value;
+    try{ await navigator.clipboard.writeText(txt); $("bkMsg").textContent="Código copiado. Guárdalo en tus notas o envíatelo por WhatsApp."; }
+    catch(e){ $("bkText").select(); $("bkMsg").textContent="Selecciona el código y cópialo a mano."; }
+  }else{
+    $("bkMsg").textContent=applyCode($("bkText").value).msg;
+  }
+});
+
+/* ============ Reportar un problema (se comparte por WhatsApp, etc.) ============ */
+function repOpen(){ $("repPanel").hidden=false; $("repMsg").textContent=""; $("repText").focus(); }
+$("repBtn").addEventListener("click",()=>{ $("repPanel").hidden?repOpen():($("repPanel").hidden=true); });
+$("repCancel").addEventListener("click",()=>{ $("repPanel").hidden=true; });
+$("repSend").addEventListener("click",async()=>{
+  const L=LEVELS[state.idx];
+  const type=(document.querySelector('input[name="repType"]:checked')||{}).value||"Otro problema";
+  const com=$("repText").value.trim();
+  const log=(state.log||[]).slice(-12).map(x=>'- "'+x.t+'" -> '+x.v).join("\n");
+  const text=["Reporte Top 10 Fútbol","Nivel: "+L.title,"Problema: "+type,com?("Comentario: "+com):"","Lo que escribí:",log||"- (nada todavía)"].filter(x=>x!=="").join("\n");
+  try{
+    if(navigator.share){ await navigator.share({title:"Reporte Top 10 Fútbol",text}); $("repMsg").textContent="Gracias. Envíalo a quien te pasó el juego."; return; }
+  }catch(e){ if(e&&e.name==="AbortError") return; }
+  try{ await navigator.clipboard.writeText(text); $("repMsg").textContent="Reporte copiado. Pégalo en un mensaje a quien te pasó el juego."; }
+  catch(e){ $("repText").value=text; $("repText").rows=8; $("repText").select(); $("repMsg").textContent="Copia este texto y envíalo a quien te pasó el juego."; }
 });
 
 $("form").addEventListener("submit",e=>{

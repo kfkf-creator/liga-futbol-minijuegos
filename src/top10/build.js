@@ -17,6 +17,9 @@ levels.filter(L=>L.oid<=100).map((L,i)=>({L,i})).sort((a,b)=>RANK[a.L.diff]-RANK
 const slug=s=>s.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
 levels.forEach(L=>{ L.key=slug(L.title); });
 if(new Set(levels.map(L=>L.key)).size!==levels.length) throw new Error("claves de nivel repetidas");
+{ const h=s=>{ let x=0x811c9dc5; for(let i=0;i<s.length;i++){ x^=s.charCodeAt(i); x=Math.imul(x,0x01000193)>>>0; } return x; };
+  const ids=levels.map(L=>h(L.key).toString(36).padStart(5,"0").slice(-5));
+  if(new Set(ids).size!==ids.length) throw new Error("identificadores de copia de seguridad repetidos"); }
 levels=levels.map((L,i)=>({L,i})).sort((a,b)=>RANK[a.L.diff]-RANK[b.L.diff]||a.i-b.i).map(x=>x.L);
 levels.forEach((L,i)=>{ L.id=i+1; });
 const YEARS=require("./data/years.js");

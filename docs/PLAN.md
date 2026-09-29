@@ -55,3 +55,9 @@ Web instalable (PWA) con minijuegos diarios de futbol en castellano, con ligas p
 - Datos verificados en fuentes web por agentes; revision propia de las 30 respuestas de cada alineacion contra memoria: sin discrepancias.
 - Progreso guardado por clave estable (`key` = titulo del nivel en minusculas sin tildes): NO cambiar titulos de niveles ya publicados o se pierde su progreso. Se migra de v3 (numeros) a v4 (claves).
 - Reparto de epocas (una sola marcada): mediados 13, finales 13, 2000s 15, 2010s 15, actualidad 29.
+
+## Mejoras de uso (HECHO 2026-09-30)
+- Reportar un problema: boton en cada nivel; prepara un texto (nivel, tipo de problema, lo que se escribio y como lo juzgo el juego) y lo comparte con el menu de compartir del movil o lo copia. Canal C (formulario de Google) pendiente para cuando se abra a mas gente.
+- Copia de seguridad por codigo de texto (`T1.<niveles>.<racha>.<control>`): guarda estrellas y racha, se recupera sumando y quedandose con lo mejor. Los ids de nivel son un hash de 5 caracteres de `key` (build.js comprueba que no haya repetidos).
+- Estadisticas en el menu: niveles superados, estrellas, perfectos, racha actual y mejor racha (dias seguidos con algun nivel superado).
+- Pendientes de la lista: PWA instalable (mejora 2), pistas opcionales, medir dificultad real con datos (necesita servidor).
