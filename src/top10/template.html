@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Top 10 Fútbol</title>
+<style>
+:root{
+  --bg:#08150f; --panel:#112a1f; --panel2:#163526; --line:#24513b;
+  --text:#eef7f1; --muted:#9dbcab; --accent:#3ddc84; --accent-ink:#052414;
+  --danger:#ff6b6b; --gold:#ffd166; --radius:14px;
+  --d-facil:#3ddc84; --d-medio:#ffd166; --d-dificil:#ff9f5a; --d-leyenda:#c792ff;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:radial-gradient(1100px 560px at 50% -180px,#15432e 0%,var(--bg) 62%) fixed;
+  color:var(--text);
+  font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  min-height:100vh;
+}
+.wrap{max-width:940px;margin:0 auto;padding:22px 16px 56px}
+[hidden]{display:none!important}
+h1{margin:0;font-size:clamp(28px,5vw,40px);letter-spacing:-.02em}
+h1 span{color:var(--accent)}
+.sub{margin:6px 0 0;color:var(--muted)}
+button{font:inherit;color:inherit;cursor:pointer}
+.btn{
+  border:1px solid var(--line);background:var(--panel2);color:var(--text);
+  padding:10px 16px;border-radius:10px;font-weight:600;
+}
+.btn:hover{border-color:var(--accent)}
+.btn:focus-visible,.lvl:focus-visible,input:focus-visible,.chipbtn:focus-visible,.sug:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.08)}
+
+/* Menu */
+.menu-head{display:flex;flex-wrap:wrap;gap:14px;align-items:end;justify-content:space-between;margin-bottom:16px}
+.summary{color:var(--muted);margin:0}
+.rules{
+  background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+  padding:14px 16px;margin:0 0 18px;color:var(--muted)
+}
+.rules b{color:var(--text)}
+.filters{display:grid;gap:10px;margin:0 0 18px}
+.frow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.flabel{font-size:13px;color:var(--muted);min-width:78px}
+.chipbtn{
+  border:1px solid var(--line);background:var(--panel);color:var(--muted);
+  border-radius:999px;padding:5px 13px;font-size:14px;font-weight:600;
+}
+.chipbtn:hover{border-color:var(--accent);color:var(--text)}
+.chipbtn[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.levels{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.lvl{
+  text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+  padding:14px;display:flex;flex-direction:column;gap:6px;min-height:128px;
+  transition:transform .12s,border-color .12s;
+}
+.lvl:hover{transform:translateY(-2px);border-color:var(--accent)}
+.lvl .num{font-size:30px;font-weight:800;line-height:1}
+.badge{
+  align-self:flex-start;font-size:12px;font-weight:700;border-radius:999px;padding:2px 9px;
+  border:1px solid currentColor;
+}
+.badge.facil{color:var(--d-facil)} .badge.medio{color:var(--d-medio)}
+.badge.dificil{color:var(--d-dificil)} .badge.leyenda{color:var(--d-leyenda)}
+.lvl .meta{font-size:12px;color:var(--muted)}
+.lvl .st{margin-top:auto;font-size:14px;color:var(--muted);letter-spacing:.06em}
+.lvl.done{border-color:#2f7a55;background:linear-gradient(180deg,#143a29,var(--panel))}
+.lvl.done .st{color:var(--gold)}
+.empty{color:var(--muted);padding:18px 0}
+
+/* Game */
+.bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+.bar .left{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.pill{
+  background:var(--panel2);border:1px solid var(--line);border-radius:999px;
+  padding:4px 12px;font-size:14px;color:var(--muted)
+}
+.pill.facil{color:var(--d-facil);border-color:var(--d-facil)} .pill.medio{color:var(--d-medio);border-color:var(--d-medio)}
+.pill.dificil{color:var(--d-dificil);border-color:var(--d-dificil)} .pill.leyenda{color:var(--d-leyenda);border-color:var(--d-leyenda)}
+.lives{display:flex;gap:4px}
+.heart svg{width:28px;height:28px;fill:#ff5470;display:block;transition:fill .2s,transform .2s}
+.heart.lost svg{fill:#2c4237;transform:scale(.88)}
+.heart.hit svg{animation:beat .5s}
+@keyframes beat{0%{transform:scale(1)}40%{transform:scale(1.35)}100%{transform:scale(.88)}}
+.q{margin:0 0 4px;font-size:clamp(20px,3.6vw,28px);line-height:1.2;letter-spacing:-.01em}
+.desc{margin:0 0 16px;color:var(--muted)}
+form.guess{display:flex;gap:10px;margin:0 0 10px}
+.acwrap{position:relative;flex:1;min-width:0}
+form.guess input{
+  width:100%;font:inherit;font-size:18px;padding:13px 14px;border-radius:12px;
+  background:#0a1c14;color:var(--text);border:2px solid var(--line);
+}
+form.guess input:focus{border-color:var(--accent);outline:none}
+form.guess input:disabled{opacity:.5}
+.ac{
+  position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:20;margin:0;padding:4px;list-style:none;
+  background:#0d2217;border:1px solid var(--accent);border-radius:12px;box-shadow:0 12px 30px rgba(0,0,0,.5);
+  max-height:290px;overflow:auto;
+}
+.ac li{padding:9px 12px;border-radius:8px;cursor:pointer;font-size:16px}
+.ac li[aria-selected="true"],.ac li:hover{background:var(--panel2);color:var(--accent)}
+.ac li small{color:var(--muted);margin-left:8px;font-size:12px}
+.feedback{min-height:26px;margin:0 0 12px;font-weight:600}
+.feedback.ok{color:var(--accent)}
+.feedback.bad{color:var(--danger)}
+.feedback.info{color:var(--gold)}
+.sug{
+  margin-left:8px;border:1px solid var(--gold);background:transparent;color:var(--gold);
+  border-radius:999px;padding:3px 12px;font-weight:700;
+}
+.sug:hover{background:var(--gold);color:#2a1d00}
+.prog{display:flex;gap:14px;color:var(--muted);font-size:14px;margin:0 0 12px}
+.slots{display:grid;grid-template-columns:1fr;gap:8px;margin:0;padding:0;list-style:none}
+@media(min-width:680px){.slots{grid-template-columns:1fr 1fr}}
+.slot{
+  display:flex;align-items:center;gap:12px;padding:10px 14px;min-height:64px;
+  background:var(--panel);border:1px solid var(--line);border-radius:12px;
+}
+.rank{
+  flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;
+  background:#0a1c14;border:1px solid var(--line);font-weight:700;font-size:14px;color:var(--muted)
+}
+.slot .txt{min-width:0}
+.slot .name{font-weight:700;font-size:17px;overflow-wrap:anywhere}
+.slot .det{font-size:13px;color:var(--muted)}
+.slot.hidden .name{color:#3b5a4a;letter-spacing:.3em}
+.slot.found{border-color:var(--accent);background:linear-gradient(90deg,#15412c,var(--panel))}
+.slot.found .rank{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.slot.found.pop{animation:pop .35s}
+@keyframes pop{0%{transform:scale(.96)}60%{transform:scale(1.03)}100%{transform:scale(1)}}
+.slot.missed{border-color:#a34a4a;background:linear-gradient(90deg,#3a1c1c,var(--panel))}
+.slot.missed .rank{background:#6d2b2b;color:#ffd3d3;border-color:#a34a4a}
+.slot.missed .name{color:#ffb4b4}
+.shake{animation:shake .4s}
+@keyframes shake{
+  10%,90%{transform:translateX(-1px)}20%,80%{transform:translateX(2px)}
+  30%,50%,70%{transform:translateX(-5px)}40%,60%{transform:translateX(5px)}
+}
+.result{
+  margin-top:20px;padding:18px;border-radius:var(--radius);
+  background:var(--panel2);border:1px solid var(--line);
+}
+.result h3{margin:0 0 4px;font-size:22px}
+.result p{margin:0 0 14px;color:var(--muted)}
+.result .stars{color:var(--gold);font-size:22px;letter-spacing:.1em;margin-bottom:6px}
+.result .actions{display:flex;flex-wrap:wrap;gap:10px}
+.result.win{border-color:var(--accent)}
+.result.lose{border-color:#a34a4a}
+.foot{margin-top:34px;color:var(--muted);font-size:13px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Top 10 <span>Fútbol</span></h1>
+    <p class="sub" id="sub"></p>
+  </header>
+
+  <main>
+    <section id="menu" aria-label="Menú de niveles">
+      <div class="menu-head">
+        <p class="summary" id="summary"></p>
+        <button class="btn primary" id="playNext" type="button">Jugar</button>
+      </div>
+      <p class="rules">
+        En cada nivel hay <b>10 respuestas</b> ocultas. Escribe una y elige del <b>desplegable</b> o pulsa Enter.
+        Cada fallo te quita <b>una vida</b> de las <b>5</b> que tienes. Si se acaban, se muestran las respuestas que faltaban.
+        Si escribes mal un nombre, el juego te propone <b>"¿Querías decir…?"</b> sin quitarte vida.
+        No hay límite de tiempo. Los acentos y las mayúsculas no importan.
+      </p>
+      <div class="filters" id="filters"></div>
+      <div class="levels" id="levels"></div>
+      <p class="foot">Datos revisados hasta septiembre de 2026. Cada nivel indica el periodo que cubre.</p>
+    </section>
+
+    <section id="game" hidden aria-label="Partida">
+      <div class="bar">
+        <div class="left">
+          <button class="btn" id="backBtn" type="button">Menú</button>
+          <span class="pill" id="lvlPill"></span>
+          <span class="pill" id="diffPill"></span>
+          <span class="pill" id="typePill"></span>
+          <span class="pill" id="tagPill"></span>
+        </div>
+        <div class="lives" id="lives" role="img"></div>
+      </div>
+
+      <h2 class="q" id="title"></h2>
+      <p class="desc" id="desc"></p>
+
+      <form class="guess" id="form" autocomplete="off">
+        <div class="acwrap">
+          <input id="input" type="text" placeholder="Escribe una respuesta" autocomplete="off"
+                 autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="send"
+                 role="combobox" aria-expanded="false" aria-controls="ac" aria-autocomplete="list"
+                 aria-label="Tu respuesta">
+          <ul class="ac" id="ac" role="listbox" hidden></ul>
+        </div>
+        <button class="btn primary" type="submit" id="sendBtn">Enviar</button>
+      </form>
+      <p class="feedback" id="feedback" aria-live="polite"></p>
+      <div class="prog"><span id="progFound"></span><span id="progLives"></span></div>
+
+      <ol class="slots" id="slots"></ol>
+
+      <div class="result" id="result" hidden>
+        <div class="stars" id="resStars"></div>
+        <h3 id="resTitle"></h3>
+        <p id="resText"></p>
+        <div class="actions">
+          <button class="btn primary" id="nextBtn" type="button">Siguiente nivel</button>
+          <button class="btn" id="retryBtn" type="button">Repetir nivel</button>
+          <button class="btn" id="menuBtn" type="button">Menú</button>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+<noscript><p style="padding:20px">Este juego necesita JavaScript activado.</p></noscript>
+
+<script>
+"use strict";
+
+/* ============================ DATOS ============================ */
+/* n: respuesta mostrada. a: alias aceptados. d: dato que se muestra al acertar o al perder.
+   auto: acepta también el último apellido/palabra. amb: entradas ambiguas de ese nivel.
+   diff: facil|medio|dificil|leyenda. type: jugadores|equipos|entrenadores|estadios|selecciones. cur: curiosidad. */
+/*__DATA__*/
+
+const MAX_LIVES = 5;
+const GLOBAL_AMBIG = ["manchester","real","united","city"];
+const DIFFS=[["facil","Fácil"],["medio","Medio"],["dificil","Difícil"],["leyenda","Leyenda"]];
+const TYPES=[["jugadores","Jugadores"],["equipos","Equipos"],["entrenadores","Entrenadores"],["estadios","Estadios"],["selecciones","Selecciones"]];
+const DIFF_NAME=Object.fromEntries(DIFFS), TYPE_NAME=Object.fromEntries(TYPES);
+
+/* ============================ LÓGICA ============================ */
+function norm(s){
+  return String(s).toLowerCase()
+    .normalize("NFD").replace(/[̀-ͯ]/g,"")
+    .replace(/ß/g,"ss").replace(/ø/g,"o").replace(/æ/g,"ae").replace(/đ/g,"d").replace(/ł/g,"l")
+    .replace(/['’`´]/g,"")
+    .replace(/[^a-z0-9]+/g," ")
+    .trim();
+}
+
+function lev(a,b){
+  if(a===b) return 0;
+  const m=a.length,n=b.length;
+  if(!m) return n; if(!n) return m;
+  let prev=new Array(n+1),cur=new Array(n+1);
+  for(let j=0;j<=n;j++) prev[j]=j;
+  for(let i=1;i<=m;i++){
+    cur[0]=i;
+    for(let j=1;j<=n;j++){
+      const c=a[i-1]===b[j-1]?0:1;
+      cur[j]=Math.min(prev[j]+1,cur[j-1]+1,prev[j-1]+c);
+    }
+    [prev,cur]=[cur,prev];
+  }
+  return prev[n];
+}
+
+function buildKeys(){
+  LEVELS.forEach(L=>{
+    L.answers.forEach(a=>{
+      const set=new Set([norm(a.n)]);
+      (a.a||[]).forEach(x=>set.add(norm(x)));
+      if(L.auto){
+        const t=norm(a.n).split(" ");
+        const last=t[t.length-1];
+        if(last.length>=4) set.add(last);
+      }
+      a.keys=[...set].filter(Boolean);
+    });
+  });
+}
+buildKeys();
+
+function tolerance(k){ return k.length>=10?2:(k.length>=6?1:0); }
+
+/* Devuelve {t:"empty"|"amb"|"also"|"miss"|"hit"|"dup", i?, n?}. also: respuesta válida que no cuenta y no resta vida. */
+function judge(L, raw, found){
+  const n=norm(raw);
+  if(!n) return {t:"empty"};
+  if(GLOBAL_AMBIG.includes(n) || (L.amb||[]).includes(n)) return {t:"amb"};
+  let cands=[];
+  L.answers.forEach((a,i)=>{ if(a.keys.includes(n)) cands.push(i); });
+  if(!cands.length){
+    L.answers.forEach((a,i)=>{
+      const ok=a.keys.some(k=>{
+        const d=tolerance(k);
+        return d>0 && Math.abs(k.length-n.length)<=d && lev(n,k)<=d;
+      });
+      if(ok) cands.push(i);
+    });
+  }
+  if(!cands.length && (L.also||[]).some(x=>norm(x)===n)) return {t:"also"};
+  if(!cands.length) return {t:"miss",n};
+  const fresh=cands.filter(i=>!found.has(i));
+  if(fresh.length) return {t:"hit",i:fresh[0]};
+  return {t:"dup",i:cands[0]};
+}
+
+/* Sugerencia "¿Querías decir…?": respuesta aún no acertada cuya clave está a pocas letras.
+   Devuelve el índice de la respuesta o null. */
+function nearMiss(L, raw, found){
+  const n=norm(raw);
+  if(n.length<3) return null;
+  let best=null;
+  L.answers.forEach((a,i)=>{
+    if(found.has(i)) return;
+    a.keys.forEach(k=>{
+      if(k.length<4) return;
+      const lim=Math.max(1,Math.floor(k.length*0.34));
+      if(Math.abs(k.length-n.length)>lim) return;
+      const d=lev(n,k);
+      if(d<=lim && (!best||d<best.d)) best={i,d};
+    });
+  });
+  return best?best.i:null;
+}
+
+/* Desplegable: reserva de nombres por tipo (respuestas de todos los niveles del mismo tipo + extras). */
+function buildPools(){
+  const maps={};
+  const add=(type,name,keys)=>{
+    const m=maps[type]||(maps[type]=new Map());
+    const nk=norm(name);
+    if(!nk) return;
+    if(!m.has(nk)) m.set(nk,{n:name,nk,keys:new Set([nk])});
+    const e=m.get(nk);
+    keys.forEach(k=>e.keys.add(k));
+  };
+  LEVELS.forEach(L=>L.answers.forEach(a=>add(L.type,a.n,a.keys)));
+  Object.keys(EXTRA).forEach(t=>EXTRA[t].forEach(n=>add(t,n,[])));
+  const pools={};
+  Object.keys(maps).forEach(t=>{ pools[t]=[...maps[t].values()].map(e=>({n:e.n,nk:e.nk,keys:[...e.keys]})); });
+  return pools;
+}
+const POOLS=buildPools();
+
+function suggest(L, raw, found){
+  const q=norm(raw);
+  if(q.length<2) return [];
+  const foundNames=new Set([...found].map(i=>norm(L.answers[i].n)));
+  const out=[];
+  (POOLS[L.type]||[]).forEach(e=>{
+    if(foundNames.has(e.nk)) return;
+    let s=-1;
+    if(e.nk.startsWith(q)) s=0;
+    else if(e.keys.some(k=>k.startsWith(q))) s=1;
+    else if(e.nk.split(" ").some(w=>w.startsWith(q))) s=2;
+    else if(q.length>=3 && e.nk.includes(q)) s=3;
+    if(s>=0) out.push({e,s});
+  });
+  out.sort((x,y)=>x.s-y.s || x.e.nk.length-y.e.nk.length || x.e.nk.localeCompare(y.e.nk));
+  return out.slice(0,7).map(x=>x.e.n);
+}
+
+//__UI__
+/* ============================ INTERFAZ ============================ */
+const $=id=>document.getElementById(id);
+const STORE_KEY="top10futbol.v2";
+
+let progress={done:{}};
+try{
+  const raw=localStorage.getItem(STORE_KEY);
+  if(raw){ const p=JSON.parse(raw); if(p&&p.done) progress=p; }
+  else{
+    /* migra el progreso de la versión de 20 niveles (índice 0 = nivel 1) */
+    const old=localStorage.getItem("top10futbol.v1");
+    if(old){ const p=JSON.parse(old); if(p&&p.done) Object.keys(p.done).forEach(k=>{ progress.done[+k+1]=p.done[k]; }); }
+  }
+}catch(e){}
+function saveProgress(){
+  try{ localStorage.setItem(STORE_KEY,JSON.stringify(progress)); }catch(e){}
+}
+
+const flt={diff:"all",type:"all",cur:false};
+const state={idx:0,list:[],found:new Set(),wrong:new Set(),near:new Set(),lives:MAX_LIVES,over:false,won:false};
+
+const HEART='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
+
+function starsFor(errors){ return errors<=1?3:(errors<=3?2:1); }
+function starText(n){ return "★".repeat(n)+"☆".repeat(3-n); }
+
+function visible(){
+  const out=[];
+  LEVELS.forEach((L,i)=>{
+    if(flt.diff!=="all" && L.diff!==flt.diff) return;
+    if(flt.type!=="all" && L.type!==flt.type) return;
+    if(flt.cur && !L.cur) return;
+    out.push(i);
+  });
+  return out;
+}
+
+function chip(label,pressed,onClick){
+  const b=document.createElement("button");
+  b.type="button"; b.className="chipbtn"; b.textContent=label;
+  b.setAttribute("aria-pressed",pressed?"true":"false");
+  b.addEventListener("click",onClick);
+  return b;
+}
+
+function renderFilters(){
+  const box=$("filters"); box.innerHTML="";
+  const row=(label,items)=>{
+    const r=document.createElement("div"); r.className="frow";
+    const l=document.createElement("span"); l.className="flabel"; l.textContent=label;
+    r.appendChild(l); items.forEach(c=>r.appendChild(c)); box.appendChild(r);
+  };
+  row("Dificultad",[chip("Todas",flt.diff==="all",()=>{flt.diff="all";renderMenu();})]
+    .concat(DIFFS.map(([k,l])=>chip(l,flt.diff===k,()=>{flt.diff=k;renderMenu();}))));
+  row("Tipo",[chip("Todos",flt.type==="all"&&!flt.cur,()=>{flt.type="all";flt.cur=false;renderMenu();})]
+    .concat(TYPES.map(([k,l])=>chip(l,flt.type===k,()=>{flt.type=(flt.type===k?"all":k);renderMenu();})))
+    .concat([chip("Curiosidades",flt.cur,()=>{flt.cur=!flt.cur;renderMenu();})]));
+}
+
+function firstPending(list){
+  for(const i of list) if(!progress.done[LEVELS[i].id]) return i;
+  return list.length?list[0]:0;
+}
+
+function renderMenu(){
+  const total=LEVELS.length;
+  const done=LEVELS.filter(L=>progress.done[L.id]).length;
+  const list=visible();
+  const doneVis=list.filter(i=>progress.done[LEVELS[i].id]).length;
+  $("sub").textContent=total+" niveles de fútbol europeo: ligas, selecciones, jugadores, equipos, entrenadores, estadios y curiosidades.";
+  $("summary").textContent=done+" de "+total+" superados"+(list.length<total?" ("+doneVis+" de "+list.length+" en este filtro)":"");
+  $("playNext").textContent=doneVis===0?"Empezar":(doneVis>=list.length?"Jugar otra vez":"Continuar");
+  $("playNext").disabled=!list.length;
+  renderFilters();
+  const grid=$("levels"); grid.innerHTML="";
+  if(!list.length){
+    const p=document.createElement("p"); p.className="empty"; p.textContent="Ningún nivel coincide con este filtro todavía."; grid.appendChild(p); return;
+  }
+  list.forEach(i=>{
+    const L=LEVELS[i];
+    const b=document.createElement("button");
+    b.type="button";
+    b.className="lvl"+(progress.done[L.id]?" done":"");
+    const num=document.createElement("span"); num.className="num"; num.textContent=L.id;
+    const bd=document.createElement("span"); bd.className="badge "+L.diff; bd.textContent=DIFF_NAME[L.diff];
+    const meta=document.createElement("span"); meta.className="meta";
+    meta.textContent=(L.cur?"Curiosidad · ":"")+TYPE_NAME[L.type]+" · "+L.tag;
+    const st=document.createElement("span"); st.className="st";
+    st.textContent=progress.done[L.id]?starText(progress.done[L.id]):"Pendiente";
+    b.append(num,bd,meta,st);
+    b.addEventListener("click",()=>startLevel(i,list));
+    grid.appendChild(b);
+  });
+}
+
+function showMenu(){
+  closeAc();
+  $("game").hidden=true;
+  $("menu").hidden=false;
+  renderMenu();
+  window.scrollTo(0,0);
+}
+
+function startLevel(i,list){
+  if(list) state.list=list;
+  else if(!state.list.includes(i)) state.list=visible().includes(i)?visible():[i];
+  state.idx=i;
+  state.found=new Set();
+  state.wrong=new Set();
+  state.near=new Set();
+  state.lives=MAX_LIVES;
+  state.over=false;
+  state.won=false;
+  const L=LEVELS[i];
+  $("menu").hidden=true;
+  $("game").hidden=false;
+  $("lvlPill").textContent="Nivel "+L.id+" de "+LEVELS.length;
+  const dp=$("diffPill"); dp.textContent=DIFF_NAME[L.diff]; dp.className="pill "+L.diff;
+  $("typePill").textContent=TYPE_NAME[L.type];
+  $("tagPill").textContent=L.cur?"Curiosidad":L.tag;
+  $("title").textContent=L.title;
+  $("desc").textContent=L.desc;
+  $("result").hidden=true;
+  say("","");
+  $("input").value="";
+  $("input").disabled=false;
+  $("sendBtn").disabled=false;
+  closeAc();
+  render();
+  window.scrollTo(0,0);
+  $("input").focus();
+}
+
+function renderLives(hitIndex){
+  const box=$("lives");
+  box.innerHTML="";
+  box.setAttribute("aria-label","Vidas: "+state.lives+" de "+MAX_LIVES);
+  for(let k=0;k<MAX_LIVES;k++){
+    const h=document.createElement("span");
+    h.className="heart"+(k>=state.lives?" lost":"")+(k===hitIndex?" hit":"");
+    h.innerHTML=HEART;
+    box.appendChild(h);
+  }
+}
+
+function render(popIdx){
+  const L=LEVELS[state.idx];
+  renderLives(-1);
+  $("progFound").textContent="Aciertos: "+state.found.size+" de "+L.answers.length;
+  $("progLives").textContent="Vidas: "+state.lives+" de "+MAX_LIVES;
+  const ol=$("slots"); ol.innerHTML="";
+  L.answers.forEach((a,i)=>{
+    const li=document.createElement("li");
+    const isFound=state.found.has(i);
+    const isMissed=state.over && !state.won && !isFound;
+    li.className="slot "+(isFound?"found":(isMissed?"missed":"hidden"))+(popIdx===i?" pop":"");
+    const rank=document.createElement("span"); rank.className="rank"; rank.textContent=i+1;
+    const txt=document.createElement("div"); txt.className="txt";
+    const name=document.createElement("div"); name.className="name";
+    const det=document.createElement("div"); det.className="det";
+    if(isFound||isMissed){ name.textContent=a.n; det.textContent=a.d; }
+    else { name.textContent="?????"; det.textContent=""; }
+    txt.append(name,det);
+    li.append(rank,txt);
+    ol.appendChild(li);
+  });
+}
+
+function say(msg,kind,suggestion){
+  const f=$("feedback");
+  f.textContent=msg;
+  f.className="feedback "+(kind||"");
+  if(suggestion){
+    const b=document.createElement("button");
+    b.type="button"; b.className="sug"; b.textContent="Sí, "+suggestion;
+    b.addEventListener("click",()=>{ submitGuess(suggestion); if(!state.over) $("input").focus(); });
+    f.appendChild(b);
+  }
+}
+
+function endGame(won){
+  state.over=true; state.won=won;
+  closeAc();
+  $("input").disabled=true;
+  $("sendBtn").disabled=true;
+  const errors=MAX_LIVES-state.lives;
+  const res=$("result");
+  res.hidden=false;
+  res.className="result "+(won?"win":"lose");
+  const L=LEVELS[state.idx];
+  if(won){
+    const s=starsFor(errors);
+    if(!progress.done[L.id] || progress.done[L.id]<s) progress.done[L.id]=s;
+    saveProgress();
+    $("resStars").textContent=starText(s);
+    $("resTitle").textContent="Nivel superado";
+    $("resText").textContent=errors===0
+      ? "Las 10 respuestas sin ningún fallo."
+      : "Las 10 respuestas con "+errors+(errors===1?" fallo.":" fallos.");
+  }else{
+    $("resStars").textContent="";
+    $("resTitle").textContent="Te has quedado sin vidas";
+    $("resText").textContent="Acertaste "+state.found.size+" de "+L.answers.length+". Las que faltaban aparecen marcadas en rojo.";
+  }
+  say("","");
+  const pos=state.list.indexOf(state.idx);
+  const hasNext=pos>=0 && pos<state.list.length-1;
+  $("nextBtn").hidden=!hasNext;
+  $("retryBtn").textContent = won ? "Repetir nivel" : "Reintentar";
+  render();
+  (hasNext&&won ? $("nextBtn") : $("retryBtn")).focus();
+  res.scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+
+function submitGuess(text){
+  if(state.over) return;
+  const L=LEVELS[state.idx];
+  closeAc();
+  const r=judge(L,text,state.found);
+  if(r.t==="empty") return;
+  if(r.t==="amb"){ say("Eso puede ser más de una respuesta. Sé más específico. No pierdes vida.","info"); return; }
+  if(r.t==="also"){ say("Es un estadio válido, pero no está entre los diez de este nivel. No pierdes vida.","info"); return; }
+  if(r.t==="dup"){ say("Ya tenías esa respuesta: "+L.answers[r.i].n+". No pierdes vida.","info"); return; }
+  if(r.t==="hit"){
+    state.found.add(r.i);
+    say("Correcto: "+L.answers[r.i].n,"ok");
+    render(r.i);
+    if(state.found.size===L.answers.length) endGame(true);
+    return;
+  }
+  /* fallo */
+  if(state.wrong.has(r.n)){ say("Ya probaste esa y no era correcta. No pierdes vida.","info"); return; }
+  if(!state.near.has(r.n)){
+    const ni=nearMiss(L,text,state.found);
+    if(ni!==null){
+      state.near.add(r.n);
+      say("No encuentro eso. ¿Querías decir "+L.answers[ni].n+"? No pierdes vida.","info",L.answers[ni].n);
+      return;
+    }
+  }
+  state.wrong.add(r.n);
+  state.lives--;
+  renderLives(state.lives);
+  $("progLives").textContent="Vidas: "+state.lives+" de "+MAX_LIVES;
+  const row=$("form");
+  row.classList.remove("shake"); void row.offsetWidth; row.classList.add("shake");
+  if(state.lives<=0){ say("Sin vidas.","bad"); endGame(false); }
+  else say("No es correcta. Te quedan "+state.lives+(state.lives===1?" vida.":" vidas."),"bad");
+}
+
+/* ---- desplegable ---- */
+let acItems=[], acActive=-1;
+function closeAc(){
+  acItems=[]; acActive=-1;
+  const ul=$("ac"); ul.hidden=true; ul.innerHTML="";
+  $("input").setAttribute("aria-expanded","false");
+  $("input").removeAttribute("aria-activedescendant");
+}
+function paintAc(){
+  const ul=$("ac");
+  [...ul.children].forEach((li,k)=>li.setAttribute("aria-selected",k===acActive?"true":"false"));
+  if(acActive>=0) $("input").setAttribute("aria-activedescendant","ac"+acActive);
+  else $("input").removeAttribute("aria-activedescendant");
+}
+function openAc(){
+  if(state.over) return closeAc();
+  const L=LEVELS[state.idx];
+  acItems=suggest(L,$("input").value,state.found);
+  acActive=-1;
+  const ul=$("ac"); ul.innerHTML="";
+  if(!acItems.length){ ul.hidden=true; $("input").setAttribute("aria-expanded","false"); return; }
+  acItems.forEach((name,k)=>{
+    const li=document.createElement("li");
+    li.id="ac"+k; li.setAttribute("role","option"); li.setAttribute("aria-selected","false");
+    li.textContent=name;
+    li.addEventListener("mousedown",e=>{ e.preventDefault(); $("input").value=""; submitGuess(name); });
+    ul.appendChild(li);
+  });
+  ul.hidden=false;
+  $("input").setAttribute("aria-expanded","true");
+}
+$("input").addEventListener("input",openAc);
+$("input").addEventListener("blur",()=>setTimeout(closeAc,120));
+$("input").addEventListener("keydown",e=>{
+  if(e.key==="ArrowDown" && acItems.length){ e.preventDefault(); acActive=(acActive+1)%acItems.length; paintAc(); }
+  else if(e.key==="ArrowUp" && acItems.length){ e.preventDefault(); acActive=(acActive<=0?acItems.length:acActive)-1; paintAc(); }
+  else if(e.key==="Escape"){ closeAc(); }
+  else if(e.key==="Enter" && acActive>=0 && acItems[acActive]){
+    e.preventDefault();
+    const name=acItems[acActive];
+    $("input").value="";
+    submitGuess(name);
+  }
+});
+
+$("form").addEventListener("submit",e=>{
+  e.preventDefault();
+  const v=$("input").value;
+  $("input").value="";
+  submitGuess(v);
+});
+
+$("backBtn").addEventListener("click",showMenu);
+$("menuBtn").addEventListener("click",showMenu);
+$("retryBtn").addEventListener("click",()=>startLevel(state.idx));
+$("nextBtn").addEventListener("click",()=>{
+  const pos=state.list.indexOf(state.idx);
+  if(pos>=0 && pos<state.list.length-1) startLevel(state.list[pos+1]);
+});
+$("playNext").addEventListener("click",()=>{ const list=visible(); if(list.length) startLevel(firstPending(list),list); });
+
+renderMenu();
+</script>
+</body>
+</html>
