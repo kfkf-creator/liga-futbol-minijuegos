@@ -83,6 +83,21 @@ td.n,th.n{text-align:right}
 .install .msg{flex:1 1 200px;font-size:14px}
 .install .x{background:none;border:0;color:var(--mut);font-size:18px}
 .upd{position:fixed;left:12px;right:12px;bottom:84px;z-index:40;display:flex;align-items:center;gap:10px;justify-content:space-between;padding:12px 14px;border:1px solid var(--gold);border-radius:14px;background:var(--bg2);box-shadow:0 6px 24px #0008}
+.opt.sm{min-height:0;padding:16px 12px}
+.tl{display:flex;flex-direction:column;gap:6px;margin:10px 0}
+.tli{display:flex;gap:12px;align-items:baseline;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.tli b{color:var(--gold);min-width:44px;font-variant-numeric:tabular-nums}
+.cgrp{border-radius:12px;padding:10px 12px;margin:8px 0;color:#141414;display:flex;flex-direction:column;gap:2px}
+.cgrp span{font-size:14px}
+.cgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}
+.tile{background:var(--card);border:2px solid var(--line);border-radius:12px;padding:12px 4px;font-weight:700;font-size:13px;min-height:64px;overflow-wrap:anywhere;color:var(--txt)}
+.tile.on{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 22%,var(--card))}
+.btn[disabled]{opacity:.45;cursor:default}
+.mhead,.mcs{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+.mhead{font-size:11px;color:var(--mut);text-align:center;margin:10px 0 4px}
+.mrow{margin:6px 0}.mn{font-weight:800;font-size:14px;margin-bottom:2px}
+.mc{border-radius:8px;padding:8px 2px;text-align:center;font-size:11px;font-weight:700;min-height:44px;display:flex;align-items:center;justify-content:center;overflow-wrap:anywhere;background:#2a3560}
+.mc.ok{background:#1f9d5b;color:#fff}.mc.near{background:#d98a1f;color:#fff}
 .code{font:800 26px ui-monospace,Menlo,monospace;letter-spacing:4px;text-align:center}
 </style>
 </head>
@@ -141,7 +156,7 @@ const LocalBackend={
   async createLeague(name){const d=this.db();const code=Math.random().toString(36).slice(2,8).toUpperCase();d.leagues.push({id:code,code,name});this.put(d);return {code,id:code,name};},
   async joinLeague(code){const d=this.db();const l=d.leagues.find(x=>x.code===code.toUpperCase());if(!l)throw new Error("No existe esa liga");return l;},
   async myLeagues(){return this.db().leagues;},
-  async board(id,from,to){let mm=0,once=0;for(let n=dayNum(from);n<=dayNum(to);n++){const r=S.days[dstrUTC(n)];if(r){mm+=r.mm||0;once+=r.once||0;}}return [{alias:S.alias||"Tú",mm,once,total:mm+once}];},
+  async board(id,from,to){const g={};let total=0;for(let n=dayNum(from);n<=dayNum(to);n++){const r=S.days[dstrUTC(n)];if(r)for(const k in r){g[k]=(g[k]||0)+r[k];total+=r[k];}}return [{alias:S.alias||"Tú",total,g}];},
   async submit(){}
 };
 const SB=DATA.CFG;
@@ -204,8 +219,14 @@ function recordDaily(game,score){
 
 /* ================= vistas principales ================= */
 const GAMES=[
- {id:"mm",name:"Más o menos",ic:"⚖️",c:"var(--mm)",desc:"¿Cuál tiene la cifra mayor? 10 duelos al día."},
- {id:"once",name:"Once oculto",ic:"🧩",c:"var(--once)",desc:"Completa la alineación de una final histórica."}
+ {id:"mm",name:"Más o menos",ic:"⚖️",c:"var(--mm)",desc:"¿Cuál tiene la cifra mayor? 10 duelos."},
+ {id:"once",name:"Once oculto",ic:"🧩",c:"var(--once)",desc:"Completa la alineación de una final."},
+ {id:"tray",name:"Trayectoria",ic:"🛤️",c:"#b58cff",desc:"Adivina al jugador por los clubes de su carrera."},
+ {id:"mist",name:"Jugador misterioso",ic:"❓",c:"#5bb8ff",desc:"Estilo Wordle, con 6 intentos y pistas."},
+ {id:"line",name:"Línea del tiempo",ic:"⏳",c:"#ffa94d",desc:"Ordena 6 hechos del más antiguo al más reciente."},
+ {id:"vf",name:"Verdadero o falso",ic:"✅",c:"#9be564",desc:"10 afirmaciones de fútbol."},
+ {id:"odd",name:"El intruso",ic:"🔍",c:"#ff8fb1",desc:"Cuatro opciones y una no encaja."},
+ {id:"con",name:"Conexiones",ic:"🧠",c:"#f5d90a",desc:"16 palabras que forman 4 grupos."}
 ];
 function show(v){
   document.querySelectorAll(".view").forEach(e=>e.classList.toggle("on",e.id==="v-"+v));
@@ -216,8 +237,9 @@ function show(v){
 document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>show(b.dataset.v));
 function shareText(){
   const r=S.days[today()]||{};
-  const sq=s=>s==null?"⬛⬛⬛⬛⬛":"🟩".repeat(Math.round(s/20))+"⬛".repeat(5-Math.round(s/20));
-  return "Minijuegos de fútbol "+today()+"\n⚖️ Más o menos "+(r.mm??"-")+"/100 "+sq(r.mm)+"\n🧩 Once oculto "+(r.once??"-")+"/100 "+sq(r.once)+"\nRacha: "+streak()+" 🔥";
+  const sq=s=>"🟩".repeat(Math.round(s/20))+"⬛".repeat(5-Math.round(s/20));
+  const played=GAMES.filter(g=>r[g.id]!=null);
+  return "Minijuegos de fútbol "+today()+"\n"+played.map(g=>g.ic+" "+g.name+" "+r[g.id]+"/"+100+" "+sq(r[g.id])).join("\n")+"\nRacha: "+streak()+" 🔥";
 }
 async function share(text){
   try{if(navigator.share){await navigator.share({text});return;}}catch(e){if(e&&e.name==="AbortError")return;}
@@ -225,11 +247,11 @@ async function share(text){
 }
 function renderHoy(){
   const r=S.days[today()]||{};
-  const total=(r.mm||0)+(r.once||0);
+  const total=GAMES.reduce((a,g)=>a+(r[g.id]||0),0),any=GAMES.some(g=>r[g.id]!=null);
   $("#v-hoy").innerHTML=`<div class="top"><div><h1>Reto de hoy</h1><div class="mut">${today()}</div></div><div class="streak">🔥 ${streak()}</div></div>
   ${GAMES.map(g=>`<button class="gcard" style="--c:${g.c}" data-play="${g.id}"><span class="ic">${g.ic}</span><span><b>${g.name}</b><small>${g.desc}</small></span><span class="pill">${r[g.id]!=null?r[g.id]+"/100":"Jugar"}</span></button>`).join("")}
-  <div class="card"><b>Total de hoy: ${total}/200</b><div class="mut">El primer intento del día es el que cuenta. Después puedes practicar sin límite.</div>
-  ${(r.mm!=null||r.once!=null)?`<button class="btn block" style="margin-top:12px" id="sh">Compartir resultado</button>`:""}</div>${window.installBarHtml?window.installBarHtml():""}`;
+  <div class="card"><b>Total de hoy: ${total}/${GAMES.length*100}</b><div class="mut">El primer intento del día es el que cuenta. Después puedes practicar sin límite.</div>
+  ${any?`<button class="btn block" style="margin-top:12px" id="sh">Compartir resultado</button>`:""}</div>${window.installBarHtml?window.installBarHtml():""}`;
   if(window.bindInstallBar)window.bindInstallBar();
   document.querySelectorAll("[data-play]").forEach(b=>b.onclick=()=>startGame(b.dataset.play,today()));
   const sh=$("#sh");if(sh)sh.onclick=()=>share(shareText());
@@ -248,17 +270,16 @@ function renderJuegos(){
   const cell=(d,g)=>{const sc=scoreOf(d,g.id);return `<button class="btn ${sc!=null?"ghost":""}" data-arch="${g.id}|${d}" style="padding:8px 10px;font-size:14px">${g.ic} ${sc!=null?sc:"Jugar"}</button>`;};
   $("#v-juegos").innerHTML=`<h1>Juegos</h1>
   <a class="gcard" style="--c:var(--top);text-decoration:none;color:inherit" href="../top10/?from=app"><span class="ic">🔟</span><span><b>Top 10 Fútbol</b><small>${DATA.T10.total} niveles para nombrar el top 10, sin límite.</small></span><span class="pill">${t.done}/${DATA.T10.total}</span></a>
-  <button class="gcard" disabled style="--c:var(--line)"><span class="ic">🛤️</span><span><b>Trayectoria</b><small>Próximamente</small></span></button>
   <button class="gcard" disabled style="--c:var(--line)"><span class="ic">🔲</span><span><b>Cuadrícula</b><small>Próximamente</small></span></button>
   <h2>Archivo de retos</h2>
   <div class="mut" style="font-size:14px;margin-bottom:8px">Repite los retos de días anteriores. No cuentan para la racha ni para las ligas.</div>
-  ${days.length?`<div class="card">${days.map(d=>`<div class="row" style="align-items:center;padding:6px 0;border-bottom:1px solid var(--line)"><span style="flex:1.2">${dayLabel(d)}</span>${GAMES.map(g=>cell(d,g)).join("")}</div>`).join("")}</div>`:`<div class="card mut">Todavía no hay retos anteriores. El archivo se irá llenando a partir de mañana.</div>`}`;
+  ${days.length?`<div class="card">${days.map(d=>`<div style="padding:8px 0;border-bottom:1px solid var(--line)"><b>${dayLabel(d)}</b><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">${GAMES.map(g=>cell(d,g)).join("")}</div></div>`).join("")}</div>`:`<div class="card mut">Todavía no hay retos anteriores. El archivo se irá llenando a partir de mañana.</div>`}`;
   document.querySelectorAll("[data-arch]").forEach(b=>b.onclick=()=>{const [g,d]=b.dataset.arch.split("|");startGame(g,d);});
 }
 function renderPerfil(){
   const t10=top10Stats();
   const days=Object.keys(S.days).length;
-  const scores=Object.values(S.days).flatMap(d=>[d.mm,d.once]).filter(x=>x!=null);
+  const scores=Object.values(S.days).flatMap(d=>Object.values(d)).filter(x=>typeof x==='number');
   const avg=scores.length?Math.round(scores.reduce((a,b)=>a+b,0)/scores.length):0;
   $("#v-perfil").innerHTML=`<h1>Perfil</h1>
   <div class="card"><b>Tu alias</b><input class="alias" id="al" maxlength="20" placeholder="Cómo te verán en las ligas" value="${esc(S.alias)}"><button class="btn block" id="al-save">Guardar alias</button></div>
@@ -310,8 +331,9 @@ async function renderBoard(){
   el.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>{LG.range=b.dataset.r;renderBoard();});
   try{
     await flushPending();
-    const rows=(await Backend.board(l.id,dstrUTC(rng_[0]),dstrUTC(rng_[1]))).slice().sort((a,b)=>b.total-a.total);
-    $("#bd").innerHTML=rows.length?`<table><tr><th>#</th><th>Jugador</th><th class="n">⚖️</th><th class="n">🧩</th><th class="n">Total</th></tr>${rows.map((r,i)=>`<tr><td>${i+1}</td><td>${esc(r.alias)}</td><td class="n">${r.mm||0}</td><td class="n">${r.once||0}</td><td class="n"><b>${r.total||0}</b></td></tr>`).join("")}</table>`:`<div class="mut">Nadie ha jugado todavía.</div>`;
+    const rows=(await Backend.board(l.id,dstrUTC(rng_[0]),dstrUTC(rng_[1]))).map(r=>{const g=r.g||{mm:r.mm||0,once:r.once||0};return {alias:r.alias,g,total:r.total!=null?r.total:Object.values(g).reduce((a,b)=>a+b,0)};}).sort((a,b)=>b.total-a.total);
+    const detail=g=>GAMES.filter(x=>g[x.id]!=null).map(x=>x.ic+g[x.id]).join(" ");
+    $("#bd").innerHTML=rows.length?`<table><tr><th>#</th><th>Jugador</th><th class="n">Total</th></tr>${rows.map((r,i)=>`<tr><td>${i+1}</td><td>${esc(r.alias)}<div class="mut" style="font-size:12px">${detail(r.g)}</div></td><td class="n"><b>${r.total}</b></td></tr>`).join("")}</table>`:`<div class="mut">Nadie ha jugado todavía.</div>`;
   }catch(e){$("#bd").innerHTML=`<div class="mut">${esc(e.message)}</div>`;}
 }
 
@@ -328,7 +350,7 @@ function closeGame(){stopTimer();G.classList.remove("on");G.innerHTML="";const v
 function startGame(id,day){
   day=day||today();
   if(scoreOf(day,id)!=null){return showDone(id,day);}
-  (id==="mm"?playMM:playOnce)(day);
+  ({mm:playMM,once:playOnce,tray:playTray,mist:playMist,line:playLine,vf:playVF,odd:playOdd,con:playCon})[id](day);
 }
 function dayLabel(d){return new Date(d+"T12:00:00").toLocaleDateString("es-ES",{weekday:"short",day:"numeric",month:"short"});}
 function showDone(id,day){
@@ -506,6 +528,8 @@ function playOnce(day){
     const t=document.getElementById("tmr");if(t)t.textContent="⏱ "+fmtT(remaining());
   },250);
 }
+
+/*__GAMES__*/
 
 /* ================= arranque ================= */
 show("hoy");

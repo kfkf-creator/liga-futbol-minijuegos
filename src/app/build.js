@@ -30,8 +30,16 @@ const ks=new Set(LINEUPS.map(l=>l.k));
 if(ks.size!==LINEUPS.length) throw new Error("claves de alineacion repetidas");
 
 const cfg=fs.existsSync(path.join(__dirname,"config.js"))?require("./config.js"):{supabaseUrl:"",supabaseKey:""};
-const data={MM,LINEUPS,T10:{total:levels.length},CFG:{supabaseUrl:cfg.supabaseUrl||"",supabaseKey:cfg.supabaseKey||""}};
-const html=read("template.html").replace("/*__DATA__*/null",()=>JSON.stringify(data));
+const chk=(name,arr,f)=>{const ids=new Set();arr.forEach(x=>{if(ids.has(x.id))throw new Error(name+" id repetido "+x.id);ids.add(x.id);f(x);});};
+const TRAY=require("./data/tray.js"),VF=require("./data/vf.js"),ODD=require("./data/intruso.js"),CON=require("./data/conexiones.js"),LINE=require("./data/linea.js"),MIST=require("./data/misterioso.js");
+chk("tray",TRAY,x=>{if(x.career.length<4)throw new Error("carrera corta "+x.id);});
+chk("vf",VF,x=>{if(typeof x.v!=="boolean")throw new Error("vf "+x.id);});
+chk("odd",ODD,x=>{if(x.items.length!==4||x.odd<0||x.odd>3)throw new Error("odd "+x.id);});
+chk("con",CON,x=>{const all=x.groups.flatMap(g=>g.items);if(x.groups.length!==4||new Set(all.map(t=>t.toLowerCase())).size!==16)throw new Error("con "+x.id);});
+chk("line",LINE,x=>{if(x.items.length!==6||new Set(x.items.map(i=>i.y)).size!==6)throw new Error("line "+x.id);});
+if(new Set(MIST.players.map(p=>p.n)).size!==MIST.players.length)throw new Error("misterioso repetidos");
+const data={MM,TRAY,VF,ODD,CON,LINE,MIST,LINEUPS,T10:{total:levels.length},CFG:{supabaseUrl:cfg.supabaseUrl||"",supabaseKey:cfg.supabaseKey||""}};
+const html=read("template.html").replace("/*__GAMES__*/",()=>read("games.js")).replace("/*__DATA__*/null",()=>JSON.stringify(data));
 const out=path.join(root,"app");
 fs.mkdirSync(out,{recursive:true});
 fs.writeFileSync(path.join(out,"index.html"),html);

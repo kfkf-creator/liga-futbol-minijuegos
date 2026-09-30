@@ -105,3 +105,10 @@ Web instalable (PWA) con minijuegos diarios de futbol en castellano, con ligas p
 - Formula (reto del dia): nota = aciertos x 9 + round(10 x (aciertos/10) x restante/total). Total: Mas o menos 120 s, Once oculto 480 s (`T_MM`, `T_ONCE`). Un reto perfecto y lento da 90. Archivo: sin reloj, aciertos x 10.
 - El reloj usa la hora real desde el primer inicio (`t0` guardado en `S.prog`): cerrar a medias no lo detiene. Al reabrir con el tiempo agotado se cierra el reto con lo respondido.
 - Las notas del reto del dia de antes de este cambio usaban aciertos x 10 sin bonus. Test: `tests/timer-test.js`.
+
+## Seis juegos mas (HECHO 2026-09-30, contenido de prueba)
+- Nuevos: Trayectoria (`tray`, 12 jugadores), Jugador misterioso (`mist`, 60 jugadores activos, 6 intentos, notas 100/85/70/55/40/25), Linea del tiempo (`line`, 12 retos de 6 hechos), Verdadero o falso (`vf`, 40), El intruso (`odd`, 30), Conexiones (`con`, 12). Datos en `src/app/data/`, logica en `src/app/games.js` (se inserta en template.html al compilar).
+- Nota: aciertos x 9 + bonus de velocidad hasta 10 en vf, odd, line y con (cuenta atras 90/150/150/300 s); tray y mist se puntuan por intentos y pistas (sin reloj).
+- Liga: `supabase/patch-02-mas-juegos.sql` (permite los ids nuevos y devuelve las notas por juego). Hasta ejecutarlo, las notas de los juegos nuevos quedan pendientes en el movil y se reintentan.
+- Pendiente de verificar en fuentes: Cannavaro (inicio Napoli 1991/92/93), Iniesta (Barcelona B), Torres y Laudrup en Trayectoria; clubes de 2026 en Jugador misterioso (Joan Garcia, Kimmich puesto); "Espana campeona 2026" en Linea del tiempo.
+- Cuadricula no se ha hecho: exige listar todos los jugadores validos de cada casilla.
