@@ -41,12 +41,24 @@ const URL=process.env.URL||"http://localhost:8123/app/index.html";
  await p.click("[data-l]");
  await p.waitForSelector("#bd table");
  out.board=await p.textContent("#bd");
- /* practica mas o menos: racha hasta fallar */
- await p.click('#tabs [data-v="juegos"]');
- await p.click('[data-prac="mm"]');
- for(let i=0;i<40;i++){await p.click('.opt[data-o="0"]');const t=await p.textContent("#go");await p.click("#go");if(t==="Ver resultado")break;}
- out.pracEnd=await p.textContent(".big");
+ /* archivo: al dia siguiente, el reto de ayer aparece con sus notas y se puede repetir el que no se jugo */
+ await p.evaluate(()=>{delete S.days[today()].once;save();});          /* ayer solo se jugo Más o menos */
+ await p.evaluate(()=>{NOW=()=>new Date(2026,9,1,12,0,0);show("juegos");});
+ out.archRows=await p.$$eval("[data-arch]",e=>e.map(x=>x.dataset.arch+"="+x.textContent.trim()));
+ out.topPill=await p.$eval("a[href*=top10] .pill",e=>e.textContent);
+ await p.click('[data-arch="once|2026-09-30"]');
+ const nm=await p.evaluate(()=>lineupOfDay("2026-09-30").ans.map(a=>a.n));
+ for(const n of nm.slice(0,4)){await p.fill("#gi",n);await p.press("#gi","Enter");}
+ for(let i=0;i<5;i++){await p.fill("#gi","zzzzqq"+i);await p.press("#gi","Enter");}
+ out.archEnd=await p.textContent(".big");
  await p.click("#e2");
+ out.arch=await p.evaluate(()=>JSON.stringify(S.arch));
+ out.daysUntouched=await p.evaluate(()=>JSON.stringify(Object.keys(S.days)));
+ out.pending=await p.evaluate(()=>S.pending.length);
+ await p.click('[data-arch="once|2026-09-30"]');
+ out.archAgain=await p.textContent(".big");
+ await p.click("#dcl");
+ out.noPractice=await p.$$eval("[data-prac]",e=>e.length);
  out.hscroll=await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth);
  out.errs=errs;
  console.log(JSON.stringify(out,null,1));

@@ -119,7 +119,7 @@ function toast(t){const e=document.createElement("div");e.className="toast";e.te
 
 /* ================= almacenamiento ================= */
 const KEY="minijuegos.v1";
-let S={days:{},mmBest:0,alias:"",pending:[],leagues:[]};
+let S={days:{},arch:{},mmBest:0,alias:"",pending:[],leagues:[]};
 try{const r=JSON.parse(localStorage.getItem(KEY));if(r&&r.days)S=Object.assign(S,r);}catch(e){}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
 function streak(){
@@ -182,6 +182,13 @@ async function flushPending(){
   for(const p of S.pending){try{await Backend.submit(p.day,p.game,p.score);}catch(e){rest.push(p);}}
   S.pending=rest;save();
 }
+const LAUNCH="2026-09-30";                      /* primer reto diario; el archivo empieza aquí */
+function scoreOf(day,game){ const a=(S.days[day]||{})[game]; return a!=null?a:(S.arch[day]||{})[game]; }   /* lo jugado el propio día manda sobre el archivo */
+function recordScore(day,game,score){
+  if(scoreOf(day,game)!=null)return;
+  if(day===today())return recordDaily(game,score);
+  (S.arch[day]=S.arch[day]||{})[game]=score;save();     /* el archivo no cuenta para liga ni racha */
+}
 function recordDaily(game,score){
   const t=today();
   S.days[t]=S.days[t]||{};
@@ -220,7 +227,7 @@ function renderHoy(){
   <div class="card"><b>Total de hoy: ${total}/200</b><div class="mut">El primer intento del día es el que cuenta. Después puedes practicar sin límite.</div>
   ${(r.mm!=null||r.once!=null)?`<button class="btn block" style="margin-top:12px" id="sh">Compartir resultado</button>`:""}</div>${window.installBarHtml?window.installBarHtml():""}`;
   if(window.bindInstallBar)window.bindInstallBar();
-  document.querySelectorAll("[data-play]").forEach(b=>b.onclick=()=>startGame(b.dataset.play,true));
+  document.querySelectorAll("[data-play]").forEach(b=>b.onclick=()=>startGame(b.dataset.play,today()));
   const sh=$("#sh");if(sh)sh.onclick=()=>share(shareText());
 }
 function top10Stats(){
@@ -232,13 +239,17 @@ function top10Stats(){
   }catch(e){return {done:0,stars:0,best:0,cur:0};}
 }
 function renderJuegos(){
-  const t=top10Stats();
-  $("#v-juegos").innerHTML=`<h1>Juegos</h1><div class="mut">Práctica sin límite (no cuenta para la liga).</div>
-  ${GAMES.map(g=>`<button class="gcard" style="--c:${g.c}" data-prac="${g.id}"><span class="ic">${g.ic}</span><span><b>${g.name}</b><small>${g.desc}</small></span><span class="pill">${g.id==="mm"?"Mejor racha "+S.mmBest:"Practicar"}</span></button>`).join("")}
-  <a class="gcard" style="--c:var(--top);text-decoration:none;color:inherit" href="../top10/?from=app"><span class="ic">🔟</span><span><b>Top 10 Fútbol</b><small>${DATA.T10.total} niveles para nombrar el top 10.</small></span><span class="pill">${t.done}/${DATA.T10.total}</span></a>
+  const t=top10Stats(),t0=dayNum(today()),first=dayNum(LAUNCH);
+  const days=[];for(let n=t0-1;n>=first&&days.length<30;n--)days.push(dstrUTC(n));
+  const cell=(d,g)=>{const sc=scoreOf(d,g.id);return `<button class="btn ${sc!=null?"ghost":""}" data-arch="${g.id}|${d}" style="padding:8px 10px;font-size:14px">${g.ic} ${sc!=null?sc:"Jugar"}</button>`;};
+  $("#v-juegos").innerHTML=`<h1>Juegos</h1>
+  <a class="gcard" style="--c:var(--top);text-decoration:none;color:inherit" href="../top10/?from=app"><span class="ic">🔟</span><span><b>Top 10 Fútbol</b><small>${DATA.T10.total} niveles para nombrar el top 10, sin límite.</small></span><span class="pill">${t.done}/${DATA.T10.total}</span></a>
   <button class="gcard" disabled style="--c:var(--line)"><span class="ic">🛤️</span><span><b>Trayectoria</b><small>Próximamente</small></span></button>
-  <button class="gcard" disabled style="--c:var(--line)"><span class="ic">🔲</span><span><b>Cuadrícula</b><small>Próximamente</small></span></button>`;
-  document.querySelectorAll("[data-prac]").forEach(b=>b.onclick=()=>startGame(b.dataset.prac,false));
+  <button class="gcard" disabled style="--c:var(--line)"><span class="ic">🔲</span><span><b>Cuadrícula</b><small>Próximamente</small></span></button>
+  <h2>Archivo de retos</h2>
+  <div class="mut" style="font-size:14px;margin-bottom:8px">Repite los retos de días anteriores. No cuentan para la racha ni para las ligas.</div>
+  ${days.length?`<div class="card">${days.map(d=>`<div class="row" style="align-items:center;padding:6px 0;border-bottom:1px solid var(--line)"><span style="flex:1.2">${dayLabel(d)}</span>${GAMES.map(g=>cell(d,g)).join("")}</div>`).join("")}</div>`:`<div class="card mut">Todavía no hay retos anteriores. El archivo se irá llenando a partir de mañana.</div>`}`;
+  document.querySelectorAll("[data-arch]").forEach(b=>b.onclick=()=>{const [g,d]=b.dataset.arch.split("|");startGame(g,d);});
 }
 function renderPerfil(){
   const t10=top10Stats();
@@ -251,7 +262,7 @@ function renderPerfil(){
   <tr><td>Racha actual</td><td class="n"><b>${streak()}</b></td></tr>
   <tr><td>Días jugados</td><td class="n"><b>${days}</b></td></tr>
   <tr><td>Nota media</td><td class="n"><b>${avg}</b></td></tr>
-  <tr><td>Mejor racha en Más o menos</td><td class="n"><b>${S.mmBest}</b></td></tr></table></div>
+</table></div>
   <div class="card"><b>Top 10 Fútbol</b><table>
   <tr><td>Niveles superados</td><td class="n"><b>${t10.done}/${DATA.T10.total}</b></td></tr>
   <tr><td>Estrellas</td><td class="n"><b>${t10.stars}/${DATA.T10.total*3}</b></td></tr>
@@ -304,17 +315,19 @@ async function renderBoard(){
 const G=$("#game");
 function openGame(title,c){G.innerHTML=`<div class="ghead"><button class="x" id="gx" aria-label="Cerrar">✕</button><div class="t" style="color:${c}">${title}</div><div id="gsc" class="mut"></div></div><div class="wrap" id="gb"></div>`;G.classList.add("on");$("#gx").onclick=closeGame;}
 function closeGame(){G.classList.remove("on");G.innerHTML="";const v=document.querySelector(".view.on").id.slice(2);show(v);}
-function startGame(id,daily){
-  if(daily&&(S.days[today()]||{})[id]!=null){return showDone(id);}
-  (id==="mm"?playMM:playOnce)(daily);
+function startGame(id,day){
+  day=day||today();
+  if(scoreOf(day,id)!=null){return showDone(id,day);}
+  (id==="mm"?playMM:playOnce)(day);
 }
-function showDone(id){
-  const g=GAMES.find(x=>x.id===id),sc=S.days[today()][id];
-  openGame(g.name,g.c);
-  $("#gb").innerHTML=`<div class="mut" style="text-align:center;margin-top:30px">Tu resultado de hoy</div><div class="big">${sc}/100</div>
-  <button class="btn block" id="dsh">Compartir</button><button class="btn block ghost" style="margin-top:10px" id="dpr">Practicar sin límite</button>`;
-  $("#dsh").onclick=()=>share(shareText());
-  $("#dpr").onclick=()=>(id==="mm"?playMM:playOnce)(false);
+function dayLabel(d){return new Date(d+"T12:00:00").toLocaleDateString("es-ES",{weekday:"short",day:"numeric",month:"short"});}
+function showDone(id,day){
+  const g=GAMES.find(x=>x.id===id),sc=scoreOf(day,id),hoy=day===today();
+  openGame(g.name+(hoy?"":" · "+dayLabel(day)),g.c);
+  $("#gb").innerHTML=`<div class="mut" style="text-align:center;margin-top:30px">${hoy?"Tu resultado de hoy":"Tu resultado de ese día"}</div><div class="big">${sc}/100</div>
+  ${hoy?`<button class="btn block" id="dsh">Compartir</button>`:""}<button class="btn block ghost" style="margin-top:10px" id="dcl">Cerrar</button>`;
+  const d=$("#dsh");if(d)d.onclick=()=>share(shareText());
+  $("#dcl").onclick=closeGame;
 }
 
 /* ---------- Más o menos ---------- */
@@ -336,19 +349,17 @@ function mmRounds(seed,n){
   return out;
 }
 function fmt(n){return n.toLocaleString("es-ES");}
-function playMM(daily){
-  openGame("Más o menos"+(daily?" · hoy":" · racha"),"var(--mm)");
-  const N=10;
-  let rounds=daily?mmRounds(hash("mm"+today()),N):null,i=0,score=0,streakN=0,locked=false;
-  const r=rng(Date.now()&0xffffff);
-  function roundNow(){return daily?rounds[i]:mmRounds(Math.floor(r()*1e9),1)[0];}
-  let cur=null;
+function playMM(day){
+  const hoy=day===today();
+  openGame("Más o menos"+(hoy?" · hoy":" · "+dayLabel(day)),"var(--mm)");
+  const N=10,rounds=mmRounds(hash("mm"+day),N);
+  let i=0,score=0,locked=false,cur=null;
   function next(){
-    cur=roundNow();locked=false;
-    const flip=(daily?rng(hash("f"+today()+i))():r())<.5;
+    cur=rounds[i];locked=false;
+    const flip=rng(hash("f"+day+i))()<.5;
     const [X,Y]=flip?[cur.B,cur.A]:[cur.A,cur.B];cur.X=X;cur.Y=Y;
-    $("#gsc").textContent=daily?"Duelo "+(i+1)+"/"+N:"Racha "+streakN;
-    $("#gb").innerHTML=`${daily?`<div class="bar" style="--c:var(--mm)"><i style="width:${i/N*100}%"></i></div>`:""}
+    $("#gsc").textContent="Duelo "+(i+1)+"/"+N;
+    $("#gb").innerHTML=`<div class="bar" style="--c:var(--mm)"><i style="width:${i/N*100}%"></i></div>
     <div class="mut" style="text-align:center">${esc(cur.s.cat)}</div><div class="q">${esc(cur.s.q)}</div>
     <div class="duel"><button class="opt" data-o="0"><b>${esc(X.n)}</b><div class="v"></div></button><div class="vs">contra</div><button class="opt" data-o="1"><b>${esc(Y.n)}</b><div class="v"></div></button></div>
     <div class="mut" style="text-align:center;margin-top:10px;font-size:13px">${esc(cur.s.asof||"")}</div><div id="nx"></div>`;
@@ -360,20 +371,17 @@ function playMM(daily){
     const opts=document.querySelectorAll(".opt");
     [cur.X,cur.Y].forEach((it,k)=>{opts[k].querySelector(".v").textContent=fmt(it.v)+" "+cur.s.unit;opts[k].classList.add(it.v>(k?cur.X:cur.Y).v?"win":"lose");});
     if(!ok)opts[o].classList.add("pickbad");
-    if(ok){score+=10;streakN++;}
-    if(daily){ $("#gsc").textContent=score+" pts"; $("#nx").innerHTML=`<button class="btn block" style="margin-top:14px" id="go">${i===N-1?"Ver resultado":"Siguiente"}</button>`;$("#go").onclick=()=>{i++;if(i>=N)end();else next();}; }
-    else if(ok){ $("#nx").innerHTML=`<button class="btn block" style="margin-top:14px" id="go">Siguiente</button>`;$("#go").onclick=next; $("#gsc").textContent="Racha "+streakN; }
-    else { if(streakN>S.mmBest){S.mmBest=streakN;save();} $("#nx").innerHTML=`<button class="btn block" style="margin-top:14px" id="go">Ver resultado</button>`;$("#go").onclick=end; }
+    if(ok)score+=10;
+    $("#gsc").textContent=score+" pts";
+    $("#nx").innerHTML=`<button class="btn block" style="margin-top:14px" id="go">${i===N-1?"Ver resultado":"Siguiente"}</button>`;
+    $("#go").onclick=()=>{i++;if(i>=N)end();else next();};
   }
   function end(){
-    if(daily)recordDaily("mm",score);
+    recordScore(day,"mm",score);
     $("#gsc").textContent="";
-    $("#gb").innerHTML=daily?`<div class="mut" style="text-align:center;margin-top:30px">Has acertado ${score/10} de ${N}</div><div class="big">${score}/100</div>
-    <button class="btn block" id="e1">Compartir</button><button class="btn block ghost" style="margin-top:10px" id="e2">Cerrar</button>`
-    :`<div class="mut" style="text-align:center;margin-top:30px">Racha final</div><div class="big">${streakN}</div><div class="mut" style="text-align:center">Mejor: ${S.mmBest}</div>
-    <button class="btn block" id="e3">Otra vez</button><button class="btn block ghost" style="margin-top:10px" id="e2">Cerrar</button>`;
+    $("#gb").innerHTML=`<div class="mut" style="text-align:center;margin-top:30px">Has acertado ${score/10} de ${N}</div><div class="big">${score}/100</div>
+    ${hoy?`<button class="btn block" id="e1">Compartir</button>`:""}<button class="btn block ghost" style="margin-top:10px" id="e2">Cerrar</button>`;
     const a=$("#e1");if(a)a.onclick=()=>share(shareText());
-    const b=$("#e3");if(b)b.onclick=()=>playMM(false);
     $("#e2").onclick=closeGame;
   }
   next();
@@ -414,10 +422,10 @@ function suggestP(raw,found,L){
   out.sort((x,y)=>x.s-y.s||y.e.f-x.e.f||x.e.nk.length-y.e.nk.length);
   return out.slice(0,6).map(x=>x.e);
 }
-function playOnce(daily){
-  openGame("Once oculto"+(daily?" · hoy":""),"var(--once)");
-  let L;
-  if(daily)L=lineupOfDay(today());else{const all=DATA.LINEUPS,td=lineupOfDay(today());do{L=all[Math.floor(Math.random()*all.length)];}while(L===td&&all.length>1);}
+function playOnce(day){
+  const hoy=day===today();
+  openGame("Once oculto"+(hoy?" · hoy":" · "+dayLabel(day)),"var(--once)");
+  let L=lineupOfDay(day);
   L=Object.assign({},L);L.ans=L.ans.map(a=>Object.assign({keys:keysOf(L,a)},a));
   const found=new Set(),MAXL=5;let lives=MAXL,over=false,slotOf=[],k=0;
   /* cada respuesta ocupa su hueco según el orden de la formación (de defensa a ataque) */
@@ -454,12 +462,11 @@ function playOnce(daily){
   }
   function finish(){
     const score=found.size*10;
-    if(daily)recordDaily("once",score);
-    $("#endbox").innerHTML=`<div class="big">${daily?score+"/100":found.size+"/10"}</div>
-    ${daily?`<button class="btn block" id="e1">Compartir</button>`:`<button class="btn block" id="e3">Otra alineación</button>`}
+    recordScore(day,"once",score);
+    $("#endbox").innerHTML=`<div class="big">${score}/100</div>
+    ${hoy?`<button class="btn block" id="e1">Compartir</button>`:""}
     <button class="btn block ghost" style="margin-top:10px" id="e2">Cerrar</button>`;
     const a=$("#e1");if(a)a.onclick=()=>share(shareText());
-    const b=$("#e3");if(b)b.onclick=()=>playOnce(false);
     $("#e2").onclick=closeGame;
   }
   draw("");

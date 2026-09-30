@@ -93,3 +93,9 @@ Web instalable (PWA) con minijuegos diarios de futbol en castellano, con ligas p
 ## Dos apps: minijuegos y Top 10 suelto (HECHO 2026-09-30)
 - Decision de Marc: app de minijuegos (con el Top 10 como uno de sus juegos) y Top 10 instalable aparte. En iOS cada app instalada tiene su propio almacen: los progresos NO se comparten entre ambas (solo con el codigo de copia de seguridad del Top 10).
 - El manifest de minijuegos tiene `scope: "../"`, asi `/top10/?from=app` se abre dentro de la app (hay que reinstalarla para que iOS lea el scope nuevo). El Top 10 muestra "‹ Minijuegos" si se llega con `?from=app` (flag en sessionStorage). Tarjeta y Perfil de minijuegos leen `top10futbol.v4` del almacen de esa app.
+
+## Sin practica libre + archivo de retos (HECHO 2026-09-30)
+- Decision de Marc: quitar la practica libre (incluida la racha de Mas o menos) porque gasta contenido. Los retos diarios se guardan y se pueden repetir desde la pestana Juegos > Archivo de retos (desde el dia siguiente al lanzamiento, `LAUNCH` en template.html; maximo 30 dias visibles).
+- Lo jugado el mismo dia esta en `S.days` (cuenta para racha y ligas); lo jugado despues va a `S.arch` (no cuenta). `scoreOf` da prioridad a `S.days`.
+- Idea futura de Marc: si el juego engancha, ofrecer una tercera app "estilo Top 10" con niveles exclusivos. Ojo: cada app instalada tiene su propio almacen de datos (no comparten progreso).
+- Pendiente conocido: si se cierra un reto diario a medias y se reabre, se puede reintentar (el resultado solo se guarda al terminar). Solucion: guardar el intento como empezado y contarlo.
