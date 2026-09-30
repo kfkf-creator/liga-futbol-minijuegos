@@ -99,3 +99,9 @@ Web instalable (PWA) con minijuegos diarios de futbol en castellano, con ligas p
 - Lo jugado el mismo dia esta en `S.days` (cuenta para racha y ligas); lo jugado despues va a `S.arch` (no cuenta). `scoreOf` da prioridad a `S.days`.
 - Idea futura de Marc: si el juego engancha, ofrecer una tercera app "estilo Top 10" con niveles exclusivos. Ojo: cada app instalada tiene su propio almacen de datos (no comparten progreso).
 - Reintento cerrado (HECHO): la partida en curso se guarda tras cada jugada (`S.prog`, clave `dia|juego`); cerrar y reabrir continua donde estabas. Test: `tests/resume-test.js`.
+
+## Cuenta atras y bonus de velocidad (HECHO 2026-09-30)
+- Decision de Marc: cuenta atras en los dos juegos del dia, el tiempo restante se convierte en puntos, pero se puede sumar yendo lento si se acierta. Al llegar a 0 el reto termina y cuenta lo respondido.
+- Formula (reto del dia): nota = aciertos x 9 + round(10 x (aciertos/10) x restante/total). Total: Mas o menos 120 s, Once oculto 480 s (`T_MM`, `T_ONCE`). Un reto perfecto y lento da 90. Archivo: sin reloj, aciertos x 10.
+- El reloj usa la hora real desde el primer inicio (`t0` guardado en `S.prog`): cerrar a medias no lo detiene. Al reabrir con el tiempo agotado se cierra el reto con lo respondido.
+- Las notas del reto del dia de antes de este cambio usaban aciertos x 10 sin bonus. Test: `tests/timer-test.js`.

@@ -317,8 +317,14 @@ async function renderBoard(){
 
 /* ================= juegos ================= */
 const G=$("#game");
-function openGame(title,c){G.innerHTML=`<div class="ghead"><button class="x" id="gx" aria-label="Cerrar">✕</button><div class="t" style="color:${c}">${title}</div><div id="gsc" class="mut"></div></div><div class="wrap" id="gb"></div>`;G.classList.add("on");$("#gx").onclick=closeGame;}
-function closeGame(){G.classList.remove("on");G.innerHTML="";const v=document.querySelector(".view.on").id.slice(2);show(v);}
+const T_MM=120, T_ONCE=480;                   /* segundos de cuenta atrás en el reto del día */
+let TIMER=null;
+function stopTimer(){ if(TIMER){clearInterval(TIMER);TIMER=null;} }
+function fmtT(sec){ sec=Math.max(0,Math.ceil(sec)); return Math.floor(sec/60)+":"+pad(sec%60); }
+/* bonus de velocidad: hasta 10 puntos, proporcional al tiempo que sobra y a la proporción de aciertos */
+function timeBonus(hits,remaining,total){ return Math.round(10*(hits/10)*Math.max(0,Math.min(remaining,total))/total); }
+function openGame(title,c){ stopTimer();G.innerHTML=`<div class="ghead"><button class="x" id="gx" aria-label="Cerrar">✕</button><div class="t" style="color:${c}">${title}</div><div id="gsc" class="mut"></div></div><div class="wrap" id="gb"></div>`;G.classList.add("on");$("#gx").onclick=closeGame;}
+function closeGame(){stopTimer();G.classList.remove("on");G.innerHTML="";const v=document.querySelector(".view.on").id.slice(2);show(v);}
 function startGame(id,day){
   day=day||today();
   if(scoreOf(day,id)!=null){return showDone(id,day);}
@@ -357,13 +363,18 @@ function playMM(day){
   const hoy=day===today();
   openGame("Más o menos"+(hoy?" · hoy":" · "+dayLabel(day)),"var(--mm)");
   const N=10,rounds=mmRounds(hash("mm"+day),N);
-  const sv=progGet(day,"mm");
-  let i=sv?sv.i:0,score=sv?sv.score:0,locked=false,cur=null;
+  let sv=progGet(day,"mm");
+  if(!sv){ sv={i:0,hits:0,t0:Date.now()}; progSet(day,"mm",sv); }
+  if(sv.hits==null) sv.hits=(sv.score||0)/10;
+  let i=sv.i,hits=sv.hits,locked=false,cur=null,done=false,label="";
+  const t0=sv.t0||Date.now();
+  const remaining=()=>hoy?T_MM-(Date.now()-t0)/1000:Infinity;
+  const hud=()=>{ $("#gsc").textContent=(hoy?"⏱ "+fmtT(remaining())+" · ":"")+label; };
   function next(){
     cur=rounds[i];locked=false;
     const flip=rng(hash("f"+day+i))()<.5;
     const [X,Y]=flip?[cur.B,cur.A]:[cur.A,cur.B];cur.X=X;cur.Y=Y;
-    $("#gsc").textContent="Duelo "+(i+1)+"/"+N;
+    label="Duelo "+(i+1)+"/"+N;hud();
     $("#gb").innerHTML=`<div class="bar" style="--c:var(--mm)"><i style="width:${i/N*100}%"></i></div>
     <div class="mut" style="text-align:center">${esc(cur.s.cat)}</div><div class="q">${esc(cur.s.q)}</div>
     <div class="duel"><button class="opt" data-o="0"><b>${esc(X.n)}</b><div class="v"></div></button><div class="vs">contra</div><button class="opt" data-o="1"><b>${esc(Y.n)}</b><div class="v"></div></button></div>
@@ -371,26 +382,31 @@ function playMM(day){
     document.querySelectorAll(".opt").forEach(b=>b.onclick=()=>pick(+b.dataset.o));
   }
   function pick(o){
-    if(locked)return;locked=true;
+    if(locked||done)return;locked=true;
     const pickV=[cur.X,cur.Y][o],other=[cur.X,cur.Y][1-o],ok=pickV.v>other.v;
     const opts=document.querySelectorAll(".opt");
     [cur.X,cur.Y].forEach((it,k)=>{opts[k].querySelector(".v").textContent=fmt(it.v)+" "+cur.s.unit;opts[k].classList.add(it.v>(k?cur.X:cur.Y).v?"win":"lose");});
     if(!ok)opts[o].classList.add("pickbad");
-    if(ok)score+=10;
-    progSet(day,"mm",{i:i+1,score});                     /* si cierras aquí, continúas en el duelo siguiente */
-    $("#gsc").textContent=score+" pts";
+    if(ok)hits++;
+    progSet(day,"mm",{i:i+1,hits,t0});                   /* si cierras aquí, continúas en el duelo siguiente */
+    label=hits+" acierto"+(hits===1?"":"s");hud();
     $("#nx").innerHTML=`<button class="btn block" style="margin-top:14px" id="go">${i===N-1?"Ver resultado":"Siguiente"}</button>`;
-    $("#go").onclick=()=>{i++;if(i>=N)end();else next();};
+    $("#go").onclick=()=>{i++;if(i>=N)end(false);else next();};
   }
-  function end(){
+  function end(timeout){
+    if(done)return;done=true;stopTimer();
+    const rem=timeout?0:Math.max(0,remaining());
+    const bonus=hoy?timeBonus(hits,rem,T_MM):0,score=hits*(hoy?9:10)+bonus;
     recordScore(day,"mm",score);
     $("#gsc").textContent="";
-    $("#gb").innerHTML=`<div class="mut" style="text-align:center;margin-top:30px">Has acertado ${score/10} de ${N}</div><div class="big">${score}/100</div>
+    $("#gb").innerHTML=`<div class="mut" style="text-align:center;margin-top:30px">${timeout?"Se acabó el tiempo. ":""}Has acertado ${hits} de ${N}${hoy?" · bonus de velocidad +"+bonus:""}</div><div class="big">${score}/100</div>
     ${hoy?`<button class="btn block" id="e1">Compartir</button>`:""}<button class="btn block ghost" style="margin-top:10px" id="e2">Cerrar</button>`;
     const a=$("#e1");if(a)a.onclick=()=>share(shareText());
     $("#e2").onclick=closeGame;
   }
-  if(i>=N)end();else next();
+  if(i>=N)end(false);
+  else if(remaining()<=0)end(true);
+  else{ next(); if(hoy)TIMER=setInterval(()=>{ if(remaining()<=0)end(true); else hud(); },250); }
 }
 
 /* ---------- Once oculto ---------- */
@@ -433,19 +449,23 @@ function playOnce(day){
   openGame("Once oculto"+(hoy?" · hoy":" · "+dayLabel(day)),"var(--once)");
   let L=lineupOfDay(day);
   L=Object.assign({},L);L.ans=L.ans.map(a=>Object.assign({keys:keysOf(L,a)},a));
-  const svo=progGet(day,"once");
+  let svo=progGet(day,"once");
+  const t0=(svo&&svo.t0)||Date.now();
+  const remaining=()=>hoy?T_ONCE-(Date.now()-t0)/1000:Infinity;
+  let timedOut=false;
   const found=new Set(svo?svo.f:[]),MAXL=5;let lives=svo?svo.l:MAXL,over=!!svo&&(svo.l<=0||svo.f.length===10),slotOf=[],k=0;
+  if(!over&&hoy&&remaining()<=0){over=true;timedOut=true;}
   /* cada respuesta ocupa su hueco según el orden de la formación (de defensa a ataque) */
   L.rows.forEach((n,r)=>{for(let j=0;j<n;j++)slotOf.push({r,j,idx:k++});});
   const R=L.rows.length;
   function draw(msg){
-    progSet(day,"once",{f:[...found],l:lives});
+    progSet(day,"once",{f:[...found],l:lives,t0});
     const rowsHtml=[];
     for(let r=R-1;r>=0;r--){
       rowsHtml.push(`<div class="prow">${slotOf.filter(s=>s.r===r).map(s=>{const a=L.ans[s.idx],g=found.has(s.idx);return `<div class="slot ${g?"got":over?"miss":""}">${(g||over)?esc(a.n):`?<small>${rowLabel(r,R)}</small>`}</div>`;}).join("")}</div>`);
     }
     const hearts="❤️".repeat(lives)+"🖤".repeat(MAXL-lives);
-    $("#gsc").innerHTML=`<span class="lives">${hearts}</span>`;
+    $("#gsc").innerHTML=`${hoy?`<span id="tmr">⏱ ${fmtT(remaining())}</span> `:""}<span class="lives">${hearts}</span>`;
     $("#gb").innerHTML=`<div class="mut" style="text-align:center;font-size:14px">${esc(L.title.replace(/^Jugadores de campo titulares d(e|el) /,""))}</div>
     <div class="pitch">${rowsHtml.join("")}<div class="prow"><div class="slot gk got" style="max-width:none;flex:0 0 auto;padding:6px 14px;background:#fff;color:#111">🧤 ${esc(L.gk||"Portero")}</div></div></div>
     <div class="mut" style="text-align:center;margin-bottom:6px">${found.size}/10 jugadores · escribe el apellido o el nombre</div>
@@ -469,15 +489,22 @@ function playOnce(day){
     draw("✘ No juega de titular (o no lo reconozco). Pierdes una vida.");
   }
   function finish(){
-    const score=found.size*10;
+    stopTimer();
+    const rem=timedOut?0:Math.max(0,remaining()),bonus=hoy?timeBonus(found.size,rem,T_ONCE):0;
+    const score=found.size*(hoy?9:10)+bonus;
     recordScore(day,"once",score);
-    $("#endbox").innerHTML=`<div class="big">${score}/100</div>
+    $("#endbox").innerHTML=`<div class="mut" style="text-align:center">${timedOut?"Se acabó el tiempo. ":""}${found.size} de 10${hoy?" · bonus de velocidad +"+bonus:""}</div><div class="big">${score}/100</div>
     ${hoy?`<button class="btn block" id="e1">Compartir</button>`:""}
     <button class="btn block ghost" style="margin-top:10px" id="e2">Cerrar</button>`;
     const a=$("#e1");if(a)a.onclick=()=>share(shareText());
     $("#e2").onclick=closeGame;
   }
-  draw("");
+  draw(timedOut?"Se acabó el tiempo":"");
+  if(hoy&&!over)TIMER=setInterval(()=>{
+    if(over){stopTimer();return;}
+    if(remaining()<=0){timedOut=true;over=true;draw("Se acabó el tiempo");return;}
+    const t=document.getElementById("tmr");if(t)t.textContent="⏱ "+fmtT(remaining());
+  },250);
 }
 
 /* ================= arranque ================= */
