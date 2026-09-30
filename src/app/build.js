@@ -35,4 +35,7 @@ const html=read("template.html").replace("/*__DATA__*/null",()=>JSON.stringify(d
 const out=path.join(root,"app");
 fs.mkdirSync(out,{recursive:true});
 fs.writeFileSync(path.join(out,"index.html"),html);
+fs.copyFileSync(path.join(__dirname,"pwa","manifest.webmanifest"),path.join(out,"manifest.webmanifest"));
+const ver=require("crypto").createHash("sha1").update(html).digest("hex").slice(0,10);
+fs.writeFileSync(path.join(out,"sw.js"),read("pwa/sw.template.js").replace("__VERSION__",ver));
 console.log("app/index.html",html.length,"bytes; MM sets",MM.length,"lineups",LINEUPS.length);

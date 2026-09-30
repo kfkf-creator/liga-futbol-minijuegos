@@ -2,7 +2,7 @@
   "id": "./",
   "name": "Top 10 Fútbol",
   "short_name": "Top 10",
-  "description": "Adivina el top 10 de fútbol: 130 niveles con vidas, pistas y sugerencias al escribir.",
+  "description": "Adivina el top 10 de fútbol: más de 160 niveles con vidas, pistas y sugerencias al escribir.",
   "lang": "es",
   "start_url": "./?source=pwa",
   "scope": "./",

@@ -24,7 +24,7 @@ const MOCK="https://mock.supabase.test";
  /* misma pagina pero con el servidor simulado configurado */
  await p.route("**/app/index.html",async r=>{
   const resp=await r.fetch();let t=await resp.text();
-  t=t.replace('"supabaseUrl":""','"supabaseUrl":"'+MOCK+'"').replace('"supabaseKey":""','"supabaseKey":"anon-key"');
+  t=t.replace(/"supabaseUrl":"[^"]*"/,'"supabaseUrl":"'+MOCK+'"').replace(/"supabaseKey":"[^"]*"/,'"supabaseKey":"anon-key"');
   r.fulfill({response:resp,body:t});
  });
  await p.goto(URL);

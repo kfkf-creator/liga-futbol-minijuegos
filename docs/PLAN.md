@@ -83,3 +83,9 @@ Web instalable (PWA) con minijuegos diarios de futbol en castellano, con ligas p
 
 ## Tanda 3: +32 niveles (HECHO 2026-09-30, publicada)
 32 niveles nuevos (b6a-b6d): mediados s. XX, finales s. XX, 2000-2009 y 2010-2019. Total 162. build/check/tests OK. Publicada en main.
+
+## App de minijuegos: PWA y menu (HECHO 2026-09-30)
+- `src/app/pwa/`: manifest, service worker (version = hash de la pagina, red primero con 4 s, cache de `entidades/`), iconos PROVISIONALES generados por `make-icons.py` (balon dorado sobre azul noche; sustituir cuando haya logo propio). Barra de instalar en la pestana Hoy y aviso de nueva version.
+- Menu raiz (`index.html`) enlaza `app/`; el Top 10 dice 162 niveles.
+- Tests en `src/app/tests/`: app-test (modo local), pwa-test, sb-mock-test (servidor simulado). Para usarlos: servidor http en la raiz del repo, `URL=http://localhost:8123/app/index.html`.
+- Ligas: probado contra Supabase real solo por Marc en el movil; con dos personas, pendiente.
