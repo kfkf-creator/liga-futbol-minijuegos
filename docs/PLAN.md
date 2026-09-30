@@ -72,3 +72,6 @@ Web instalable (PWA) con minijuegos diarios de futbol en castellano, con ligas p
 - `pwa/manifest.webmanifest` y `pwa/sw.template.js` (build.js genera `top10/sw.js` con version = hash del juego). Pagina y juego: red primero con 4 s de limite y cache si no hay conexion; `entidades/*.json`: cache primero y refresco por detras. Funciona sin conexion tras la primera carga.
 - Menu: barra "Instalar" (Android/Chrome, via beforeinstallprompt) y explicacion del gesto en iPhone; aviso "Hay una version nueva, Recargar" cuando el service worker cambia.
 - Pendiente de comprobar en moviles reales: instalacion en Android y en iPhone.
+
+## Tanda 3 (rama `niveles-tanda-3`, pendiente de aprobación)
+32 niveles nuevos (b6a-b6d): mediados s. XX, finales s. XX, 2000-2009 y 2010-2019. Total 162. build/check/tests OK. No está en main hasta que Marc diga "súbelos".

@@ -1,7 +1,7 @@
 /* Service worker del Top 10 Fútbol. VERSION se sustituye al compilar (hash del juego).
    - Juego y página: red primero (con tiempo límite) y caché si no hay conexión, así las actualizaciones llegan rápido.
    - Ficheros de nombres (entidades/*.json): caché primero y se refrescan por detrás. */
-const VERSION="0d08a114a8";
+const VERSION="7799391a00";
 const CORE="top10-core-"+VERSION;
 const DATA="top10-data";
 const CORE_FILES=["./","index.html","manifest.webmanifest","icon-192.png","icon-512.png","apple-touch-icon.png"];
