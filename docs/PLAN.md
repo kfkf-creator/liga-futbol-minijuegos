@@ -98,4 +98,4 @@ Web instalable (PWA) con minijuegos diarios de futbol en castellano, con ligas p
 - Decision de Marc: quitar la practica libre (incluida la racha de Mas o menos) porque gasta contenido. Los retos diarios se guardan y se pueden repetir desde la pestana Juegos > Archivo de retos (desde el dia siguiente al lanzamiento, `LAUNCH` en template.html; maximo 30 dias visibles).
 - Lo jugado el mismo dia esta en `S.days` (cuenta para racha y ligas); lo jugado despues va a `S.arch` (no cuenta). `scoreOf` da prioridad a `S.days`.
 - Idea futura de Marc: si el juego engancha, ofrecer una tercera app "estilo Top 10" con niveles exclusivos. Ojo: cada app instalada tiene su propio almacen de datos (no comparten progreso).
-- Pendiente conocido: si se cierra un reto diario a medias y se reabre, se puede reintentar (el resultado solo se guarda al terminar). Solucion: guardar el intento como empezado y contarlo.
+- Reintento cerrado (HECHO): la partida en curso se guarda tras cada jugada (`S.prog`, clave `dia|juego`); cerrar y reabrir continua donde estabas. Test: `tests/resume-test.js`.

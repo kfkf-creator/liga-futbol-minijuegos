@@ -119,7 +119,7 @@ function toast(t){const e=document.createElement("div");e.className="toast";e.te
 
 /* ================= almacenamiento ================= */
 const KEY="minijuegos.v1";
-let S={days:{},arch:{},mmBest:0,alias:"",pending:[],leagues:[]};
+let S={days:{},arch:{},prog:{},mmBest:0,alias:"",pending:[],leagues:[]};
 try{const r=JSON.parse(localStorage.getItem(KEY));if(r&&r.days)S=Object.assign(S,r);}catch(e){}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
 function streak(){
@@ -184,8 +184,12 @@ async function flushPending(){
 }
 const LAUNCH="2026-09-30";                      /* primer reto diario; el archivo empieza aquí */
 function scoreOf(day,game){ const a=(S.days[day]||{})[game]; return a!=null?a:(S.arch[day]||{})[game]; }   /* lo jugado el propio día manda sobre el archivo */
+/* Partida en curso: se guarda tras cada jugada, así cerrar y reabrir continúa donde estabas y no permite repetir */
+function progGet(day,game){ return (S.prog||{})[day+"|"+game]||null; }
+function progSet(day,game,o){ (S.prog=S.prog||{})[day+"|"+game]=o; save(); }
 function recordScore(day,game,score){
-  if(scoreOf(day,game)!=null)return;
+  if(S.prog)delete S.prog[day+"|"+game];
+  if(scoreOf(day,game)!=null){save();return;}
   if(day===today())return recordDaily(game,score);
   (S.arch[day]=S.arch[day]||{})[game]=score;save();     /* el archivo no cuenta para liga ni racha */
 }
@@ -353,7 +357,8 @@ function playMM(day){
   const hoy=day===today();
   openGame("Más o menos"+(hoy?" · hoy":" · "+dayLabel(day)),"var(--mm)");
   const N=10,rounds=mmRounds(hash("mm"+day),N);
-  let i=0,score=0,locked=false,cur=null;
+  const sv=progGet(day,"mm");
+  let i=sv?sv.i:0,score=sv?sv.score:0,locked=false,cur=null;
   function next(){
     cur=rounds[i];locked=false;
     const flip=rng(hash("f"+day+i))()<.5;
@@ -372,6 +377,7 @@ function playMM(day){
     [cur.X,cur.Y].forEach((it,k)=>{opts[k].querySelector(".v").textContent=fmt(it.v)+" "+cur.s.unit;opts[k].classList.add(it.v>(k?cur.X:cur.Y).v?"win":"lose");});
     if(!ok)opts[o].classList.add("pickbad");
     if(ok)score+=10;
+    progSet(day,"mm",{i:i+1,score});                     /* si cierras aquí, continúas en el duelo siguiente */
     $("#gsc").textContent=score+" pts";
     $("#nx").innerHTML=`<button class="btn block" style="margin-top:14px" id="go">${i===N-1?"Ver resultado":"Siguiente"}</button>`;
     $("#go").onclick=()=>{i++;if(i>=N)end();else next();};
@@ -384,7 +390,7 @@ function playMM(day){
     const a=$("#e1");if(a)a.onclick=()=>share(shareText());
     $("#e2").onclick=closeGame;
   }
-  next();
+  if(i>=N)end();else next();
 }
 
 /* ---------- Once oculto ---------- */
@@ -427,11 +433,13 @@ function playOnce(day){
   openGame("Once oculto"+(hoy?" · hoy":" · "+dayLabel(day)),"var(--once)");
   let L=lineupOfDay(day);
   L=Object.assign({},L);L.ans=L.ans.map(a=>Object.assign({keys:keysOf(L,a)},a));
-  const found=new Set(),MAXL=5;let lives=MAXL,over=false,slotOf=[],k=0;
+  const svo=progGet(day,"once");
+  const found=new Set(svo?svo.f:[]),MAXL=5;let lives=svo?svo.l:MAXL,over=!!svo&&(svo.l<=0||svo.f.length===10),slotOf=[],k=0;
   /* cada respuesta ocupa su hueco según el orden de la formación (de defensa a ataque) */
   L.rows.forEach((n,r)=>{for(let j=0;j<n;j++)slotOf.push({r,j,idx:k++});});
   const R=L.rows.length;
   function draw(msg){
+    progSet(day,"once",{f:[...found],l:lives});
     const rowsHtml=[];
     for(let r=R-1;r>=0;r--){
       rowsHtml.push(`<div class="prow">${slotOf.filter(s=>s.r===r).map(s=>{const a=L.ans[s.idx],g=found.has(s.idx);return `<div class="slot ${g?"got":over?"miss":""}">${(g||over)?esc(a.n):`?<small>${rowLabel(r,R)}</small>`}</div>`;}).join("")}</div>`);
