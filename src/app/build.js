@@ -30,7 +30,7 @@ const ks=new Set(LINEUPS.map(l=>l.k));
 if(ks.size!==LINEUPS.length) throw new Error("claves de alineacion repetidas");
 
 const cfg=fs.existsSync(path.join(__dirname,"config.js"))?require("./config.js"):{supabaseUrl:"",supabaseKey:""};
-const data={MM,LINEUPS,CFG:{supabaseUrl:cfg.supabaseUrl||"",supabaseKey:cfg.supabaseKey||""}};
+const data={MM,LINEUPS,T10:{total:levels.length},CFG:{supabaseUrl:cfg.supabaseUrl||"",supabaseKey:cfg.supabaseKey||""}};
 const html=read("template.html").replace("/*__DATA__*/null",()=>JSON.stringify(data));
 const out=path.join(root,"app");
 fs.mkdirSync(out,{recursive:true});

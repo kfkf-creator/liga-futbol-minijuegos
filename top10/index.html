@@ -191,6 +191,7 @@ textarea{width:100%;background:var(--bg);color:var(--text);border:1px solid var(
 </head>
 <body>
 <div class="wrap">
+  <a id="backApp" href="../app/" hidden style="display:inline-block;margin:0 0 10px;color:var(--accent);text-decoration:none;font-weight:700">‹ Minijuegos</a>
   <header>
     <h1>Top 10 <span>Fútbol</span></h1>
     <p class="sub" id="sub"></p>
@@ -17345,6 +17346,11 @@ $("nextBtn").addEventListener("click",()=>{
 $("playNext").addEventListener("click",()=>{ const list=visible(); if(list.length) startLevel(firstPending(list),list); });
 
 renderMenu();
+/* si se llega desde la app de minijuegos, se ofrece volver (dentro de una app instalada no hay boton de atras) */
+try{
+  if(/[?&]from=app\b/.test(location.search)) sessionStorage.setItem("top10.fromApp","1");
+  if(sessionStorage.getItem("top10.fromApp")==="1") $("backApp").hidden=false;
+}catch(e){}
 
 /* ============ App instalable (PWA) ============ */
 (function(){

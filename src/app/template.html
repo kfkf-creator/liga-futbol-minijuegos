@@ -223,15 +223,25 @@ function renderHoy(){
   document.querySelectorAll("[data-play]").forEach(b=>b.onclick=()=>startGame(b.dataset.play,true));
   const sh=$("#sh");if(sh)sh.onclick=()=>share(shareText());
 }
+function top10Stats(){
+  try{
+    const p=JSON.parse(localStorage.getItem("top10futbol.v4"))||{};
+    const v=Object.values(p.done||{}).filter(x=>x>0);
+    const st=p.streak||{},td=today(),y=dstrUTC(dayNum(td)-1),cur=(st.last===td||st.last===y)?st.cur||0:0;
+    return {done:v.length,stars:v.reduce((a,b)=>a+b,0),best:st.best||0,cur};
+  }catch(e){return {done:0,stars:0,best:0,cur:0};}
+}
 function renderJuegos(){
+  const t=top10Stats();
   $("#v-juegos").innerHTML=`<h1>Juegos</h1><div class="mut">Práctica sin límite (no cuenta para la liga).</div>
   ${GAMES.map(g=>`<button class="gcard" style="--c:${g.c}" data-prac="${g.id}"><span class="ic">${g.ic}</span><span><b>${g.name}</b><small>${g.desc}</small></span><span class="pill">${g.id==="mm"?"Mejor racha "+S.mmBest:"Practicar"}</span></button>`).join("")}
-  <a class="gcard" style="--c:var(--top);text-decoration:none;color:inherit" href="../top10/"><span class="ic">🔟</span><span><b>Top 10 Fútbol</b><small>162 niveles para nombrar el top 10.</small></span><span class="pill">Abrir</span></a>
+  <a class="gcard" style="--c:var(--top);text-decoration:none;color:inherit" href="../top10/?from=app"><span class="ic">🔟</span><span><b>Top 10 Fútbol</b><small>${DATA.T10.total} niveles para nombrar el top 10.</small></span><span class="pill">${t.done}/${DATA.T10.total}</span></a>
   <button class="gcard" disabled style="--c:var(--line)"><span class="ic">🛤️</span><span><b>Trayectoria</b><small>Próximamente</small></span></button>
   <button class="gcard" disabled style="--c:var(--line)"><span class="ic">🔲</span><span><b>Cuadrícula</b><small>Próximamente</small></span></button>`;
   document.querySelectorAll("[data-prac]").forEach(b=>b.onclick=()=>startGame(b.dataset.prac,false));
 }
 function renderPerfil(){
+  const t10=top10Stats();
   const days=Object.keys(S.days).length;
   const scores=Object.values(S.days).flatMap(d=>[d.mm,d.once]).filter(x=>x!=null);
   const avg=scores.length?Math.round(scores.reduce((a,b)=>a+b,0)/scores.length):0;
@@ -241,7 +251,12 @@ function renderPerfil(){
   <tr><td>Racha actual</td><td class="n"><b>${streak()}</b></td></tr>
   <tr><td>Días jugados</td><td class="n"><b>${days}</b></td></tr>
   <tr><td>Nota media</td><td class="n"><b>${avg}</b></td></tr>
-  <tr><td>Mejor racha en Más o menos</td><td class="n"><b>${S.mmBest}</b></td></tr></table></div>`;
+  <tr><td>Mejor racha en Más o menos</td><td class="n"><b>${S.mmBest}</b></td></tr></table></div>
+  <div class="card"><b>Top 10 Fútbol</b><table>
+  <tr><td>Niveles superados</td><td class="n"><b>${t10.done}/${DATA.T10.total}</b></td></tr>
+  <tr><td>Estrellas</td><td class="n"><b>${t10.stars}/${DATA.T10.total*3}</b></td></tr>
+  <tr><td>Racha actual / mejor</td><td class="n"><b>${t10.cur} / ${t10.best}</b></td></tr></table>
+  <div class="mut" style="font-size:13px;margin-top:8px">Es el progreso guardado en esta app. El Top 10 instalado por separado tiene el suyo.</div></div>`;
   $("#al-save").onclick=async()=>{
     const a=$("#al").value.trim();
     if(a.length<2){toast("Mínimo 2 letras");return;}
