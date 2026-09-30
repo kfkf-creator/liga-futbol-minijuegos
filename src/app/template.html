@@ -470,8 +470,8 @@ flushPending();
   function refresh(){const v=document.querySelector(".view.on");if(v&&v.id==="v-hoy"&&!document.getElementById("game").classList.contains("on"))renderHoy();}
   window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferred=e;text="Instala la app: se abre con un toque y funciona sin conexión.";refresh();});
   window.addEventListener("appinstalled",()=>{text="";refresh();});
-  const ios=/iphone|ipad|ipod/i.test(navigator.userAgent)&&!/crios|fxios/i.test(navigator.userAgent);
-  if(ios){text="Para instalarla en el iPhone: toca Compartir y elige «Añadir a pantalla de inicio».";refresh();}
+  const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  if(ios){text="Para instalarla en el iPhone: toca el botón Compartir (o el menú ⋯ en Chrome) y elige «Añadir a pantalla de inicio».";refresh();}
   if("serviceWorker" in navigator&&/^https?:$/.test(location.protocol)){
     const had=!!navigator.serviceWorker.controller;
     navigator.serviceWorker.register("sw.js").catch(()=>{});

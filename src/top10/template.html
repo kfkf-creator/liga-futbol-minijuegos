@@ -999,7 +999,7 @@ renderMenu();
   window.addEventListener("appinstalled",()=>{ bar.hidden=true; });
   $("installX").addEventListener("click",()=>{ bar.hidden=true; try{ localStorage.setItem(KEY,"1"); }catch(e){} });
   /* iPhone/iPad: no hay aviso automático, se explica el gesto */
-  const ios=/iphone|ipad|ipod/i.test(navigator.userAgent)&&!/crios|fxios/i.test(navigator.userAgent);
+  const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);
   if(ios){ msg.textContent="Para instalarlo en el iPhone: toca el botón Compartir y elige «Añadir a pantalla de inicio»."; show(); }
   /* service worker + aviso de nueva versión */
   if("serviceWorker" in navigator && /^https?:$/.test(location.protocol)){
