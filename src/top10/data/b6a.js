@@ -47,7 +47,7 @@ module.exports=[
     {n:"Schubert Gambetta", a:["gambetta","schubert gambetta"], d:"Centrocampista"},
     {n:"Obdulio Varela", a:["varela","obdulio varela","obdulio","el negro jefe"], d:"Capitán y mediocentro. El alma del Maracanazo"},
     {n:"Víctor Rodríguez Andrade", a:["rodriguez andrade","andrade","victor rodriguez andrade","victor andrade"], d:"Centrocampista"},
-    {n:"Alcides Ghiggia", a:["ghiggia","alcides ghiggia"], d:"Extremo derecho. Marcó el 2-1 en el minuto 79 (81 según otras fuentes)"},
+    {n:"Alcides Ghiggia", a:["ghiggia","alcides ghiggia"], d:"Extremo derecho. Marcó el 2-1 en el minuto 79"},
     {n:"Julio Pérez", a:["perez","julio perez"], d:"Interior"},
     {n:"Óscar Míguez", a:["miguez","oscar miguez","omar miguez"], d:"Delantero centro"},
     {n:"Juan Alberto Schiaffino", a:["schiaffino","juan alberto schiaffino","pepe schiaffino","juan schiaffino"], d:"Interior. Marcó el 1-1"},
