@@ -1,0 +1,53 @@
+const {chromium}=require(require("child_process").execSync("npm root -g").toString().trim()+"/playwright");
+const URL=process.env.URL||"http://localhost:8123/app/index.html";
+(async()=>{
+ const b=await chromium.launch({executablePath:"/opt/pw-browsers/chromium",args:["--no-sandbox"]});
+ const ctx=await b.newContext({viewport:{width:390,height:800}});
+ const p=await ctx.newPage();const errs=[];
+ p.on("pageerror",e=>errs.push(String(e)));p.on("console",m=>{if(m.type()==="error"&&!/Failed to load resource|net::/.test(m.text()))errs.push(m.text());});
+ const out={};
+ await p.goto(URL);
+ out.title=await p.title();
+ out.cards=await p.$$eval("[data-play]",e=>e.length);
+ /* Más o menos diario: 10 duelos, siempre la primera opción */
+ await p.click('[data-play="mm"]');
+ for(let i=0;i<10;i++){await p.click('.opt[data-o="0"]');await p.click("#go");}
+ out.mmEnd=await p.textContent(".big");
+ const mmExpected=await p.evaluate(()=>S.days[today()].mm);
+ out.mmStored=mmExpected;
+ await p.click("#e2");
+ /* no se puede repetir el diario */
+ await p.click('[data-play="mm"]');
+ out.mmAgain=await p.textContent(".big");
+ await p.click("#gx");
+ /* Once oculto diario: acierto 6, fallo 5 */
+ await p.click('[data-play="once"]');
+ const names=await p.evaluate(()=>{const L=lineupOfDay(today());return {n:L.ans.map(a=>a.n),gk:L.gk,title:L.title};});
+ out.lineup=names.title;
+ for(const n of names.n.slice(0,6)){await p.fill("#gi",n);await p.press("#gi","Enter");}
+ out.found=await p.textContent(".mut + .mut, .pitch + .mut");
+ for(let i=0;i<5;i++){await p.fill("#gi","zzzzqq"+i);await p.press("#gi","Enter");}
+ out.end=await p.textContent(".big");
+ out.onceStored=await p.evaluate(()=>S.days[today()].once);
+ await p.click("#e2");
+ out.streak=await p.textContent(".streak");
+ out.share=await p.evaluate(()=>shareText());
+ /* ligas modo local */
+ await p.click('#tabs [data-v="ligas"]');
+ await p.fill("#al","Marc");await p.click("#al-ok");
+ await p.fill("#ln","Los cracks");await p.click("#lc");
+ await p.waitForSelector("[data-l]");
+ await p.click("[data-l]");
+ await p.waitForSelector("#bd table");
+ out.board=await p.textContent("#bd");
+ /* practica mas o menos: racha hasta fallar */
+ await p.click('#tabs [data-v="juegos"]');
+ await p.click('[data-prac="mm"]');
+ for(let i=0;i<40;i++){await p.click('.opt[data-o="0"]');const t=await p.textContent("#go");await p.click("#go");if(t==="Ver resultado")break;}
+ out.pracEnd=await p.textContent(".big");
+ await p.click("#e2");
+ out.hscroll=await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth);
+ out.errs=errs;
+ console.log(JSON.stringify(out,null,1));
+ await b.close();
+})();

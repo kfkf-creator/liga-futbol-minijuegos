@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1020">
+<title>Minijuegos de fútbol</title>
+<style>
+:root{--bg:#0b1020;--bg2:#131a33;--card:#1a2342;--line:#2a3560;--txt:#f2f4ff;--mut:#9aa6d4;--mm:#ff6b4a;--once:#2ee6c5;--top:#3ddc84;--gold:#ffc83d;--bad:#ff5470;--ok:#3ddc84}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{min-height:100vh;padding-bottom:calc(72px + env(safe-area-inset-bottom))}
+button{font:inherit;color:inherit;cursor:pointer}
+.wrap{max-width:560px;margin:0 auto;padding:18px 16px}
+h1{font-size:26px;margin:0}
+h2{font-size:18px;margin:22px 0 10px}
+.mut{color:var(--mut)}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.streak{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-weight:700;white-space:nowrap}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin:10px 0}
+.gcard{display:flex;gap:14px;align-items:center;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;margin:10px 0;border-left:6px solid var(--c,var(--line))}
+.gcard .ic{font-size:30px;width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:color-mix(in srgb,var(--c) 22%,transparent)}
+.gcard b{display:block;font-size:17px}
+.gcard small{color:var(--mut)}
+.gcard .pill{margin-left:auto;font-weight:800;color:var(--c);white-space:nowrap}
+.gcard[disabled]{opacity:.5;cursor:default}
+.btn{background:var(--gold);color:#1b1500;border:0;border-radius:14px;padding:12px 18px;font-weight:800}
+.btn.ghost{background:transparent;color:var(--txt);border:1px solid var(--line)}
+.btn.block{display:block;width:100%}
+.row{display:flex;gap:10px}
+.row>*{flex:1}
+.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--bg2);border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:5}
+.tabs button{flex:1;background:none;border:0;padding:10px 0 8px;color:var(--mut);font-size:12px}
+.tabs button span{display:block;font-size:22px}
+.tabs button.on{color:var(--gold);font-weight:700}
+.view{display:none}.view.on{display:block}
+#game{position:fixed;inset:0;background:var(--bg);z-index:10;overflow:auto;display:none}
+#game.on{display:block}
+.ghead{display:flex;align-items:center;gap:10px;padding:12px 16px;position:sticky;top:0;background:var(--bg);z-index:2;border-bottom:1px solid var(--line)}
+.ghead .x{background:none;border:0;font-size:24px;color:var(--mut);padding:0 6px}
+.ghead .t{font-weight:800;flex:1}
+.bar{height:6px;background:var(--line);border-radius:6px;overflow:hidden;margin:10px 0}
+.bar i{display:block;height:100%;background:var(--c,var(--gold));width:0;transition:width .3s}
+/* mas o menos */
+.q{font-size:20px;font-weight:800;text-align:center;margin:14px 0}
+.duel{display:grid;gap:12px}
+.opt{border:2px solid var(--line);background:var(--card);border-radius:20px;padding:22px 14px;text-align:center;min-height:120px;display:flex;flex-direction:column;justify-content:center;gap:6px}
+.opt b{font-size:22px}
+.opt .v{font-size:30px;font-weight:900;height:38px}
+.opt.win{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 16%,var(--card))}
+.opt.lose{border-color:var(--line);opacity:.65}
+.opt.pickbad{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 18%,var(--card));opacity:1}
+.vs{text-align:center;color:var(--mut);font-weight:800}
+/* once oculto */
+.pitch{background:linear-gradient(#0f5a36,#0c4a2d);border:2px solid #1f8a57;border-radius:18px;padding:14px 8px;display:flex;flex-direction:column;gap:14px;margin:12px 0}
+.prow{display:flex;justify-content:space-around;gap:6px}
+.slot{width:0;flex:1;max-width:96px;min-height:58px;border-radius:12px;background:rgba(0,0,0,.28);border:1px dashed rgba(255,255,255,.35);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:4px;font-size:12px;line-height:1.15;overflow-wrap:anywhere}
+.slot small{opacity:.7;font-size:10px}
+.slot.got{background:var(--once);color:#04231c;border:1px solid var(--once);font-weight:800}
+.slot.miss{background:rgba(255,84,112,.3);border:1px solid var(--bad)}
+.gk{align-self:center}
+.inp{display:flex;gap:8px;position:relative}
+.inp input{flex:1;background:var(--card);border:2px solid var(--line);border-radius:14px;padding:12px 14px;color:var(--txt);font:inherit;min-width:0}
+.sug{position:absolute;left:0;right:0;top:100%;margin-top:4px;background:var(--bg2);border:1px solid var(--line);border-radius:12px;z-index:4;overflow:hidden}
+.sug button{display:block;width:100%;text-align:left;background:none;border:0;padding:10px 14px;border-bottom:1px solid var(--line)}
+.sug button small{color:var(--mut);margin-left:6px}
+.lives{font-size:20px;letter-spacing:2px}
+.fb{min-height:22px;margin:8px 0;font-weight:700}
+.big{font-size:54px;font-weight:900;text-align:center;margin:6px 0;color:var(--gold)}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--txt);color:#111;border-radius:999px;padding:10px 16px;font-weight:700;z-index:30}
+input.alias{width:100%;background:var(--card);border:2px solid var(--line);border-radius:12px;padding:12px;color:var(--txt);font:inherit;margin:6px 0}
+table{width:100%;border-collapse:collapse}
+td,th{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left}
+td.n,th.n{text-align:right}
+.seg{display:flex;background:var(--card);border-radius:12px;padding:3px;margin:10px 0}
+.seg button{flex:1;background:none;border:0;padding:8px;border-radius:10px;color:var(--mut)}
+.seg button.on{background:var(--line);color:var(--txt);font-weight:700}
+.code{font:800 26px ui-monospace,Menlo,monospace;letter-spacing:4px;text-align:center}
+</style>
+</head>
+<body>
+<div id="app">
+ <section class="view on wrap" id="v-hoy"></section>
+ <section class="view wrap" id="v-juegos"></section>
+ <section class="view wrap" id="v-ligas"></section>
+ <section class="view wrap" id="v-perfil"></section>
+</div>
+<div id="game"></div>
+<nav class="tabs" id="tabs">
+ <button data-v="hoy" class="on"><span>📅</span>Hoy</button>
+ <button data-v="juegos"><span>🎮</span>Juegos</button>
+ <button data-v="ligas"><span>🏆</span>Ligas</button>
+ <button data-v="perfil"><span>👤</span>Perfil</button>
+</nav>
+<script>
+const DATA=/*__DATA__*/null;
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function norm(s){return String(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/ß/g,"ss").replace(/ø/g,"o").replace(/æ/g,"ae").replace(/đ/g,"d").replace(/ł/g,"l").replace(/['’`´]/g,"").replace(/[^a-z0-9]+/g," ").trim();}
+function lev(a,b){if(a===b)return 0;const m=a.length,n=b.length;if(!m)return n;if(!n)return m;let p=[],c=[];for(let j=0;j<=n;j++)p[j]=j;for(let i=1;i<=m;i++){c[0]=i;for(let j=1;j<=n;j++){c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]===b[j-1]?0:1));}[p,c]=[c,p];}return p[n];}
+function hash(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
+function rng(seed){let a=seed>>>0;return()=>{a=(a+0x6D2B79F5)>>>0;let t=a;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296;};}
+function shuffled(arr,r){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function pad(n){return String(n).padStart(2,"0");}
+function ymd(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());}
+let NOW=()=>new Date();               /* reemplazable en pruebas */
+const today=()=>ymd(NOW());
+const dayNum=s=>Math.floor(Date.UTC(+s.slice(0,4),+s.slice(5,7)-1,+s.slice(8,10))/86400000);
+function toast(t){const e=document.createElement("div");e.className="toast";e.textContent=t;document.body.appendChild(e);setTimeout(()=>e.remove(),1800);}
+
+/* ================= almacenamiento ================= */
+const KEY="minijuegos.v1";
+let S={days:{},mmBest:0,alias:"",pending:[],leagues:[]};
+try{const r=JSON.parse(localStorage.getItem(KEY));if(r&&r.days)S=Object.assign(S,r);}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+function streak(){
+  let d=dayNum(today()),cur=0;
+  if(!S.days[dstrUTC(d)]) d--;                     /* si hoy aún no has jugado, la racha sigue viva hasta ayer */
+  while(S.days[dstrUTC(d)]){cur++;d--;}
+  return cur;
+}
+function dstrUTC(n){const d=new Date(n*86400000);return d.getUTCFullYear()+"-"+pad(d.getUTCMonth()+1)+"-"+pad(d.getUTCDate());}
+
+/* ================= capa de ligas (servidor intercambiable) ================= */
+/* Interfaz: init(), setAlias(a), createLeague(name)->{code}, joinLeague(code)->{name}, myLeagues()->[{id,code,name}],
+   board(leagueId,fromDay,toDay)->[{alias,mm,once,total}], submit(day,game,score). Dos implementaciones: Local y Supabase. */
+const LocalBackend={
+  kind:"local",
+  db(){try{return JSON.parse(localStorage.getItem("minijuegos.local"))||{leagues:[]};}catch(e){return {leagues:[]};}},
+  put(d){localStorage.setItem("minijuegos.local",JSON.stringify(d));},
+  async setAlias(){},
+  async createLeague(name){const d=this.db();const code=Math.random().toString(36).slice(2,8).toUpperCase();d.leagues.push({id:code,code,name});this.put(d);return {code,id:code,name};},
+  async joinLeague(code){const d=this.db();const l=d.leagues.find(x=>x.code===code.toUpperCase());if(!l)throw new Error("No existe esa liga");return l;},
+  async myLeagues(){return this.db().leagues;},
+  async board(id,from,to){let mm=0,once=0;for(let n=dayNum(from);n<=dayNum(to);n++){const r=S.days[dstrUTC(n)];if(r){mm+=r.mm||0;once+=r.once||0;}}return [{alias:S.alias||"Tú",mm,once,total:mm+once}];},
+  async submit(){}
+};
+const SB=DATA.CFG;
+const SupabaseBackend={
+  kind:"supabase",
+  tok:null,
+  load(){try{this.tok=JSON.parse(localStorage.getItem("minijuegos.sb"));}catch(e){}},
+  async auth(){
+    if(this.tok&&this.tok.access_token&&this.tok.exp>Date.now()/1000+60)return;
+    let r;
+    if(this.tok&&this.tok.refresh_token){
+      r=await fetch(SB.supabaseUrl+"/auth/v1/token?grant_type=refresh_token",{method:"POST",headers:{apikey:SB.supabaseKey,"Content-Type":"application/json"},body:JSON.stringify({refresh_token:this.tok.refresh_token})});
+    }
+    if(!r||!r.ok) r=await fetch(SB.supabaseUrl+"/auth/v1/signup",{method:"POST",headers:{apikey:SB.supabaseKey,"Content-Type":"application/json"},body:"{}"});
+    if(!r.ok)throw new Error("No se pudo conectar con el servidor");
+    const j=await r.json();
+    this.tok={access_token:j.access_token,refresh_token:j.refresh_token,exp:Math.floor(Date.now()/1000)+(j.expires_in||3600)};
+    localStorage.setItem("minijuegos.sb",JSON.stringify(this.tok));
+  },
+  async call(path,opt){
+    await this.auth();
+    const r=await fetch(SB.supabaseUrl+"/rest/v1/"+path,Object.assign({},opt,{headers:Object.assign({apikey:SB.supabaseKey,Authorization:"Bearer "+this.tok.access_token,"Content-Type":"application/json"},opt&&opt.headers)}));
+    if(!r.ok){let m="Error del servidor";try{const j=await r.json();m=j.message||m;}catch(e){}throw new Error(m);}
+    const t=await r.text();return t?JSON.parse(t):null;
+  },
+  rpc(n,args){return this.call("rpc/"+n,{method:"POST",body:JSON.stringify(args||{})});},
+  async setAlias(a){await this.rpc("set_alias",{p_alias:a});},
+  async createLeague(name){const r=await this.rpc("create_league",{p_name:name});return {code:r.code,id:r.id,name};},
+  async joinLeague(code){const r=await this.rpc("join_league",{p_code:code.toUpperCase()});return {id:r.id,code:r.code,name:r.name};},
+  async myLeagues(){return await this.rpc("my_leagues");},
+  async board(id,from,to){return await this.rpc("league_board",{p_league:id,p_from:from,p_to:to});},
+  async submit(day,game,score){await this.rpc("submit_score",{p_day:day,p_game:game,p_score:score});}
+};
+const Backend=(SB.supabaseUrl&&SB.supabaseKey)?(SupabaseBackend.load(),SupabaseBackend):LocalBackend;
+async function flushPending(){
+  if(Backend.kind==="local"||!S.alias)return;
+  const rest=[];
+  for(const p of S.pending){try{await Backend.submit(p.day,p.game,p.score);}catch(e){rest.push(p);}}
+  S.pending=rest;save();
+}
+function recordDaily(game,score){
+  const t=today();
+  S.days[t]=S.days[t]||{};
+  if(S.days[t][game]!=null)return;              /* el primer resultado del día es el que cuenta */
+  S.days[t][game]=score;
+  S.pending.push({day:t,game,score});
+  save();flushPending();
+}
+
+/* ================= vistas principales ================= */
+const GAMES=[
+ {id:"mm",name:"Más o menos",ic:"⚖️",c:"var(--mm)",desc:"¿Cuál tiene la cifra mayor? 10 duelos al día."},
+ {id:"once",name:"Once oculto",ic:"🧩",c:"var(--once)",desc:"Completa la alineación de una final histórica."}
+];
+function show(v){
+  document.querySelectorAll(".view").forEach(e=>e.classList.toggle("on",e.id==="v-"+v));
+  document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.v===v));
+  ({hoy:renderHoy,juegos:renderJuegos,ligas:renderLigas,perfil:renderPerfil})[v]();
+  window.scrollTo(0,0);
+}
+document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>show(b.dataset.v));
+function shareText(){
+  const r=S.days[today()]||{};
+  const sq=s=>s==null?"⬛⬛⬛⬛⬛":"🟩".repeat(Math.round(s/20))+"⬛".repeat(5-Math.round(s/20));
+  return "Minijuegos de fútbol "+today()+"\n⚖️ Más o menos "+(r.mm??"-")+"/100 "+sq(r.mm)+"\n🧩 Once oculto "+(r.once??"-")+"/100 "+sq(r.once)+"\nRacha: "+streak()+" 🔥";
+}
+async function share(text){
+  try{if(navigator.share){await navigator.share({text});return;}}catch(e){if(e&&e.name==="AbortError")return;}
+  try{await navigator.clipboard.writeText(text);toast("Copiado");}catch(e){prompt("Copia el texto:",text);}
+}
+function renderHoy(){
+  const r=S.days[today()]||{};
+  const total=(r.mm||0)+(r.once||0);
+  $("#v-hoy").innerHTML=`<div class="top"><div><h1>Reto de hoy</h1><div class="mut">${today()}</div></div><div class="streak">🔥 ${streak()}</div></div>
+  ${GAMES.map(g=>`<button class="gcard" style="--c:${g.c}" data-play="${g.id}"><span class="ic">${g.ic}</span><span><b>${g.name}</b><small>${g.desc}</small></span><span class="pill">${r[g.id]!=null?r[g.id]+"/100":"Jugar"}</span></button>`).join("")}
+  <div class="card"><b>Total de hoy: ${total}/200</b><div class="mut">El primer intento del día es el que cuenta. Después puedes practicar sin límite.</div>
+  ${(r.mm!=null||r.once!=null)?`<button class="btn block" style="margin-top:12px" id="sh">Compartir resultado</button>`:""}</div>`;
+  document.querySelectorAll("[data-play]").forEach(b=>b.onclick=()=>startGame(b.dataset.play,true));
+  const sh=$("#sh");if(sh)sh.onclick=()=>share(shareText());
+}
+function renderJuegos(){
+  $("#v-juegos").innerHTML=`<h1>Juegos</h1><div class="mut">Práctica sin límite (no cuenta para la liga).</div>
+  ${GAMES.map(g=>`<button class="gcard" style="--c:${g.c}" data-prac="${g.id}"><span class="ic">${g.ic}</span><span><b>${g.name}</b><small>${g.desc}</small></span><span class="pill">${g.id==="mm"?"Mejor racha "+S.mmBest:"Practicar"}</span></button>`).join("")}
+  <a class="gcard" style="--c:var(--top);text-decoration:none;color:inherit" href="../top10/"><span class="ic">🔟</span><span><b>Top 10 Fútbol</b><small>162 niveles para nombrar el top 10.</small></span><span class="pill">Abrir</span></a>
+  <button class="gcard" disabled style="--c:var(--line)"><span class="ic">🛤️</span><span><b>Trayectoria</b><small>Próximamente</small></span></button>
+  <button class="gcard" disabled style="--c:var(--line)"><span class="ic">🔲</span><span><b>Cuadrícula</b><small>Próximamente</small></span></button>`;
+  document.querySelectorAll("[data-prac]").forEach(b=>b.onclick=()=>startGame(b.dataset.prac,false));
+}
+function renderPerfil(){
+  const days=Object.keys(S.days).length;
+  const scores=Object.values(S.days).flatMap(d=>[d.mm,d.once]).filter(x=>x!=null);
+  const avg=scores.length?Math.round(scores.reduce((a,b)=>a+b,0)/scores.length):0;
+  $("#v-perfil").innerHTML=`<h1>Perfil</h1>
+  <div class="card"><b>Tu alias</b><input class="alias" id="al" maxlength="20" placeholder="Cómo te verán en las ligas" value="${esc(S.alias)}"><button class="btn block" id="al-save">Guardar alias</button></div>
+  <div class="card"><table>
+  <tr><td>Racha actual</td><td class="n"><b>${streak()}</b></td></tr>
+  <tr><td>Días jugados</td><td class="n"><b>${days}</b></td></tr>
+  <tr><td>Nota media</td><td class="n"><b>${avg}</b></td></tr>
+  <tr><td>Mejor racha en Más o menos</td><td class="n"><b>${S.mmBest}</b></td></tr></table></div>`;
+  $("#al-save").onclick=async()=>{
+    const a=$("#al").value.trim();
+    if(a.length<2){toast("Mínimo 2 letras");return;}
+    try{await Backend.setAlias(a);S.alias=a;save();flushPending();toast("Guardado");}catch(e){toast(e.message);}
+  };
+}
+
+/* ================= ligas ================= */
+let LG={sel:null,range:"hoy",rows:null,err:""};
+async function renderLigas(){
+  const el=$("#v-ligas");
+  if(!S.alias){el.innerHTML=`<h1>Ligas</h1><div class="card"><b>Primero elige un alias</b><div class="mut">Es el nombre que verán tus amigos.</div><input class="alias" id="al" maxlength="20" placeholder="Tu alias"><button class="btn block" id="al-ok">Continuar</button></div>`;
+    $("#al-ok").onclick=async()=>{const a=$("#al").value.trim();if(a.length<2){toast("Mínimo 2 letras");return;}try{await Backend.setAlias(a);S.alias=a;save();flushPending();renderLigas();}catch(e){toast(e.message);}};return;}
+  let list=[];
+  try{list=await Backend.myLeagues();S.leagues=list;save();}catch(e){list=S.leagues||[];}
+  const note=Backend.kind==="local"?`<div class="card mut">Modo de prueba: todavía no hay servidor conectado, así que las ligas solo existen en este móvil y solo apareces tú.</div>`:"";
+  if(LG.sel){return renderBoard(list);}
+  el.innerHTML=`<h1>Ligas privadas</h1>${note}
+  ${list.map(l=>`<button class="gcard" style="--c:var(--gold)" data-l="${esc(l.id)}"><span class="ic">🏆</span><span><b>${esc(l.name)}</b><small>Código ${esc(l.code)}</small></span></button>`).join("")||`<div class="mut">Aún no estás en ninguna liga.</div>`}
+  <div class="card"><b>Crear liga</b><input class="alias" id="ln" maxlength="30" placeholder="Nombre de la liga"><button class="btn block" id="lc">Crear</button></div>
+  <div class="card"><b>Unirme con código</b><input class="alias" id="lj" maxlength="8" placeholder="Código de 6 letras" autocapitalize="characters"><button class="btn block" id="ljb">Unirme</button></div>`;
+  document.querySelectorAll("[data-l]").forEach(b=>b.onclick=()=>{LG.sel=list.find(x=>String(x.id)===b.dataset.l);LG.range="hoy";renderLigas();});
+  $("#lc").onclick=async()=>{const n=$("#ln").value.trim();if(n.length<2){toast("Pon un nombre");return;}try{const l=await Backend.createLeague(n);toast("Liga creada: "+l.code);renderLigas();}catch(e){toast(e.message);}};
+  $("#ljb").onclick=async()=>{const c=$("#lj").value.trim();if(c.length<4){toast("Código no válido");return;}try{const l=await Backend.joinLeague(c);toast("Te has unido a "+l.name);renderLigas();}catch(e){toast(e.message);}};
+}
+async function renderBoard(){
+  const el=$("#v-ligas"),l=LG.sel;
+  const t=dayNum(today());
+  const rng_={hoy:[t,t],semana:[t-6,t],total:[t-400,t]}[LG.range];
+  el.innerHTML=`<div class="top"><button class="btn ghost" id="bk">←</button><h1 style="flex:1;margin-left:10px">${esc(l.name)}</h1></div>
+  <div class="card"><div class="mut" style="text-align:center">Código para invitar</div><div class="code">${esc(l.code)}</div><button class="btn block ghost" id="lsh">Compartir código</button></div>
+  <div class="seg">${[["hoy","Hoy"],["semana","7 días"],["total","Total"]].map(([k,n])=>`<button data-r="${k}" class="${LG.range===k?"on":""}">${n}</button>`).join("")}</div>
+  <div class="card" id="bd">Cargando...</div>`;
+  $("#bk").onclick=()=>{LG.sel=null;renderLigas();};
+  $("#lsh").onclick=()=>share("Únete a mi liga «"+l.name+"» en Minijuegos de fútbol con el código "+l.code+" "+location.href.split("#")[0]);
+  el.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>{LG.range=b.dataset.r;renderBoard();});
+  try{
+    await flushPending();
+    const rows=(await Backend.board(l.id,dstrUTC(rng_[0]),dstrUTC(rng_[1]))).slice().sort((a,b)=>b.total-a.total);
+    $("#bd").innerHTML=rows.length?`<table><tr><th>#</th><th>Jugador</th><th class="n">⚖️</th><th class="n">🧩</th><th class="n">Total</th></tr>${rows.map((r,i)=>`<tr><td>${i+1}</td><td>${esc(r.alias)}</td><td class="n">${r.mm||0}</td><td class="n">${r.once||0}</td><td class="n"><b>${r.total||0}</b></td></tr>`).join("")}</table>`:`<div class="mut">Nadie ha jugado todavía.</div>`;
+  }catch(e){$("#bd").innerHTML=`<div class="mut">${esc(e.message)}</div>`;}
+}
+
+/* ================= juegos ================= */
+const G=$("#game");
+function openGame(title,c){G.innerHTML=`<div class="ghead"><button class="x" id="gx" aria-label="Cerrar">✕</button><div class="t" style="color:${c}">${title}</div><div id="gsc" class="mut"></div></div><div class="wrap" id="gb"></div>`;G.classList.add("on");$("#gx").onclick=closeGame;}
+function closeGame(){G.classList.remove("on");G.innerHTML="";const v=document.querySelector(".view.on").id.slice(2);show(v);}
+function startGame(id,daily){
+  if(daily&&(S.days[today()]||{})[id]!=null){return showDone(id);}
+  (id==="mm"?playMM:playOnce)(daily);
+}
+function showDone(id){
+  const g=GAMES.find(x=>x.id===id),sc=S.days[today()][id];
+  openGame(g.name,g.c);
+  $("#gb").innerHTML=`<div class="mut" style="text-align:center;margin-top:30px">Tu resultado de hoy</div><div class="big">${sc}/100</div>
+  <button class="btn block" id="dsh">Compartir</button><button class="btn block ghost" style="margin-top:10px" id="dpr">Practicar sin límite</button>`;
+  $("#dsh").onclick=()=>share(shareText());
+  $("#dpr").onclick=()=>(id==="mm"?playMM:playOnce)(false);
+}
+
+/* ---------- Más o menos ---------- */
+function mmRounds(seed,n){
+  const r=rng(seed),sets=DATA.MM,out=[];let last=-1;
+  for(let i=0;i<n;i++){
+    const target=3.2-i*(2.2/(n-1));           /* de pares muy distintos a pares ajustados */
+    let best=null;
+    for(let k=0;k<50;k++){
+      let si=Math.floor(r()*sets.length);if(si===last&&sets.length>1)si=(si+1)%sets.length;
+      const s=sets[si];let a=Math.floor(r()*s.items.length),b=Math.floor(r()*s.items.length);
+      if(a===b)continue;
+      const A=s.items[a],B=s.items[b],ratio=Math.max(A.v,B.v)/Math.max(1,Math.min(A.v,B.v));
+      const d=Math.abs(Math.log(ratio)-Math.log(target));
+      if(!best||d<best.d)best={d,s,A,B};
+    }
+    last=sets.indexOf(best.s);out.push(best);
+  }
+  return out;
+}
+function fmt(n){return n.toLocaleString("es-ES");}
+function playMM(daily){
+  openGame("Más o menos"+(daily?" · hoy":" · racha"),"var(--mm)");
+  const N=10;
+  let rounds=daily?mmRounds(hash("mm"+today()),N):null,i=0,score=0,streakN=0,locked=false;
+  const r=rng(Date.now()&0xffffff);
+  function roundNow(){return daily?rounds[i]:mmRounds(Math.floor(r()*1e9),1)[0];}
+  let cur=null;
+  function next(){
+    cur=roundNow();locked=false;
+    const flip=(daily?rng(hash("f"+today()+i))():r())<.5;
+    const [X,Y]=flip?[cur.B,cur.A]:[cur.A,cur.B];cur.X=X;cur.Y=Y;
+    $("#gsc").textContent=daily?"Duelo "+(i+1)+"/"+N:"Racha "+streakN;
+    $("#gb").innerHTML=`${daily?`<div class="bar" style="--c:var(--mm)"><i style="width:${i/N*100}%"></i></div>`:""}
+    <div class="mut" style="text-align:center">${esc(cur.s.cat)}</div><div class="q">${esc(cur.s.q)}</div>
+    <div class="duel"><button class="opt" data-o="0"><b>${esc(X.n)}</b><div class="v"></div></button><div class="vs">contra</div><button class="opt" data-o="1"><b>${esc(Y.n)}</b><div class="v"></div></button></div>
+    <div class="mut" style="text-align:center;margin-top:10px;font-size:13px">${esc(cur.s.asof||"")}</div><div id="nx"></div>`;
+    document.querySelectorAll(".opt").forEach(b=>b.onclick=()=>pick(+b.dataset.o));
+  }
+  function pick(o){
+    if(locked)return;locked=true;
+    const pickV=[cur.X,cur.Y][o],other=[cur.X,cur.Y][1-o],ok=pickV.v>other.v;
+    const opts=document.querySelectorAll(".opt");
+    [cur.X,cur.Y].forEach((it,k)=>{opts[k].querySelector(".v").textContent=fmt(it.v)+" "+cur.s.unit;opts[k].classList.add(it.v>(k?cur.X:cur.Y).v?"win":"lose");});
+    if(!ok)opts[o].classList.add("pickbad");
+    if(ok){score+=10;streakN++;}
+    if(daily){ $("#gsc").textContent=score+" pts"; $("#nx").innerHTML=`<button class="btn block" style="margin-top:14px" id="go">${i===N-1?"Ver resultado":"Siguiente"}</button>`;$("#go").onclick=()=>{i++;if(i>=N)end();else next();}; }
+    else if(ok){ $("#nx").innerHTML=`<button class="btn block" style="margin-top:14px" id="go">Siguiente</button>`;$("#go").onclick=next; $("#gsc").textContent="Racha "+streakN; }
+    else { if(streakN>S.mmBest){S.mmBest=streakN;save();} $("#nx").innerHTML=`<button class="btn block" style="margin-top:14px" id="go">Ver resultado</button>`;$("#go").onclick=end; }
+  }
+  function end(){
+    if(daily)recordDaily("mm",score);
+    $("#gsc").textContent="";
+    $("#gb").innerHTML=daily?`<div class="mut" style="text-align:center;margin-top:30px">Has acertado ${score/10} de ${N}</div><div class="big">${score}/100</div>
+    <button class="btn block" id="e1">Compartir</button><button class="btn block ghost" style="margin-top:10px" id="e2">Cerrar</button>`
+    :`<div class="mut" style="text-align:center;margin-top:30px">Racha final</div><div class="big">${streakN}</div><div class="mut" style="text-align:center">Mejor: ${S.mmBest}</div>
+    <button class="btn block" id="e3">Otra vez</button><button class="btn block ghost" style="margin-top:10px" id="e2">Cerrar</button>`;
+    const a=$("#e1");if(a)a.onclick=()=>share(shareText());
+    const b=$("#e3");if(b)b.onclick=()=>playMM(false);
+    $("#e2").onclick=closeGame;
+  }
+  next();
+}
+
+/* ---------- Once oculto ---------- */
+const PLAYERS={state:"idle",list:[]};
+async function loadPlayers(){
+  if(PLAYERS.state!=="idle")return;PLAYERS.state="loading";
+  try{const r=await fetch("../top10/entidades/jugadores.json");if(!r.ok)throw 0;PLAYERS.list=(await r.json()).map(x=>({n:x[0],nk:norm(x[0]),sub:[x[1],x[2]||""].filter(Boolean).join(" · "),f:x[3]||60}));PLAYERS.state="ready";}catch(e){PLAYERS.state="failed";}
+}
+loadPlayers();
+function lineupOfDay(d){const order=shuffled(DATA.LINEUPS,rng(20260930));return order[dayNum(d)%order.length];}
+function rowLabel(r,R){return r===0?"Defensa":r===R-1?"Delantero":"Medio";}
+function keysOf(L,a){const s=new Set([norm(a.n)]);(a.a||[]).forEach(x=>s.add(norm(x)));if(L.auto){const t=norm(a.n).split(" "),l=t[t.length-1];if(l.length>=4)s.add(l);}return [...s].filter(Boolean);}
+function judge(L,raw,found){
+  const q=norm(raw);if(!q)return {t:"empty"};
+  let near=-1;
+  for(let i=0;i<L.ans.length;i++){
+    const ks=L.ans[i].keys;
+    if(ks.includes(q))return found.has(i)?{t:"dup",i}:{t:"hit",i};
+  }
+  for(let i=0;i<L.ans.length;i++){
+    if(found.has(i))continue;
+    for(const k of L.ans[i].keys){const tol=k.length>=10?2:k.length>=6?1:0;if(tol&&lev(q,k)<=tol&&q.length>=4)near=i;}
+  }
+  return near>=0?{t:"hit",i:near}:{t:"miss"};
+}
+function suggestP(raw,found,L){
+  const q=norm(raw);if(q.length<2)return [];
+  const got=new Set([...found].map(i=>norm(L.ans[i].n)));
+  const out=[];
+  for(const e of PLAYERS.list){
+    if(got.has(e.nk))continue;
+    let s=-1;if(e.nk.startsWith(q))s=0;else if(e.nk.indexOf(" "+q)>=0)s=1;else if(q.length>=3&&e.nk.includes(q))s=2;
+    if(s>=0)out.push({e,s});
+  }
+  out.sort((x,y)=>x.s-y.s||y.e.f-x.e.f||x.e.nk.length-y.e.nk.length);
+  return out.slice(0,6).map(x=>x.e);
+}
+function playOnce(daily){
+  openGame("Once oculto"+(daily?" · hoy":""),"var(--once)");
+  let L;
+  if(daily)L=lineupOfDay(today());else{const all=DATA.LINEUPS,td=lineupOfDay(today());do{L=all[Math.floor(Math.random()*all.length)];}while(L===td&&all.length>1);}
+  L=Object.assign({},L);L.ans=L.ans.map(a=>Object.assign({keys:keysOf(L,a)},a));
+  const found=new Set(),MAXL=5;let lives=MAXL,over=false,slotOf=[],k=0;
+  /* cada respuesta ocupa su hueco según el orden de la formación (de defensa a ataque) */
+  L.rows.forEach((n,r)=>{for(let j=0;j<n;j++)slotOf.push({r,j,idx:k++});});
+  const R=L.rows.length;
+  function draw(msg){
+    const rowsHtml=[];
+    for(let r=R-1;r>=0;r--){
+      rowsHtml.push(`<div class="prow">${slotOf.filter(s=>s.r===r).map(s=>{const a=L.ans[s.idx],g=found.has(s.idx);return `<div class="slot ${g?"got":over?"miss":""}">${(g||over)?esc(a.n):`?<small>${rowLabel(r,R)}</small>`}</div>`;}).join("")}</div>`);
+    }
+    const hearts="❤️".repeat(lives)+"🖤".repeat(MAXL-lives);
+    $("#gsc").innerHTML=`<span class="lives">${hearts}</span>`;
+    $("#gb").innerHTML=`<div class="mut" style="text-align:center;font-size:14px">${esc(L.title.replace(/^Jugadores de campo titulares d(e|el) /,""))}</div>
+    <div class="pitch">${rowsHtml.join("")}<div class="prow"><div class="slot gk got" style="max-width:none;flex:0 0 auto;padding:6px 14px;background:#fff;color:#111">🧤 ${esc(L.gk||"Portero")}</div></div></div>
+    <div class="mut" style="text-align:center;margin-bottom:6px">${found.size}/10 jugadores · escribe el apellido o el nombre</div>
+    ${over?"":`<div class="inp"><input id="gi" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Jugador de campo..."><button class="btn" id="gs">OK</button><div class="sug" id="sg" style="display:none"></div></div>`}
+    <div class="fb" id="fb">${msg||""}</div><div id="endbox"></div>`;
+    if(!over){
+      const inp=$("#gi");
+      const submit=v=>{const val=(v??inp.value);if(!val.trim())return;try2(val);};
+      $("#gs").onclick=()=>submit();
+      inp.onkeydown=e=>{if(e.key==="Enter")submit();};
+      inp.oninput=()=>{const s=suggestP(inp.value,found,L),box=$("#sg");if(!s.length){box.style.display="none";return;}box.style.display="block";box.innerHTML=s.map((e,n)=>`<button data-n="${n}">${esc(e.n)}<small>${esc(e.sub)}</small></button>`).join("");box.querySelectorAll("button").forEach((b,n)=>b.onclick=()=>submit(s[n].n));};
+      inp.focus();
+    }
+    if(over)finish();
+  }
+  function try2(v){
+    const j=judge(L,v,found);
+    if(j.t==="hit"){found.add(j.i);if(found.size===10){over=true;return draw("¡Completo!");}return draw("✔ "+esc(L.ans[j.i].n));}
+    if(j.t==="dup")return draw("Ya lo tenías");
+    lives--;if(lives<=0){over=true;return draw("Sin vidas");}
+    draw("✘ No juega de titular (o no lo reconozco). Pierdes una vida.");
+  }
+  function finish(){
+    const score=found.size*10;
+    if(daily)recordDaily("once",score);
+    $("#endbox").innerHTML=`<div class="big">${daily?score+"/100":found.size+"/10"}</div>
+    ${daily?`<button class="btn block" id="e1">Compartir</button>`:`<button class="btn block" id="e3">Otra alineación</button>`}
+    <button class="btn block ghost" style="margin-top:10px" id="e2">Cerrar</button>`;
+    const a=$("#e1");if(a)a.onclick=()=>share(shareText());
+    const b=$("#e3");if(b)b.onclick=()=>playOnce(false);
+    $("#e2").onclick=closeGame;
+  }
+  draw("");
+}
+
+/* ================= arranque ================= */
+show("hoy");
+flushPending();
+if("serviceWorker" in navigator&&location.protocol!=="file:"){/* PWA de la app: se añadirá cuando se publique */}
+</script>
+</body>
+</html>

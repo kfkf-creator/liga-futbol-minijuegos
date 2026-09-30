@@ -72,3 +72,11 @@ Web instalable (PWA) con minijuegos diarios de futbol en castellano, con ligas p
 - `pwa/manifest.webmanifest` y `pwa/sw.template.js` (build.js genera `top10/sw.js` con version = hash del juego). Pagina y juego: red primero con 4 s de limite y cache si no hay conexion; `entidades/*.json`: cache primero y refresco por detras. Funciona sin conexion tras la primera carga.
 - Menu: barra "Instalar" (Android/Chrome, via beforeinstallprompt) y explicacion del gesto en iPhone; aviso "Hay una version nueva, Recargar" cuando el service worker cambia.
 - Pendiente de comprobar en moviles reales: instalacion en Android y en iPhone.
+
+## App de minijuegos, fase 1 (rama `minijuegos-app`, pendiente de aprobacion)
+- `src/app/` (template.html + build.js) genera `app/index.html`: menu con pestanas Hoy / Juegos / Ligas / Perfil, diseno nuevo (azul noche), Top 10 enlazado en `../top10/` (comparten origen, sin tocar su progreso).
+- Juegos: Mas o menos (16 conjuntos en `data/mm1.js`, `mm2.js`; fuentes por item; duelo diario de 10, nota 0-100; modo racha) y Once oculto (46 alineaciones tomadas de los niveles del Top 10 + `data/formaciones.json`; 5 vidas; nota = aciertos x10).
+- Diario: contenido elegido por fecha (semilla), primer resultado del dia cuenta, racha de dias, texto para compartir.
+- Ligas: interfaz `Backend` con `LocalBackend` (modo prueba) y `SupabaseBackend` (REST + RPC). `supabase/schema.sql` crea tablas con RLS sin politicas y funciones security definer. Se activa rellenando `src/app/config.js` (`supabaseUrl`, `supabaseKey`, clave anon publica) y activando el inicio de sesion anonimo. Sin probar contra un servidor real (solo contra un simulado: `tests/sb-mock-test.js`).
+- Limite conocido: las notas las envia el cliente, asi que un jugador puede falsearlas. Validacion en servidor queda para el ranking global.
+- Pendiente: PWA de la app, sus propios iconos, Trayectoria, Cuadricula, Wordle.

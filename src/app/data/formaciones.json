@@ -1,0 +1,449 @@
+[
+ {
+  "title": "Jugadores de campo titulares de España en la final de la Eurocopa 2024 (España 2-1 Inglaterra, Berlín)",
+  "rows": [
+   4,
+   2,
+   3,
+   1
+  ],
+  "gk": "Unai Simón"
+ },
+ {
+  "title": "Jugadores de campo titulares del Real Madrid en la final de la Champions 2024 (Real Madrid 2-0 Borussia Dortmund, Wembley)",
+  "rows": [
+   4,
+   3,
+   1,
+   2
+  ],
+  "gk": "Thibaut Courtois"
+ },
+ {
+  "title": "Jugadores de campo titulares del Barcelona en la final de la Champions 2009 (Barcelona 2-0 Manchester United, Roma)",
+  "rows": [
+   4,
+   3,
+   3
+  ],
+  "gk": "Víctor Valdés"
+ },
+ {
+  "title": "Jugadores de campo titulares de España en la final del Mundial 2010 (España 1-0 Países Bajos)",
+  "rows": [
+   4,
+   2,
+   3,
+   1
+  ],
+  "gk": "Iker Casillas"
+ },
+ {
+  "title": "Jugadores de campo titulares del PSG en la final de la Champions 2025 (PSG 5-0 Inter, Múnich)",
+  "rows": [
+   4,
+   3,
+   3
+  ],
+  "gk": "Gianluigi Donnarumma"
+ },
+ {
+  "title": "Jugadores de campo titulares del Barcelona en la final de la Champions 2015 (Barcelona 3-1 Juventus, Berlín)",
+  "rows": [
+   4,
+   3,
+   3
+  ],
+  "gk": "Marc-André ter Stegen"
+ },
+ {
+  "title": "Jugadores de campo titulares de Italia en la final de la Eurocopa 2020 (Italia 1-1 Inglaterra, Wembley, 3-2 en los penaltis)",
+  "rows": [
+   4,
+   3,
+   3
+  ],
+  "gk": "Gianluigi Donnarumma"
+ },
+ {
+  "title": "Jugadores de campo titulares de Alemania en la final del Mundial 2014 (Alemania 1-0 Argentina, Maracanã)",
+  "rows": [
+   4,
+   2,
+   3,
+   1
+  ],
+  "gk": "Manuel Neuer"
+ },
+ {
+  "title": "Jugadores de campo titulares de Francia en la final del Mundial 2018 (Francia 4-2 Croacia, Moscú)",
+  "rows": [
+   4,
+   2,
+   3,
+   1
+  ],
+  "gk": "Hugo Lloris"
+ },
+ {
+  "title": "Jugadores de campo titulares de Argentina en la final del Mundial 2022 (Argentina 3-3 Francia, 4-2 en los penaltis, Lusail)",
+  "rows": [
+   4,
+   3,
+   3
+  ],
+  "gk": "Emiliano Martínez",
+  "note": "Argentina 2022 jugó un 4-4-2 (Di María abierto); el orden de answers lo agrupa como 4-3-3."
+ },
+ {
+  "title": "Jugadores de campo titulares del Liverpool en la final de la Champions 2019 (Liverpool 2-0 Tottenham, Madrid)",
+  "rows": [
+   4,
+   3,
+   3
+  ],
+  "gk": "Alisson"
+ },
+ {
+  "title": "Jugadores de campo titulares de España en la final de la Eurocopa 2012 (España 4-0 Italia, Kiev)",
+  "rows": [
+   4,
+   3,
+   2,
+   1
+  ],
+  "gk": "Iker Casillas",
+  "note": "Fàbregas de falso nueve: equivale a un 4-6-0; se dibuja [4,3,2,1]."
+ },
+ {
+  "title": "Jugadores de campo titulares del Real Madrid en la final de la Champions 2014 (Real Madrid 4-1 Atlético, Lisboa)",
+  "rows": [
+   4,
+   3,
+   3
+  ],
+  "gk": "Iker Casillas"
+ },
+ {
+  "title": "Jugadores de campo titulares del Barcelona en la final de la Champions 2011 (Barcelona 3-1 Manchester United, Wembley)",
+  "rows": [
+   4,
+   3,
+   3
+  ],
+  "gk": "Víctor Valdés"
+ },
+ {
+  "title": "Jugadores de campo titulares del Chelsea en la final de la Champions 2021 (Chelsea 1-0 Manchester City, Oporto)",
+  "rows": [
+   3,
+   4,
+   2,
+   1
+  ],
+  "gk": "Édouard Mendy"
+ },
+ {
+  "title": "Jugadores de campo titulares del Bayern en la final de la Champions 2013 (Bayern 2-1 Borussia Dortmund, Wembley)",
+  "rows": [
+   4,
+   2,
+   3,
+   1
+  ],
+  "gk": "Manuel Neuer"
+ },
+ {
+  "title": "Jugadores de campo titulares del Inter en la final de la Champions 2010 (Inter 2-0 Bayern, Bernabéu)",
+  "rows": [
+   4,
+   2,
+   3,
+   1
+  ],
+  "gk": "Júlio César"
+ },
+ {
+  "title": "Jugadores de campo titulares del Milan en la final de la Champions 2007 (Milan 2-1 Liverpool, Atenas)",
+  "rows": [
+   4,
+   3,
+   2,
+   1
+  ],
+  "gk": "Dida"
+ },
+ {
+  "title": "Jugadores de campo titulares del Manchester United en la final de la Champions 1999 (Manchester United 2-1 Bayern, Camp Nou)",
+  "rows": [
+   4,
+   4,
+   2
+  ],
+  "gk": "Peter Schmeichel"
+ },
+ {
+  "title": "Jugadores de campo titulares de Inglaterra en la final del Mundial 1966 (Inglaterra 4-2 Alemania Occidental, Wembley)",
+  "rows": [
+   5,
+   1,
+   2,
+   2
+  ],
+  "gk": "Gordon Banks",
+  "note": "Orden de answers no separa defensas: Stiles (mediocentro defensivo) aparece en 3.ª posición entre los defensas. Formación real 4-4-2 sin extremos. Se agrupa [5,1,2,2] para respetar el orden; conviene reordenar answers si se quiere dibujar 4-4-2."
+ },
+ {
+  "title": "Jugadores de campo titulares de Brasil en la final del Mundial 1970 (Brasil 4-1 Italia, Estadio Azteca)",
+  "rows": [
+   4,
+   2,
+   4
+  ],
+  "gk": "Félix",
+  "note": "Formación real 4-2-3-1/4-2-4; Jairzinho y Rivellino abiertos con Tostão y Pelé. Se dibuja [4,2,4]."
+ },
+ {
+  "title": "Jugadores de campo titulares de Italia en la final del Mundial 2006 (Italia 1-1 Francia, 5-3 en los penaltis, Berlín)",
+  "rows": [
+   4,
+   4,
+   1,
+   1
+  ],
+  "gk": "Gianluigi Buffon"
+ },
+ {
+  "title": "Jugadores de campo titulares de España en la final del Mundial 2026 (España 1-0 Argentina en la prórroga, MetLife Stadium)",
+  "rows": [
+   4,
+   3,
+   3
+  ],
+  "gk": "Unai Simón",
+  "note": "Orden de answers coloca a Olmo (mediapunta) al final, se agrupa 4-3-3."
+ },
+ {
+  "title": "Jugadores de campo titulares de Argentina en la final del Mundial 2026 (España 1-0 Argentina en la prórroga, MetLife Stadium)",
+  "rows": [
+   4,
+   3,
+   3
+  ],
+  "gk": "Emiliano Martínez"
+ },
+ {
+  "title": "Jugadores de campo titulares del Real Madrid en la final de la Champions 2018 (Real Madrid 3-1 Liverpool, Kiev)",
+  "rows": [
+   4,
+   3,
+   1,
+   2
+  ],
+  "gk": "Keylor Navas"
+ },
+ {
+  "title": "Jugadores de campo titulares del Real Madrid en la final de la Champions 2022 (Real Madrid 1-0 Liverpool, París)",
+  "rows": [
+   4,
+   3,
+   3
+  ],
+  "gk": "Thibaut Courtois"
+ },
+ {
+  "title": "Jugadores de campo titulares de Inglaterra en la final de la Eurocopa 2024 (Inglaterra 1-2 España, Berlín)",
+  "rows": [
+   4,
+   2,
+   3,
+   1
+  ],
+  "gk": "Jordan Pickford"
+ },
+ {
+  "title": "Jugadores de campo titulares de Brasil en la final del Mundial 1958 (Brasil 5-2 Suecia, Råsunda)",
+  "rows": [
+   4,
+   2,
+   4
+  ],
+  "gk": "Gilmar"
+ },
+ {
+  "title": "Jugadores de campo titulares del Real Madrid en la final de la Copa de Europa 1960 (Real Madrid 7-3 Eintracht Frankfurt, Hampden Park)",
+  "rows": [
+   3,
+   2,
+   5
+  ],
+  "gk": "Rogelio Domínguez",
+  "note": "En realidad 3-2-5 (WM), con Marquitos, Santamaría y Pachín como línea defensiva."
+ },
+ {
+  "title": "Jugadores de campo titulares de Alemania Occidental en la final del Mundial 1974 (Alemania Occidental 2-1 Países Bajos, Múnich)",
+  "rows": [
+   4,
+   3,
+   3
+  ],
+  "gk": "Sepp Maier"
+ },
+ {
+  "title": "Jugadores de campo titulares de Países Bajos en la final del Mundial 1974 (Alemania Occidental 2-1 Países Bajos, Múnich)",
+  "rows": [
+   4,
+   3,
+   3
+  ],
+  "gk": "Jan Jongbloed"
+ },
+ {
+  "title": "Jugadores de campo titulares de Argentina en la final del Mundial 1978 (Argentina 3-1 Países Bajos en la prórroga, Monumental)",
+  "rows": [
+   4,
+   3,
+   3
+  ],
+  "gk": "Ubaldo Fillol",
+  "note": "Formación real con Kempes por detrás de la delantera; se dibuja 4-3-3."
+ },
+ {
+  "title": "Jugadores de campo titulares del Celtic en la final de la Copa de Europa 1967 (Celtic 2-1 Inter, Lisboa), los Leones de Lisboa",
+  "rows": [
+   4,
+   2,
+   4
+  ],
+  "gk": "Ronnie Simpson"
+ },
+ {
+  "title": "Jugadores de campo titulares de Francia en la final del Mundial 1998 (Francia 3-0 Brasil, Stade de France)",
+  "rows": [
+   4,
+   3,
+   2,
+   1
+  ],
+  "gk": "Fabien Barthez"
+ },
+ {
+  "title": "Jugadores de campo titulares de Brasil en la final del Mundial 1994 (Brasil 0-0 Italia, 3-2 en los penaltis, Pasadena)",
+  "rows": [
+   4,
+   4,
+   2
+  ],
+  "gk": "Taffarel"
+ },
+ {
+  "title": "Jugadores de campo titulares de Argentina en la final del Mundial 1986 (Argentina 3-2 Alemania Occidental, Estadio Azteca)",
+  "rows": [
+   3,
+   5,
+   2
+  ],
+  "gk": "Nery Pumpido",
+  "note": "Formación real 3-5-2 (Olarticoechea de carrilero izquierdo); se dibuja [3,5,2] con Olarticoechea abriendo la segunda fila."
+ },
+ {
+  "title": "Jugadores de campo titulares del Barcelona en la final de la Copa de Europa 1992 (Barcelona 1-0 Sampdoria en la prórroga, Wembley)",
+  "rows": [
+   4,
+   3,
+   3
+  ],
+  "gk": "Andoni Zubizarreta",
+  "note": "Formación real 4-3-3 / 3-4-3 de Cruyff; se dibuja [4,3,3]."
+ },
+ {
+  "title": "Jugadores de campo titulares de Italia en la final del Mundial 1982 (Italia 3-1 Alemania Occidental, Santiago Bernabéu)",
+  "rows": [
+   5,
+   2,
+   1,
+   2
+  ],
+  "gk": "Dino Zoff",
+  "note": "Sistema con líbero (Scirea) y Gentile marcador: línea de 5 en las answers."
+ },
+ {
+  "title": "Jugadores de campo titulares de Alemania Occidental en la final del Mundial 1990 (RFA 1-0 Argentina, Estadio Olímpico de Roma)",
+  "rows": [
+   5,
+   3,
+   2
+  ],
+  "gk": "Bodo Illgner",
+  "note": "Formación real 3-5-2 (Berthold y Brehme carrileros; Augenthaler líbero); el orden de answers obliga a agrupar [5,3,2]."
+ },
+ {
+  "title": "Jugadores de campo titulares de Brasil en la final del Mundial 2002 (Brasil 2-0 Alemania, Yokohama)",
+  "rows": [
+   5,
+   2,
+   2,
+   1
+  ],
+  "gk": "Marcos",
+  "note": "Formación real 3-4-2-1 (carrileros Cafu y Roberto Carlos); el orden de answers los sitúa en la primera fila: [5,2,2,1]."
+ },
+ {
+  "title": "Jugadores de campo titulares de Francia en la final del Mundial 2006 (Italia 1-1 Francia, 5-3 en los penaltis, Berlín)",
+  "rows": [
+   4,
+   2,
+   3,
+   1
+  ],
+  "gk": "Fabien Barthez"
+ },
+ {
+  "title": "Jugadores de campo titulares de España en la final de la Eurocopa 2008 (Alemania 0-1 España, Viena)",
+  "rows": [
+   4,
+   1,
+   4,
+   1
+  ],
+  "gk": "Iker Casillas"
+ },
+ {
+  "title": "Jugadores de campo titulares del Real Madrid en la final de la Champions 2002 (Real Madrid 2-1 Bayer Leverkusen, Hampden Park)",
+  "rows": [
+   4,
+   4,
+   2
+  ],
+  "gk": "César Sánchez",
+  "note": "Sin consenso claro (4-4-2 con Zidane de enganche); se dibuja [4,4,2]."
+ },
+ {
+  "title": "Jugadores de campo titulares del Manchester United en la final de la Champions 2008 (Manchester United 1-1 Chelsea, 6-5 en los penaltis, Moscú)",
+  "rows": [
+   4,
+   3,
+   3
+  ],
+  "gk": "Edwin van der Sar"
+ },
+ {
+  "title": "Jugadores de campo titulares del Liverpool en la final de la Champions 2005 (Milan 3-3 Liverpool, 2-3 en los penaltis, Estambul)",
+  "rows": [
+   4,
+   4,
+   2
+  ],
+  "gk": "Jerzy Dudek",
+  "note": "Formación real 3-4-1-2 o 4-4-2 con Riise por la izquierda; se dibuja [4,4,2] con Riise abriendo el centro del campo."
+ },
+ {
+  "title": "Jugadores de campo titulares del Barcelona en la final de la Champions 2006 (Barcelona 2-1 Arsenal, París)",
+  "rows": [
+   4,
+   3,
+   3
+  ],
+  "gk": "Víctor Valdés"
+ }
+]
