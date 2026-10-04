@@ -153,10 +153,10 @@ const LocalBackend={
   db(){try{return JSON.parse(localStorage.getItem("minijuegos.local"))||{leagues:[]};}catch(e){return {leagues:[]};}},
   put(d){localStorage.setItem("minijuegos.local",JSON.stringify(d));},
   async setAlias(){},
-  async createLeague(name){const d=this.db();const code=Math.random().toString(36).slice(2,8).toUpperCase();d.leagues.push({id:code,code,name});this.put(d);return {code,id:code,name};},
+  async createLeague(name){const d=this.db();const code=Math.random().toString(36).slice(2,8).toUpperCase();d.leagues.push({id:code,code,name,since:today()});this.put(d);return {code,id:code,name};},
   async joinLeague(code){const d=this.db();const l=d.leagues.find(x=>x.code===code.toUpperCase());if(!l)throw new Error("No existe esa liga");return l;},
   async myLeagues(){return this.db().leagues;},
-  async board(id,from,to){const g={};let total=0;for(let n=dayNum(from);n<=dayNum(to);n++){const r=S.days[dstrUTC(n)];if(r)for(const k in r){g[k]=(g[k]||0)+r[k];total+=r[k];}}return [{alias:S.alias||"Tú",total,g}];},
+  async board(id,from,to){const g={};let total=0;const L=this.db().leagues.find(x=>x.id===id);if(L&&L.since&&L.since>from)from=L.since;for(let n=dayNum(from);n<=dayNum(to);n++){const r=S.days[dstrUTC(n)];if(r)for(const k in r){g[k]=(g[k]||0)+r[k];total+=r[k];}}return [{alias:S.alias||"Tú",total,g}];},
   async submit(){}
 };
 const SB=DATA.CFG;

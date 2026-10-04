@@ -2,7 +2,7 @@
    - Pagina: red primero (4 s de limite) y cache si no hay conexion.
    - Nombres de jugadores (../top10/entidades/*.json): cache primero, se refresca por detras.
    - Llamadas al servidor de ligas (otro origen): no se tocan. */
-const VERSION="b4dc0c26df";
+const VERSION="7edff10b95";
 const CORE="minijuegos-core-"+VERSION;
 const DATA="minijuegos-data";
 const CORE_FILES=["./","index.html","manifest.webmanifest","icon-192.png","icon-512.png","apple-touch-icon.png"];
