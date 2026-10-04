@@ -30,8 +30,14 @@ const URL=process.env.URL||"http://localhost:8123/app/index.html";
  /* Línea del tiempo: en orden */
  await p.click('[data-play="line"]');
  const order=await p.evaluate(()=>{const its=chunkOfDay(DATA.LINE,1,today())[0].items;return its.slice().sort((a,b)=>a.y-b.y).map(i=>i.t);});
- await p.click(`[data-k]:has-text("${order[1].replace(/"/g,'\\"')}")`);           /* error: no es el más antiguo */
- for(const t of order){await p.click(`[data-k]:has-text("${t.replace(/"/g,'\\"')}")`);}
+ for(let i=0;i<order.length;i++){
+   for(let guard=0;guard<10;guard++){
+     const cur=await p.$$eval(".tli span",els=>els.map(e=>e.textContent));
+     const at=cur.indexOf(order[i]);if(at<=i)break;
+     await p.click(`[data-m="${at}|-1"]`);
+   }
+ }
+ await p.click("#sub");
  out.line=await big();await p.click("#e2");
  /* Verdadero o falso */
  await p.click('[data-play="vf"]');

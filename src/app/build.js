@@ -31,7 +31,8 @@ if(ks.size!==LINEUPS.length) throw new Error("claves de alineacion repetidas");
 
 const cfg=fs.existsSync(path.join(__dirname,"config.js"))?require("./config.js"):{supabaseUrl:"",supabaseKey:""};
 const chk=(name,arr,f)=>{const ids=new Set();arr.forEach(x=>{if(ids.has(x.id))throw new Error(name+" id repetido "+x.id);ids.add(x.id);f(x);});};
-const TRAY=require("./data/tray.js"),VF=require("./data/vf.js"),ODD=require("./data/intruso.js"),CON=require("./data/conexiones.js"),LINE=require("./data/linea.js"),MIST=require("./data/misterioso.js");
+const TRAY=require("./data/tray.js"),VF=require("./data/vf.js"),ODD=require("./data/intruso.js"),CON=[].concat(require("./data/conexiones.js"),require("./data/conexiones2.js").filter(x=>!["con-16","con-20"].includes(x.id))),  /* con-16 y con-20 con dudas de verificacion: fuera hasta revisarlos */
+  LINE=require("./data/linea.js"),MIST=require("./data/misterioso.js");
 chk("tray",TRAY,x=>{if(x.career.length<4)throw new Error("carrera corta "+x.id);});
 chk("vf",VF,x=>{if(typeof x.v!=="boolean")throw new Error("vf "+x.id);});
 chk("odd",ODD,x=>{if(x.items.length!==4||x.odd<0||x.odd>3)throw new Error("odd "+x.id);});

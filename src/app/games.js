@@ -94,48 +94,43 @@ function playOdd(day){
 function playLine(day){
   const hoy=day===today(),g=meta("line"),T=150;
   openGame(g.name+(hoy?" · hoy":" · "+dayLabel(day)),g.c);
-  const puz=chunkOfDay(DATA.LINE,1,day)[0],its=puz.items;
-  const order=shuffled(its.map((_,k)=>k),rng(hash("line"+day)));
-  const sorted=its.map((_,k)=>k).sort((a,b)=>its[a].y-its[b].y);
+  const puz=chunkOfDay(DATA.LINE,1,day)[0],its=puz.items,N=its.length;
+  const sortedY=its.map(i=>i.y).sort((a,b)=>a-b);
   let sv=progGet(day,"line");
-  if(!sv){sv={p:[],err:0,t0:Date.now()};progSet(day,"line",sv);}
-  let placed=sv.p.slice(),err=sv.err,done=false,msg="";
+  if(!sv||!sv.o){sv={o:shuffled(its.map((_,k)=>k),rng(hash("line"+day))),t0:Date.now()};progSet(day,"line",sv);}
+  let ord=sv.o.slice(),done=false;
   const t0=sv.t0,rem=()=>hoy?T-(Date.now()-t0)/1000:Infinity;
-  const hud=()=>{$("#gsc").textContent=(hoy?"⏱ "+fmtT(rem())+" · ":"")+"errores "+err;};
+  const hud=()=>{$("#gsc").textContent=hoy?"⏱ "+fmtT(rem()):"";};
+  function save(){progSet(day,"line",{o:ord,t0});}
   function draw(){
     hud();
-    const left=order.filter(k=>!placed.includes(k));
     $("#gb").innerHTML=`<div class="mut" style="text-align:center;margin-top:8px">${esc(puz.title)}</div>
-    <div class="q" style="font-size:17px">Toca los hechos del más antiguo al más reciente</div>
-    <div class="tl">${placed.map(k=>`<div class="tli"><b>${its[k].y}</b><span>${esc(its[k].t)}</span></div>`).join("")}</div>
-    <div class="fb" id="fb">${msg}</div>
-    <div class="duel">${left.map(k=>`<button class="opt sm" data-k="${k}"><b style="font-size:16px">${esc(its[k].t)}</b></button>`).join("")}</div>`;
-    document.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>tap(+b.dataset.k));
-  }
-  function save(){progSet(day,"line",{p:placed,err,t0});}
-  function tap(k){
-    if(done)return;
-    const next=sorted.find(x=>!placed.includes(x));
-    if(its[k].y===its[next].y||k===next){placed.push(k);msg="";}
-    else{err++;msg="Ese no es el más antiguo de los que quedan.";}
-    save();
-    if(placed.length===its.length)end(false);else draw();
+    <div class="q" style="font-size:17px">Ordena los hechos del más antiguo (arriba) al más reciente (abajo)</div>
+    <div class="tl">${ord.map((k,i)=>`<div class="tli" style="align-items:center"><span style="flex:1">${esc(its[k].t)}</span>
+      <button class="btn ghost" style="padding:8px 12px" data-m="${i}|-1" ${i===0?"disabled":""} aria-label="Subir">▲</button>
+      <button class="btn ghost" style="padding:8px 12px" data-m="${i}|1" ${i===N-1?"disabled":""} aria-label="Bajar">▼</button></div>`).join("")}</div>
+    <button class="btn block" id="sub" style="margin-top:12px">Entregar</button>`;
+    document.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{const [i,d]=b.dataset.m.split("|").map(Number);[ord[i],ord[i+d]]=[ord[i+d],ord[i]];save();draw();});
+    $("#sub").onclick=()=>end(false);
   }
   function end(timeout){
-    if(done)return;done=true;
-    const p=placed.length;
-    let score,line;
-    if(hoy){const base=Math.max(0,15*p-15*err);score=base+Math.round(10*(base/90)*(timeout?0:Math.max(0,rem()))/T);line=`${timeout?"Se acabó el tiempo. ":""}${p} de 6 colocados, ${err} error${err===1?"":"es"}`;}
-    else{score=Math.round(Math.max(0,100*p/6-15*err));line=`${p} de 6 colocados, ${err} error${err===1?"":"es"}`;}
-    if(timeout){placed=sorted.slice();}
-    $("#gb").innerHTML=`<div class="tl">${sorted.map(k=>`<div class="tli"><b>${its[k].y}</b><span>${esc(its[k].t)}</span></div>`).join("")}</div><div id="endbox"></div>`;
-    stopTimer();recordScore(day,"line",score);$("#gsc").textContent="";
+    if(done)return;done=true;stopTimer();
+    let pairs=0;for(let a=0;a<N;a++)for(let b=a+1;b<N;b++)if(its[ord[a]].y<=its[ord[b]].y)pairs++;
+    const tot=N*(N-1)/2,fr=pairs/tot,exact=ord.filter((k,i)=>its[k].y===sortedY[i]).length;
+    let score;
+    if(hoy){const r=timeout?0:Math.max(0,rem());score=Math.round(90*fr)+Math.round(10*fr*r/T);}
+    else score=Math.round(100*fr);
+    if(exact===N)score=hoy?score:100;
+    const line=`${timeout?"Se acabó el tiempo. ":""}${exact} de ${N} en su sitio · ${pairs} de ${tot} parejas bien ordenadas`;
+    const okRow=(k,i)=>its[k].y===sortedY[i];
+    $("#gb").innerHTML=`<div class="mut" style="text-align:center;margin-top:8px">Así lo entregaste (verde: en su sitio)</div>
+    <div class="tl">${ord.map((k,i)=>`<div class="tli" style="border-color:${okRow(k,i)?"var(--ok)":"var(--bad)"}"><b>${its[k].y}</b><span>${esc(its[k].t)}</span></div>`).join("")}</div><div id="endbox"></div>`;
+    recordScore(day,"line",score);$("#gsc").textContent="";
     $("#endbox").innerHTML=`<div class="mut" style="text-align:center;margin-top:16px">${line}</div><div class="big">${score}/100</div>${hoy?`<button class="btn block" id="e1">Compartir</button>`:""}<button class="btn block ghost" style="margin-top:10px" id="e2">Cerrar</button>`;
     const a=$("#e1");if(a)a.onclick=()=>share(shareText());
     $("#e2").onclick=closeGame;
   }
-  if(placed.length===its.length)end(false);
-  else if(rem()<=0)end(true);
+  if(rem()<=0)end(true);
   else{draw();if(hoy)runClock(()=>{if(rem()<=0)end(true);else hud();});}
 }
 
