@@ -28,7 +28,7 @@ function bindNameInput(sugFn,onSubmit){
 function suggestAny(raw,skip){                          /* sugerencias de la base de jugadores */
   const q=norm(raw);if(q.length<2)return [];
   const out=[];
-  for(const e of PLAYERS.list){
+  for(const e of allNames()){
     if(skip&&skip.has(e.nk))continue;
     let s=-1;if(e.nk.startsWith(q))s=0;else if(e.nk.indexOf(" "+q)>=0)s=1;else if(q.length>=3&&e.nk.includes(q))s=2;
     if(s>=0)out.push({e,s});
@@ -205,7 +205,7 @@ function playTray(day){
   let sv=progGet(day,"tray");
   if(!sv){sv={shown:2,nat:0,pos:0,wrong:0,gs:[]};progSet(day,"tray",sv);}
   let {shown,nat,pos,wrong}=sv,gs=sv.gs.slice(),over=false;
-  const cost=()=>8*(shown-2)+10*(nat+pos)+15*wrong;
+  const cost=()=>10*(shown-2)+15*wrong;
   const hud=()=>{$("#gsc").textContent="Valor "+Math.max(10,100-cost())+" pts";};
   function save(){progSet(day,"tray",{shown,nat,pos,wrong,gs});}
   function draw(msg){
@@ -213,15 +213,12 @@ function playTray(day){
     const rows=P.career.slice(0,shown);
     $("#gb").innerHTML=`<div class="mut" style="text-align:center;margin-top:8px">¿Quién es? Sus clubes, en orden</div>
     <div class="tl">${rows.map(r=>`<div class="tli"><b style="min-width:82px">${esc(r.y)}</b><span>${esc(r.c)}</span></div>`).join("")}${shown<P.career.length?`<div class="tli mut"><b style="min-width:82px">?</b><span>${P.career.length-shown} club${P.career.length-shown===1?"":"es"} más</span></div>`:""}</div>
-    <div class="row" style="margin:10px 0"><button class="btn ghost" id="tmore" ${shown>=P.career.length?"disabled":""}>Otro club (−8)</button>
-    <button class="btn ghost" id="tnat" ${nat?"disabled":""}>${nat?esc(P.nat):"Pista: país (−10)"}</button>
-    <button class="btn ghost" id="tpos" ${pos?"disabled":""}>${pos?esc(P.pos):"Pista: puesto (−10)"}</button></div>
+    <div class="row" style="margin:10px 0"><button class="btn ghost block" id="tmore" ${shown>=P.career.length?"disabled":""}>Otro club (−10)</button></div>
     ${gs.length?`<div class="mut" style="font-size:14px">Ya has probado: ${gs.map(esc).join(", ")}</div>`:""}
     ${over?"":INPUT_HTML}<div class="fb" id="fb">${msg||""}</div><div id="endbox"></div>`;
+    if(msg==="¡Correcto!"){const f=$("#fb");f.style.cssText="text-align:center;font-size:30px;font-weight:900;color:#fff;background:var(--ok);border-radius:16px;padding:14px;margin:10px 0";}
     if(!over){
       $("#tmore").onclick=()=>{if(shown<P.career.length){shown++;save();draw();}};
-      $("#tnat").onclick=()=>{nat=1;save();draw();};
-      $("#tpos").onclick=()=>{pos=1;save();draw();};
       bindNameInput(raw=>suggestAny(raw),guess);
     }
   }

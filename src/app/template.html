@@ -47,9 +47,9 @@ h2{font-size:18px;margin:22px 0 10px}
 .bar i{display:block;height:100%;background:var(--c,var(--gold));width:0;transition:width .3s}
 /* mas o menos */
 .q{font-size:20px;font-weight:800;text-align:center;margin:14px 0}
-.duel{display:grid;gap:12px}
+.duel{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
 .opt{border:2px solid var(--line);background:var(--card);border-radius:20px;padding:22px 14px;text-align:center;min-height:120px;display:flex;flex-direction:column;justify-content:center;gap:6px}
-.opt b{font-size:22px}
+.opt{min-width:0}.opt b{font-size:22px;overflow-wrap:anywhere;hyphens:auto;line-height:1.2}.opt.long b{font-size:17px}
 .opt .v{font-size:30px;font-weight:900;height:38px}
 .opt.win{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 16%,var(--card))}
 .opt.lose{border-color:var(--line);opacity:.65}
@@ -93,10 +93,10 @@ td.n,th.n{text-align:right}
 .tile{background:var(--card);border:2px solid var(--line);border-radius:12px;padding:12px 4px;font-weight:700;font-size:13px;min-height:64px;overflow-wrap:anywhere;color:var(--txt)}
 .tile.on{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 22%,var(--card))}
 .btn[disabled]{opacity:.45;cursor:default}
-.mhead,.mcs{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+.mhead,.mcs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}
 .mhead{font-size:11px;color:var(--mut);text-align:center;margin:10px 0 4px}
 .mrow{margin:6px 0}.mn{font-weight:800;font-size:14px;margin-bottom:2px}
-.mc{border-radius:8px;padding:8px 2px;text-align:center;font-size:11px;font-weight:700;min-height:44px;display:flex;align-items:center;justify-content:center;overflow-wrap:anywhere;background:#2a3560}
+.mc{border-radius:8px;padding:6px 3px;text-align:center;font-size:10.5px;line-height:1.15;font-weight:700;min-height:48px;min-width:0;display:flex;align-items:center;justify-content:center;overflow-wrap:break-word;word-break:normal;hyphens:auto;background:#2a3560}
 .mc.ok{background:#1f9d5b;color:#fff}.mc.near{background:#d98a1f;color:#fff}
 .code{font:800 26px ui-monospace,Menlo,monospace;letter-spacing:4px;text-align:center}
 </style>
@@ -399,7 +399,7 @@ function playMM(day){
     label="Duelo "+(i+1)+"/"+N;hud();
     $("#gb").innerHTML=`<div class="bar" style="--c:var(--mm)"><i style="width:${i/N*100}%"></i></div>
     <div class="mut" style="text-align:center">${esc(cur.s.cat)}</div><div class="q">${esc(cur.s.q)}</div>
-    <div class="duel"><button class="opt" data-o="0"><b>${esc(X.n)}</b><div class="v"></div></button><div class="vs">contra</div><button class="opt" data-o="1"><b>${esc(Y.n)}</b><div class="v"></div></button></div>
+    <div class="duel"><button class="opt${X.n.length>22?" long":""}" data-o="0"><b>${esc(X.n)}</b><div class="v"></div></button><div class="vs">o</div><button class="opt${Y.n.length>22?" long":""}" data-o="1"><b>${esc(Y.n)}</b><div class="v"></div></button></div>
     <div class="mut" style="text-align:center;margin-top:10px;font-size:13px">${esc(cur.s.asof||"")}</div><div id="nx"></div>`;
     document.querySelectorAll(".opt").forEach(b=>b.onclick=()=>pick(+b.dataset.o));
   }
@@ -454,11 +454,18 @@ function judge(L,raw,found){
   }
   return near>=0?{t:"hit",i:near}:{t:"miss"};
 }
+let _extra=null;
+function allNames(){                                   /* base de jugadores + respuestas de todas las alineaciones que falten (sin delatar las del día) */
+  if(_extra&&_extra.n===PLAYERS.list.length)return _extra.l;
+  const have=new Set(PLAYERS.list.map(e=>e.nk)),add=[];
+  DATA.LINEUPS.forEach(L=>L.ans.forEach(a=>{const nk=norm(a.n);if(!have.has(nk)){have.add(nk);add.push({n:a.n,nk,sub:"",f:50});}}));
+  _extra={n:PLAYERS.list.length,l:PLAYERS.list.concat(add)};return _extra.l;
+}
 function suggestP(raw,found,L){
   const q=norm(raw);if(q.length<2)return [];
   const got=new Set([...found].map(i=>norm(L.ans[i].n)));
   const out=[];
-  for(const e of PLAYERS.list){
+  for(const e of allNames()){
     if(got.has(e.nk))continue;
     let s=-1;if(e.nk.startsWith(q))s=0;else if(e.nk.indexOf(" "+q)>=0)s=1;else if(q.length>=3&&e.nk.includes(q))s=2;
     if(s>=0)out.push({e,s});
@@ -489,11 +496,13 @@ function playOnce(day){
     const hearts="❤️".repeat(lives)+"🖤".repeat(MAXL-lives);
     $("#gsc").innerHTML=`${hoy?`<span id="tmr">⏱ ${fmtT(remaining())}</span> `:""}<span class="lives">${hearts}</span>`;
     $("#gb").innerHTML=`<div class="mut" style="text-align:center;font-size:14px">${esc(L.title.replace(/^Jugadores de campo titulares d(e|el) /,""))}</div>
-    <div class="pitch">${rowsHtml.join("")}<div class="prow"><div class="slot gk got" style="max-width:none;flex:0 0 auto;padding:6px 14px;background:#fff;color:#111">🧤 ${esc(L.gk||"Portero")}</div></div></div>
+    <div class="pitch">${rowsHtml.join("")}<div class="prow"><div class="slot gk got" style="width:auto;max-width:none;flex:0 0 auto;min-height:0;padding:8px 18px;font-size:14px;white-space:nowrap;background:#fff;color:#111">🧤 ${esc(L.gk||"Portero")}</div></div></div>
     <div class="mut" style="text-align:center;margin-bottom:6px">${found.size}/10 jugadores · escribe el apellido o el nombre</div>
     ${over?"":`<div class="inp"><input id="gi" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Jugador de campo..."><button class="btn" id="gs">OK</button><div class="sug" id="sg" style="display:none"></div></div>`}
+    ${over?"":`<button class="btn ghost block" id="giveup" style="margin-top:8px">Rendirme</button>`}
     <div class="fb" id="fb">${msg||""}</div><div id="endbox"></div>`;
     if(!over){
+      $("#giveup").onclick=()=>{if(confirm("¿Rendirte? Te quedas con "+found.size+" acierto"+(found.size===1?"":"s")+".")){lives=0;over=true;draw("Te has rendido");}};
       const inp=$("#gi");
       const submit=v=>{const val=(v??inp.value);if(!val.trim())return;try2(val);};
       $("#gs").onclick=()=>submit();
