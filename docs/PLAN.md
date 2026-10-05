@@ -88,7 +88,7 @@ Web instalable (PWA) con minijuegos diarios de futbol en castellano, con ligas p
 - `src/app/pwa/`: manifest, service worker (version = hash de la pagina, red primero con 4 s, cache de `entidades/`), iconos PROVISIONALES generados por `make-icons.py` (balon dorado sobre azul noche; sustituir cuando haya logo propio). Barra de instalar en la pestana Hoy y aviso de nueva version.
 - Menu raiz (`index.html`) enlaza `app/`; el Top 10 dice 162 niveles.
 - Tests en `src/app/tests/`: app-test (modo local), pwa-test, sb-mock-test (servidor simulado). Para usarlos: servidor http en la raiz del repo, `URL=http://localhost:8123/app/index.html`.
-- Ligas: probado contra Supabase real solo por Marc en el movil; con dos personas, pendiente.
+- Ligas: probado contra Supabase real por Marc y un amigo (2026-10-05): crear liga, unirse con codigo y clasificacion funcionan.
 
 ## Dos apps: minijuegos y Top 10 suelto (HECHO 2026-09-30)
 - Decision de Marc: app de minijuegos (con el Top 10 como uno de sus juegos) y Top 10 instalable aparte. En iOS cada app instalada tiene su propio almacen: los progresos NO se comparten entre ambas (solo con el codigo de copia de seguridad del Top 10).
