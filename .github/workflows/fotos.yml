@@ -1,0 +1,25 @@
+name: Piloto de fotos libres
+on:
+  workflow_dispatch:
+    inputs:
+      cantidad:
+        description: "Cuantos jugadores probar (0 = todos los de los juegos)"
+        default: "100"
+permissions:
+  contents: write
+jobs:
+  fotos:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node tools/fotos/build-fotos.js ${{ inputs.cantidad }}
+      - name: Guardar resultados
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@users.noreply.github.com"
+          git add app/fotos
+          git commit -m "Piloto de fotos libres: resultados" || echo "sin cambios"
+          git push
