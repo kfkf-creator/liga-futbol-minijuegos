@@ -27,9 +27,10 @@ function candidatos(){
 }
 
 async function api(url){
-  for(let t=0;t<4;t++){
-    const r=await fetch(url,{headers:{"User-Agent":UA,"Accept":"application/json"}});
-    if(r.status===429||r.status>=500){await sleep(1500*(t+1));continue;}
+  for(let t=0;t<6;t++){
+    let r;
+    try{r=await fetch(url,{headers:{"User-Agent":UA,"Accept":"application/json"}});}catch(e){await sleep(3000*(t+1));continue;}
+    if(r.status===429||r.status>=500){await sleep(3000*(t+1));continue;}
     if(!r.ok)throw new Error(r.status+" "+url);
     return r.json();
   }
@@ -42,12 +43,12 @@ const birthYear=e=>{const c=((e.claims||{}).P569||[])[0];const t=c&&c.mainsnak.d
 async function findPlayer(p){
   const ids=new Set();
   for(const lang of ["es","en"]){
-    const j=await api(`${WD}?action=wbsearchentities&search=${encodeURIComponent(p.n)}&language=${lang}&limit=6&type=item&format=json`);
+    const j=await api(`${WD}?action=wbsearchentities&search=${encodeURIComponent(p.n)}&language=${lang}&limit=10&type=item&format=json`);
     (j.search||[]).forEach(s=>ids.add(s.id));
     await sleep(process.env.FOTOS_FAST?0:150);
   }
   if(!ids.size)return {why:"sin entidad en Wikidata"};
-  const j=await api(`${WD}?action=wbgetentities&ids=${[...ids].slice(0,12).join("|")}&props=claims|labels&languages=es|en&format=json`);
+  const j=await api(`${WD}?action=wbgetentities&ids=${[...ids].slice(0,20).join("|")}&props=claims|labels&languages=es|en&format=json`);
   let best=null;
   for(const id of Object.keys(j.entities||{})){
     const e=j.entities[id];
