@@ -16,7 +16,7 @@ self.addEventListener("fetch",e=>{
   if(req.method!=="GET") return;
   const url=new URL(req.url);
   if(url.origin!==location.origin) return;
-  if(url.pathname.includes("/entidades/")){
+  if(url.pathname.includes("/entidades/")||url.pathname.includes("/app/fotos/")){
     e.respondWith(caches.open(DATA).then(async cache=>{
       const hit=await cache.match(req);
       const net=fetch(req).then(r=>{ if(r.ok) cache.put(req,r.clone()); return r; }).catch(()=>null);

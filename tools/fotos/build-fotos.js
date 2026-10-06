@@ -68,7 +68,7 @@ async function findPlayer(p){
 const OK_LIC=/^(CC0|Public domain|PD\b|CC[ -]BY(-SA)?\b)/i, BAD_LIC=/\b(NC|ND)\b/i;
 const strip=h=>String(h||"").replace(/<[^>]*>/g,"").replace(/&amp;/g,"&").replace(/&quot;/g,'"').replace(/&#0?39;/g,"'").replace(/\s+/g," ").trim();
 async function commonsInfo(file){
-  const j=await api(`${CM}?action=query&titles=${encodeURIComponent("File:"+file)}&prop=imageinfo&iiprop=extmetadata|url|mime&iiurlwidth=256&format=json`);
+  const j=await api(`${CM}?action=query&titles=${encodeURIComponent("File:"+file)}&prop=imageinfo&iiprop=extmetadata|url|mime&iiurlwidth=320&format=json`);
   const pg=Object.values((j.query||{}).pages||{})[0],ii=pg&&pg.imageinfo&&pg.imageinfo[0];
   if(!ii)return {why:"sin datos en Commons"};
   const x=ii.extmetadata||{},v=k=>strip(x[k]&&x[k].value);

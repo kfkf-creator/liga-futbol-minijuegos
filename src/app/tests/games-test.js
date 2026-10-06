@@ -55,7 +55,7 @@ const URL=process.env.URL||"http://localhost:8123/app/index.html";
  for(let gi=0;gi<4;gi++){for(const t of groups[gi]){await p.click(`.tile:text-is("${t.replace(/"/g,'\\"')}")`);}await p.click("#cok");}
  out.con=await big();await p.click("#e2");
  out.today=await p.evaluate(()=>JSON.stringify(S.days[today()]));
- out.hoyTotal=await p.evaluate(()=>{show("hoy");return document.querySelector("#v-hoy .card b").textContent;});
+ out.hoyTotal=await p.evaluate(()=>{show("hoy");return "Total de hoy: "+document.querySelector("#v-hoy .board .bt b").textContent+"/800";});
  out.hscroll=await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth);
  out.errs=errs;console.log(JSON.stringify(out,null,1));await b.close();
 })();

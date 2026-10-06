@@ -91,21 +91,23 @@ function playOdd(day){
 }
 
 /* ---------- Línea del tiempo ---------- */
-function playLine(day){
-  const hoy=day===today(),g=meta("line"),T=150;
+/* ---------- Motor de "ordenar y entregar" (Línea del tiempo y Reconstruye la tabla) ---------- */
+function playOrder(id,day,cfg){
+  const hoy=day===today(),g=meta(id),T=cfg.T;
   openGame(g.name+(hoy?" · hoy":" · "+dayLabel(day)),g.c);
-  const puz=chunkOfDay(DATA.LINE,1,day)[0],its=puz.items,N=its.length;
-  const sortedY=its.map(i=>i.y).sort((a,b)=>a-b);
-  let sv=progGet(day,"line");
-  if(!sv||!sv.o){sv={o:shuffled(its.map((_,k)=>k),rng(hash("line"+day))),t0:Date.now()};progSet(day,"line",sv);}
+  const puz=chunkOfDay(cfg.bank,1,day)[0],its=puz.items,N=its.length;
+  const keyOf=k=>cfg.key(its[k]);
+  const sortedK=its.map(i=>cfg.key(i)).sort((a,b)=>a-b);
+  let sv=progGet(day,id);
+  if(!sv||!sv.o){sv={o:shuffled(its.map((_,k)=>k),rng(hash(id+day))),t0:Date.now()};progSet(day,id,sv);}
   let ord=sv.o.slice(),done=false;
   const t0=sv.t0,rem=()=>hoy?T-(Date.now()-t0)/1000:Infinity;
   const hud=()=>{$("#gsc").textContent=hoy?"⏱ "+fmtT(rem()):"";};
-  function save(){progSet(day,"line",{o:ord,t0});}
+  function save(){progSet(day,id,{o:ord,t0});}
   function draw(){
     hud();
     $("#gb").innerHTML=`<div class="mut" style="text-align:center;margin-top:8px">${esc(puz.title)}</div>
-    <div class="q" style="font-size:17px">Ordena los hechos del más antiguo (arriba) al más reciente (abajo)</div>
+    <div class="q" style="font-size:17px">${esc(cfg.prompt)}</div>
     <div class="tl">${ord.map((k,i)=>`<div class="tli" style="align-items:center"><span style="flex:1">${esc(its[k].t)}</span>
       <button class="btn ghost" style="padding:8px 12px" data-m="${i}|-1" ${i===0?"disabled":""} aria-label="Subir">▲</button>
       <button class="btn ghost" style="padding:8px 12px" data-m="${i}|1" ${i===N-1?"disabled":""} aria-label="Bajar">▼</button></div>`).join("")}</div>
@@ -115,23 +117,132 @@ function playLine(day){
   }
   function end(timeout){
     if(done)return;done=true;stopTimer();
-    let pairs=0;for(let a=0;a<N;a++)for(let b=a+1;b<N;b++)if(its[ord[a]].y<=its[ord[b]].y)pairs++;
-    const tot=N*(N-1)/2,fr=pairs/tot,exact=ord.filter((k,i)=>its[k].y===sortedY[i]).length;
+    let pairs=0;for(let a=0;a<N;a++)for(let b=a+1;b<N;b++)if(keyOf(ord[a])<=keyOf(ord[b]))pairs++;
+    const tot=N*(N-1)/2,fr=pairs/tot,exact=ord.filter((k,i)=>keyOf(k)===sortedK[i]).length;
     let score;
     if(hoy){const r=timeout?0:Math.max(0,rem());score=Math.round(90*fr)+Math.round(10*fr*r/T);}
     else score=Math.round(100*fr);
-    if(exact===N)score=hoy?score:100;
     const line=`${timeout?"Se acabó el tiempo. ":""}${exact} de ${N} en su sitio · ${pairs} de ${tot} parejas bien ordenadas`;
-    const okRow=(k,i)=>its[k].y===sortedY[i];
+    const ok=(k,i)=>keyOf(k)===sortedK[i];
     $("#gb").innerHTML=`<div class="mut" style="text-align:center;margin-top:8px">Así lo entregaste (verde: en su sitio)</div>
-    <div class="tl">${ord.map((k,i)=>`<div class="tli" style="border-color:${okRow(k,i)?"var(--ok)":"var(--bad)"}"><b>${its[k].y}</b><span>${esc(its[k].t)}</span></div>`).join("")}</div><div id="endbox"></div>`;
-    recordScore(day,"line",score);$("#gsc").textContent="";
+    <div class="tl">${ord.map((k,i)=>`<div class="tli" style="border-color:${ok(k,i)?"var(--ok)":"var(--bad)"}"><b>${cfg.tag(its[k])}</b><span>${esc(its[k].t)}</span>${cfg.sub?`<span class="mut" style="margin-left:auto">${esc(cfg.sub(its[k]))}</span>`:""}</div>`).join("")}</div><div id="endbox"></div>`;
+    recordScore(day,id,score);$("#gsc").textContent="";
     $("#endbox").innerHTML=`<div class="mut" style="text-align:center;margin-top:16px">${line}</div><div class="big">${score}/100</div>${hoy?`<button class="btn block" id="e1">Compartir</button>`:""}<button class="btn block ghost" style="margin-top:10px" id="e2">Cerrar</button>`;
     const a=$("#e1");if(a)a.onclick=()=>share(shareText());
     $("#e2").onclick=closeGame;
   }
   if(rem()<=0)end(true);
   else{draw();if(hoy)runClock(()=>{if(rem()<=0)end(true);else hud();});}
+}
+function playLine(day){
+  playOrder("line",day,{bank:DATA.LINE,T:150,prompt:"Ordena los hechos del más antiguo (arriba) al más reciente (abajo)",key:i=>i.y,tag:i=>i.y});
+}
+function playTable(day){
+  playOrder("table",day,{bank:DATA.TABLE,T:150,prompt:"Ordena los 8 primeros de la clasificación final: el campeón arriba",key:i=>i.pos,tag:i=>i.pos+"º",sub:i=>i.pts+" pts"});
+}
+function playKey(day){
+  playQuiz("key",day,{bank:DATA.KEY,T:150,
+    render:it=>`<div class="q" style="margin-top:22px">${esc(it.q)}</div>`,
+    options:it=>it.opts,correct:it=>it.a,explain:it=>it.why});
+}
+
+/* ---------- Marcador exacto ---------- */
+function playScore(day){
+  const hoy=day===today(),g=meta("score"),N=10,T=240;
+  openGame(g.name+(hoy?" · hoy":" · "+dayLabel(day)),g.c);
+  const items=chunkOfDay(DATA.SCORE,N,day);
+  let sv=progGet(day,"score");
+  if(!sv){sv={i:0,pts:0,t0:Date.now()};progSet(day,"score",sv);}
+  let i=sv.i,pts=sv.pts,done=false,a=0,b=0,checked=false;
+  const t0=sv.t0,rem=()=>hoy?T-(Date.now()-t0)/1000:Infinity;
+  const hud=()=>{$("#gsc").textContent=(hoy?"⏱ "+fmtT(rem())+" · ":"")+pts+" pts";};
+  const award=(it,x,y)=>{if(x===it.hg&&y===it.ag)return 10;if(Math.sign(it.hg-it.ag)!==Math.sign(x-y))return 0;return x-y===it.hg-it.ag?6:4;};
+  function draw(){
+    const it=items[i];hud();
+    const row=(who,v,k)=>`<div class="tli" style="align-items:center"><span style="flex:1;font-weight:700">${esc(who)}</span><span class="stp"><button class="btn ghost" data-st="${k}-" ${checked?"disabled":""} aria-label="Menos">−</button><b>${v}</b><button class="btn ghost" data-st="${k}+" ${checked?"disabled":""} aria-label="Más">+</button></span></div>`;
+    $("#gb").innerHTML=`<div class="bar" style="--c:${g.c}"><i style="width:${i/N*100}%"></i></div>
+    <div class="mut" style="text-align:center">Partido ${i+1} de ${N}</div><div class="q">${esc(it.comp)}</div>
+    <div class="tl">${row(it.home,a,"a")}${row(it.away,b,"b")}</div>
+    <div class="mut" style="text-align:center;font-size:13px">${it.et?"Cuenta el resultado tras la prórroga (sin penaltis).":"Cuenta el resultado final."}</div>
+    <div id="nx" style="margin-top:12px"></div>`;
+    document.querySelectorAll("[data-st]").forEach(bt=>bt.onclick=()=>{const [k,d]=bt.dataset.st.split("");const dv=d==="+"?1:-1;if(k==="a")a=Math.max(0,Math.min(15,a+dv));else b=Math.max(0,Math.min(15,b+dv));draw();});
+    if(checked)return reveal(it);
+    $("#nx").innerHTML=`<button class="btn block" id="chk">Comprobar</button>`;
+    $("#chk").onclick=()=>{checked=true;const p=award(it,a,b);pts+=p;progSet(day,"score",{i:i+1,pts,t0});draw();};
+  }
+  function reveal(it){
+    const p=award(it,a,b);
+    $("#nx").innerHTML=`<div class="card" style="text-align:center"><div class="mut">Resultado real</div><div class="big" style="font-size:40px;margin:4px 0">${it.hg} - ${it.ag}</div><div>${p===10?"¡Exacto! +10":p>0?"+"+p+(p===6?" (resultado y diferencia de goles)":" (aciertas quién gana o el empate)"):"+0"}</div>${it.pen?`<div class="mut" style="margin-top:6px;font-size:13px">Tanda de penaltis: ${esc(it.pen)}</div>`:""}<div class="mut" style="margin-top:6px;font-size:13px">${esc(it.note||"")}</div></div><button class="btn block" style="margin-top:10px" id="go">${i===N-1?"Ver resultado":"Siguiente"}</button>`;
+    $("#go").onclick=()=>{i++;checked=false;a=b=0;if(i>=N)end(false);else draw();};
+  }
+  function end(timeout){
+    if(done)return;done=true;
+    const score=hoy?Math.round(0.9*pts)+Math.round(10*(pts/100)*(timeout?0:Math.max(0,rem()))/T):pts;
+    endScreen(day,"score",score,`${timeout?"Se acabó el tiempo. ":""}${pts} de 100 puntos posibles`);
+  }
+  if(i>=N)end(false);else if(rem()<=0)end(true);
+  else{draw();if(hoy)runClock(()=>{if(rem()<=0)end(true);else hud();});}
+}
+
+/* ---------- Camino a la final ---------- */
+const SEL={state:"idle",list:[]};
+async function loadSel(){
+  if(SEL.state!=="idle")return;SEL.state="loading";
+  try{const r=await fetch("../top10/entidades/selecciones.json");if(!r.ok)throw 0;SEL.list=(await r.json()).map(x=>x[0]);}catch(e){}
+  DATA.ROAD.forEach(x=>{SEL.list.push(x.team);(x.alias||[]).forEach(a=>SEL.list.push(a));});
+  SEL.list=[...new Set(SEL.list)];SEL.state="ready";
+}
+function suggestSel(raw){
+  const q=norm(raw);if(q.length<2)return [];
+  return SEL.list.map(n=>({n,k:norm(n)})).filter(x=>x.k.startsWith(q)||x.k.includes(" "+q)).slice(0,6).map(x=>({n:x.n,sub:""}));
+}
+function playRoad(day){
+  const g=meta("road");
+  openGame(g.name+(day===today()?" · hoy":" · "+dayLabel(day)),g.c);loadSel();
+  const P=chunkOfDay(DATA.ROAD,1,day)[0],M=P.matches;
+  let sv=progGet(day,"road");
+  if(!sv){sv={shown:1,wrong:0,gs:[]};progSet(day,"road",sv);}
+  let {shown,wrong}=sv,gs=sv.gs.slice(),over=false,ye="";
+  const cost=()=>10*(shown-1)+10*wrong;
+  const hud=()=>{$("#gsc").textContent="Vale "+Math.max(20,90-cost())+" pts";};
+  const save=()=>progSet(day,"road",{shown,wrong,gs});
+  const line=(m,k)=>`<div class="tli"><b style="min-width:112px;font-size:13px">${esc(m.r)}</b><span>Selección misteriosa <b style="color:var(--txt)">${esc(m.s)}</b> ${esc(m.opp)}${m.pen?` <span class="mut">(penaltis ${esc(m.pen)})</span>`:""}</span></div>`;
+  function draw(msg){
+    hud();
+    $("#gb").innerHTML=`<div class="mut" style="text-align:center;margin-top:8px">${esc(P.comp)}: ¿qué selección es y en qué año?</div>
+    <div class="tl">${M.slice(0,shown).map(line).join("")}${shown<M.length?`<div class="tli mut"><span>${M.length-shown} partido${M.length-shown===1?"":"s"} más hasta el final</span></div>`:""}</div>
+    ${over?"":`<button class="btn ghost block" id="rmore" ${shown>=M.length?"disabled":""}>Destapar otro partido (−10)</button>
+    <input class="alias" id="gy" inputmode="numeric" maxlength="4" placeholder="Año (opcional, +10)" value="${esc(ye)}" style="margin-top:12px">
+    <div class="inp"><input id="gi" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Selección"><button class="btn" id="gs">OK</button><div class="sug" id="sg" style="display:none"></div></div>`}
+    ${gs.length?`<div class="mut" style="font-size:14px;margin-top:8px">Ya has probado: ${gs.map(esc).join(", ")}</div>`:""}
+    <div class="fb" id="fb">${msg||""}</div><div id="endbox"></div>`;
+    if(!over){
+      $("#rmore").onclick=()=>{if(shown<M.length){shown++;save();draw();}};
+      $("#gy").oninput=e=>{ye=e.target.value;};
+      bindNameInput(suggestSel,guess);
+    }
+  }
+  function guess(raw){
+    const y=($("#gy")?$("#gy").value:"").trim();ye=y;
+    if(matchesName(raw,{n:P.team,a:P.alias||[]})){
+      over=true;
+      const base=Math.max(20,90-cost()),bonus=(+y===P.year)?10:0;
+      draw(`¡Correcto! Era ${P.team} en ${P.year}.${y?(bonus?" Año acertado: +10.":" El año no era "+esc(y)+"."):""}`);
+      const f=$("#fb");f.style.cssText="text-align:center;font-size:22px;font-weight:900;color:#fff;background:var(--ok);border-radius:16px;padding:12px;margin:10px 0";
+      finish(base+bonus);return;
+    }
+    wrong++;gs.push(raw.trim());save();
+    if(wrong>=3){over=true;draw(`Era ${P.team} en ${P.year}.`);finish(0);return;}
+    draw("No es. Pierdes 10 puntos.");
+  }
+  function finish(score){
+    stopTimer();recordScore(day,"road",score);$("#gsc").textContent="";
+    const all=M.slice(shown);
+    $("#endbox").innerHTML=`${all.length?`<div class="mut" style="margin-top:8px">Resto del camino</div><div class="tl">${all.map(line).join("")}</div>`:""}<div class="big">${score}/100</div><button class="btn block ghost" style="margin-top:10px" id="e2">Cerrar</button>`;
+    $("#e2").onclick=closeGame;
+  }
+  if(wrong>=3){over=true;draw(`Era ${P.team} en ${P.year}.`);finish(0);}
+  else draw("");
 }
 
 /* ---------- Conexiones ---------- */
@@ -207,8 +318,8 @@ function playTray(day){
     hud();
     const rows=P.career.slice(0,shown);
     $("#gb").innerHTML=`<div class="mut" style="text-align:center;margin-top:8px">¿Quién es? Sus clubes, en orden</div>
-    <div class="tl">${rows.map(r=>`<div class="tli"><b style="min-width:82px">${esc(r.y)}</b><span>${esc(r.c)}</span></div>`).join("")}${shown<P.career.length?`<div class="tli mut"><b style="min-width:82px">?</b><span>${P.career.length-shown} club${P.career.length-shown===1?"":"es"} más</span></div>`:""}</div>
-    <div class="row" style="margin:10px 0"><button class="btn ghost block" id="tmore" ${shown>=P.career.length?"disabled":""}>Otro club (−10)</button></div>
+    ${over?"":`<div class="tl">${rows.map(r=>`<div class="tli"><b style="min-width:82px">${esc(r.y)}</b><span>${esc(r.c)}</span></div>`).join("")}${shown<P.career.length?`<div class="tli mut"><b style="min-width:82px">?</b><span>${P.career.length-shown} club${P.career.length-shown===1?"":"es"} más</span></div>`:""}</div>
+    <div class="row" style="margin:10px 0"><button class="btn ghost block" id="tmore" ${shown>=P.career.length?"disabled":""}>Otro club (−10)</button></div>`}
     ${gs.length?`<div class="mut" style="font-size:14px">Ya has probado: ${gs.map(esc).join(", ")}</div>`:""}
     ${over?"":INPUT_HTML}<div class="fb" id="fb">${msg||""}</div><div id="endbox"></div>`;
     if(msg==="¡Correcto!"){const f=$("#fb");f.style.cssText="text-align:center;font-size:30px;font-weight:900;color:#fff;background:var(--ok);border-radius:16px;padding:14px;margin:10px 0";}
@@ -229,7 +340,7 @@ function playTray(day){
     $("#endbox").innerHTML=`<div class="tl">${rows.map(r=>`<div class="tli"><b style="min-width:82px">${esc(r.y)}</b><span>${esc(r.c)}</span></div>`).join("")}</div>
     <div class="mut" style="text-align:center">${esc(line)}</div><div class="big">${score}/100</div>${hoy?`<button class="btn block" id="e1">Compartir</button>`:""}<button class="btn block ghost" style="margin-top:10px" id="e2">Cerrar</button>`;
     const a=$("#e1");if(a)a.onclick=()=>share(shareText());
-    $("#e2").onclick=closeGame;
+    $("#e2").onclick=closeGame;showPhoto(P.n);
   }
   if(wrong>=3){over=true;draw("");finish(0,`Era ${P.n}`);}
   else draw("");
@@ -275,9 +386,23 @@ function playMist(day){
     stopTimer();recordScore(day,"mist",score);$("#gsc").textContent="";
     $("#endbox").innerHTML=`<div class="mut" style="text-align:center;margin-top:14px">${esc(line)}</div><div class="big">${score}/100</div>${hoy?`<button class="btn block" id="e1">Compartir</button>`:""}<button class="btn block ghost" style="margin-top:10px" id="e2">Cerrar</button>`;
     const a=$("#e1");if(a)a.onclick=()=>share(shareText());
-    $("#e2").onclick=closeGame;
+    $("#e2").onclick=closeGame;showPhoto(T.n);
   }
   if(gs.includes(T.n)){over=true;draw("");finish(SC[gs.length-1],`Era ${T.n}`);}
   else if(gs.length>=MAXT){over=true;draw("");finish(0,`Era ${T.n}`);}
   else draw("");
 }
+
+/* ---------- Fotos libres (Wikimedia Commons): solo al revelar la respuesta ---------- */
+const PHOTOS={state:"idle",map:{},list:[]};
+async function loadPhotos(){
+  if(PHOTOS.state!=="idle")return;PHOTOS.state="loading";
+  try{const r=await fetch("fotos/index.json");if(r.ok){const j=await r.json();for(const k in j){const e=Object.assign({k},j[k]);PHOTOS.map[norm(j[k].n)]=e;PHOTOS.list.push(e);}}}catch(e){}
+  PHOTOS.state="ready";
+}
+async function photoCard(name){
+  await loadPhotos();
+  const e=PHOTOS.map[norm(name)],ini=name.split(" ").filter(Boolean).map(x=>x[0]).slice(0,2).join("").toUpperCase();
+  return `<div class="photo">${e?`<img src="fotos/${esc(e.k)}.jpg" alt="${esc(name)}" width="72" height="72">`:`<div class="ph">${esc(ini)}</div>`}<div><b>${esc(name)}</b>${e?`<small>Foto: ${esc(e.artist||"autor desconocido")} · <a href="${esc(e.page)}" target="_blank" rel="noopener" style="color:var(--mut)">${esc(e.lic)}</a></small>`:""}</div></div>`;
+}
+function showPhoto(name){photoCard(name).then(h=>{const b=document.getElementById("endbox");if(b)b.insertAdjacentHTML("afterbegin",h);});}

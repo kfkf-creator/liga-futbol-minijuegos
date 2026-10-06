@@ -39,7 +39,12 @@ chk("odd",ODD,x=>{if(x.items.length!==4||x.odd<0||x.odd>3)throw new Error("odd "
 chk("con",CON,x=>{const all=x.groups.flatMap(g=>g.items);if(x.groups.length!==4||new Set(all.map(t=>t.toLowerCase())).size!==16)throw new Error("con "+x.id);});
 chk("line",LINE,x=>{if(x.items.length!==6||new Set(x.items.map(i=>i.y)).size!==6)throw new Error("line "+x.id);});
 if(new Set(MIST.players.map(p=>p.n)).size!==MIST.players.length)throw new Error("misterioso repetidos");
-const data={MM,TRAY,VF,ODD,CON,LINE,MIST,LINEUPS,T10:{total:levels.length},CFG:{supabaseUrl:cfg.supabaseUrl||"",supabaseKey:cfg.supabaseKey||""}};
+const SCORE=require("./data/marcador.js"),KEY=require("./data/momentos.js"),ROAD=require("./data/camino.js"),TABLE=require("./data/tabla.js");
+chk("score",SCORE,x=>{if(!Number.isInteger(x.hg)||!Number.isInteger(x.ag)||!x.home||!x.away)throw new Error("score "+x.id);});
+chk("key",KEY,x=>{if(x.opts.length!==4||x.a<0||x.a>3||new Set(x.opts).size!==4)throw new Error("key "+x.id);});
+chk("road",ROAD,x=>{if(x.matches.length<5||!x.team||!x.year)throw new Error("road "+x.id);});
+chk("table",TABLE,x=>{if(x.items.length!==8||x.items.some((i,k)=>i.pos!==k+1))throw new Error("table "+x.id);});
+const data={MM,TRAY,VF,ODD,CON,LINE,MIST,SCORE,KEY,ROAD,TABLE,LINEUPS,T10:{total:levels.length},CFG:{supabaseUrl:cfg.supabaseUrl||"",supabaseKey:cfg.supabaseKey||""}};
 const mk=(tpl,gms)=>read(tpl).replace("/*__GAMES__*/",()=>read(gms)).replace("/*__DATA__*/null",()=>JSON.stringify(data));
 const html=mk("template.html","games.js");
 const out=path.join(root,"app");
