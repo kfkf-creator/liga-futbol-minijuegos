@@ -128,6 +128,7 @@ td.n,th.n{text-align:right}
 .sec span{font-size:12.5px;color:var(--mut)}
 .chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:7px 11px;font-size:13.5px;font-weight:700}
 .chip.ok{border-color:color-mix(in srgb,var(--c) 45%,var(--line))}
+.chip.new{opacity:.7;padding:7px 10px;border-style:dashed}
 .chip svg{width:16px;height:16px;stroke:var(--c);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .chip i{font-style:normal;color:var(--mut);font-weight:600}
 .photo{display:flex;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:var(--r2);padding:10px;margin:12px 0}
@@ -329,6 +330,7 @@ async function share(text){
   try{await navigator.clipboard.writeText(text);toast("Copiado");}catch(e){prompt("Copia el texto:",text);}
 }
 const MAINS=()=>GAMES.filter(g=>!g.beta);
+function nextIn(){const d=NOW(),m=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1),mins=Math.max(1,Math.round((m-d)/60000)),h=Math.floor(mins/60);return "retos nuevos en "+(h?h+" h "+(mins%60)+" min":mins+" min");}
 function gameCard(g,r){const sc=r[g.id];return `<button class="gcard" style="--c:${g.c}" data-play="${g.id}"><span class="ic">${svg(g.id)}</span><span class="tx"><b>${g.name}</b><small>${g.desc}</small></span>${sc!=null?`<span class="pill done">${sc}<i>/100</i></span>`:`<span class="pill">Jugar</span>`}</button>`;}
 function renderHoy(){
   const r=S.days[today()]||{},M=MAINS(),B=GAMES.filter(g=>g.beta);
@@ -337,7 +339,7 @@ function renderHoy(){
   $("#v-hoy").innerHTML=`<div class="top"><h1>Hoy</h1><div class="streak" title="Racha de días jugados">${svg("flame")}${streak()}</div></div>
   <div class="board"><div class="bd">${esc(fecha)}</div><div class="bt"><b>${total}</b><small>/ ${M.length*100} puntos</small></div>
   <div class="pips">${M.map(g=>`<i class="pip ${r[g.id]!=null?"on":""}" style="--c:${g.c}"></i>`).join("")}</div>
-  <div class="bm">${n===M.length?"Has completado los "+M.length+" retos de hoy":n+" de "+M.length+" retos jugados"}</div></div>
+  <div class="bm">${n===M.length?"Has completado los "+M.length+" retos de hoy":n+" de "+M.length+" retos jugados"} · ${nextIn()}</div></div>
   ${M.map(g=>gameCard(g,r)).join("")}
   ${B.length?`<div class="sec"><h2>En pruebas</h2><span>No cuentan en las ligas</span></div>${B.map(g=>gameCard(g,r)).join("")}`:""}
   <div class="mut" style="font-size:13px;margin:14px 2px">Solo cuenta el primer resultado de cada reto. Los retos de días anteriores están en la pestaña Juegos.</div>
@@ -357,10 +359,9 @@ function top10Stats(){
 function renderJuegos(){
   const t=top10Stats(),t0=dayNum(today()),first=dayNum(LAUNCH);
   const days=[];for(let n=t0-1;n>=first&&days.length<30;n--)days.push(dstrUTC(n));
-  const cell=(d,g)=>{const sc=scoreOf(d,g.id);return `<button class="chip ${sc!=null?"ok":""}" style="--c:${g.c}" data-arch="${g.id}|${d}" aria-label="${g.name}">${svg(g.id)}${sc!=null?sc:"<i>Jugar</i>"}</button>`;};
+  const cell=(d,g)=>{const sc=scoreOf(d,g.id);return `<button class="chip ${sc!=null?"ok":"new"}" style="--c:${g.c}" data-arch="${g.id}|${d}" aria-label="${g.name}${sc!=null?": "+sc:": jugar"}" title="${g.name}">${svg(g.id)}${sc!=null?sc:""}</button>`;};
   $("#v-juegos").innerHTML=`<h1>Juegos</h1>
   <a class="gcard" style="--c:var(--top);text-decoration:none;color:inherit" href="../top10/?from=app"><span class="ic">${svg("top")}</span><span class="tx"><b>Top 10 Fútbol</b><small>${DATA.T10.total} niveles para nombrar el top 10, sin límite.</small></span><span class="pill done">${t.done}<i>/${DATA.T10.total}</i></span></a>
-  <button class="gcard" disabled style="--c:var(--line)"><span class="ic">${svg("con")}</span><span class="tx"><b>Cuadrícula</b><small>Próximamente</small></span></button>
   <h2>Archivo de retos</h2>
   <div class="mut" style="font-size:14px;margin-bottom:8px">Repite los retos de días anteriores. No cuentan para la racha ni para las ligas.</div>
   ${days.length?`<div class="card">${days.map(d=>`<div style="padding:8px 0;border-bottom:1px solid var(--line)"><b>${dayLabel(d)}</b><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">${GAMES.map(g=>cell(d,g)).join("")}</div></div>`).join("")}</div>`:`<div class="card mut">Todavía no hay retos anteriores. El archivo se irá llenando a partir de mañana.</div>`}`;
@@ -378,6 +379,7 @@ function renderPerfil(){
   <tr><td>Días jugados</td><td class="n"><b>${days}</b></td></tr>
   <tr><td>Nota media</td><td class="n"><b>${avg}</b></td></tr>
 </table></div>
+  <div class="card"><b>Por juego</b><table>${GAMES.map(g=>{const v=Object.values(S.days).map(d=>d[g.id]).filter(x=>typeof x==="number");return v.length?`<tr><td><span class="chip" style="--c:${g.c};border:0;background:none;padding:0">${svg(g.id)}${esc(g.name)}</span></td><td class="n">media <b>${Math.round(v.reduce((a,b)=>a+b,0)/v.length)}</b></td><td class="n mut">${v.length} ${v.length===1?"día":"días"}</td></tr>`:"";}).join("")||`<tr><td class="mut">Juega un reto de hoy para ver tus medias.</td></tr>`}</table></div>
   <div class="card"><b>Top 10 Fútbol</b><table>
   <tr><td>Niveles superados</td><td class="n"><b>${t10.done}/${DATA.T10.total}</b></td></tr>
   <tr><td>Estrellas</td><td class="n"><b>${t10.stars}/${DATA.T10.total*3}</b></td></tr>

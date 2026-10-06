@@ -112,3 +112,13 @@ Web instalable (PWA) con minijuegos diarios de futbol en castellano, con ligas p
 - Liga: `supabase/patch-02-mas-juegos.sql` (permite los ids nuevos y devuelve las notas por juego). Hasta ejecutarlo, las notas de los juegos nuevos quedan pendientes en el movil y se reintentan.
 - Pendiente de verificar en fuentes: Cannavaro (inicio Napoli 1991/92/93), Iniesta (Barcelona B), Torres y Laudrup en Trayectoria; clubes de 2026 en Jugador misterioso (Joan Garcia, Kimmich puesto); "Espana campeona 2026" en Linea del tiempo.
 - Cuadricula no se ha hecho: exige listar todos los jugadores validos de cada casilla.
+
+## Sesion 2026-10-06: interfaz nueva, fotos, juegos en pruebas (hecho de forma autonoma)
+- Interfaz: nuevo tema (azul noche y dorado, iconos SVG propios, marcador de la jornada en Hoy, tarjetas, botones, barra inferior con desenfoque). La version anterior queda intacta en `/app/classic/` (`src/app/template.classic.html` + `games.classic.js`; no recibe juegos nuevos ni cambios).
+- Ayuda "?" en cada juego (reglas y puntuacion), estadisticas por juego en Perfil, aviso de cuando salen los retos nuevos, chips compactos en el archivo.
+- Fotos: `tools/fotos/build-fotos.js` (Wikidata + Commons, solo CC BY, CC BY-SA, CC0 y dominio publico) y workflow manual `fotos.yml`. Resultado: 93 % de los 397 jugadores de los juegos. Se muestran solo al revelar la respuesta (Trayectoria y Jugador misterioso), con autor y licencia, y lista completa en Perfil. Miniaturas recortadas a 160 px (2 MB en total). Pendiente: revisar a mano 9 jugadores que no se encontraron y las licencias "Attribution".
+- Riesgo legal pendiente: las licencias de Commons no cubren el derecho a la propia imagen; si se monetiza, consultar antes.
+- Base de nombres: `tools/jugadores/ampliar.js` + workflow `jugadores.yml` (Wikidata, futbolistas con 5 o mas enlaces) amplia `top10/entidades/jugadores.json`.
+- Datos verificados por agentes con fuentes: Trayectoria (4 correcciones de anos), Verdadero o falso (actualizado a 2026), notas de Conexiones; reactivados con-16 y con-20.
+- Juegos nuevos EN PRUEBAS (`beta:true`): Marcador exacto (40 partidos), Momentos clave (50 preguntas), Camino a la final (14 retos), Reconstruye la tabla (14 tablas). Salen en Hoy en la seccion "En pruebas", no suman al total ni se envian a las ligas. Para promoverlos hace falta quitar `beta` y un parche SQL que anada sus ids ('score','key','road','table') al check de `scores.game`.
+- Motor comun `playOrder` para Linea del tiempo y Reconstruye la tabla.
