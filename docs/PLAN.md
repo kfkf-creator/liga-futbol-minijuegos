@@ -133,3 +133,23 @@ Web instalable (PWA) con minijuegos diarios de futbol en castellano, con ligas p
 - Solo los 4 obligatorios se envian al servidor y cuentan en las ligas. Los otros 8 son opcionales: se juegan, salen en el perfil y el archivo, pero no suman a las ligas. Los puntos extra de los opcionales quedan como idea pendiente.
 - Servidor: `supabase/patch-05-doce-juegos.sql` (ampliar el check de scores.game).
 - Pendiente: Camino a la final y Reconstruye la tabla solo tienen 14 retos (se repiten tras 14 dias); revisar datos de una sola fuente.
+
+## Diseño acordado (debate 2026-10-06), pendiente de implementar
+Solo diseño; nada de esto esta en el codigo todavia salvo lo indicado en secciones anteriores.
+
+### Retos
+- 4 obligatorios al dia (ya implementado) + 8 opcionales que no puntuan en liga.
+- Incentivos con video (anuncio recompensado, a conectar mas adelante; primero capa de recompensas con anuncio simulado): ver solucion y explicacion tras fallar (todos los juegos, no cambia la nota), desbloquear los opcionales del dia (1 video para todos), repetir un reto del archivo, salvar la racha tras perder exactamente 1 dia (max 1 vez por semana).
+- Pistas: como estaban (penalizan puntos). No hay "vida extra" como incentivo de video. Sin multiplicador x1,5.
+- Idea abierta: racha cuenta solo si se juega al menos un obligatorio.
+
+### Premios de racha
+3 dias medalla; 7 medalla + comodin de pista (quita la penalizacion de una pista); 10 comodin de vida extra (+1 vida/intento/fallo en Once, Mist, Camino); 14 y 30 medalla (a los 30 otro comodin a elegir); 100 y 365 medalla especial. Max 1 comodin de cada tipo guardado. Requiere guardar racha, medallas y comodines en el servidor antes de lanzarlo.
+
+### Ligas por temporadas
+- Temporada de 4 semanas fijas (lunes a domingo), calculada por fecha; luego empieza otra con todos a cero. Campeon con medalla e historico de campeones en la liga.
+- Nota semanal = suma de los 5 mejores dias de 7 (los 2 peores se descartan).
+- Puntos de liga por semana: 1.º 5, 2.º 3, 3.º 2, resto con >=3 dias jugados 1, menos de 3 dias 0. Empate: ambos reciben los puntos de la posicion mas alta.
+- MVP de la jornada: +1 punto extra para quien tenga el mejor dia individual de la semana (mayor total diario de los 4 obligatorios); empate: +1 para cada uno; solo si cumple el minimo de 3 dias.
+- Desempate de temporada: puntos brutos de la temporada.
+- Opcional: insignia de "MVP del dia" cosmetica.
