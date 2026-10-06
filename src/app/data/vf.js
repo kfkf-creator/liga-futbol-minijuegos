@@ -1,6 +1,6 @@
 module.exports = [
   {"id":"vf-01","s":"El Real Madrid ha ganado más Copas de Europa que el Milan (hasta 2025).","v":true,"e":"El Madrid tiene 15 y el Milan 7.","src":"https://en.wikipedia.org/wiki/List_of_European_Cup_and_UEFA_Champions_League_finals"},
-  {"id":"vf-02","s":"Alemania ha ganado cinco Mundiales (hasta 2022).","v":false,"e":"Alemania tiene 4: 1954, 1974, 1990 y 2014. Brasil tiene 5.","src":"https://en.wikipedia.org/wiki/List_of_FIFA_World_Cup_finals"},
+  {"id":"vf-02","s":"Alemania ha ganado cinco Mundiales (hasta 2026).","v":false,"e":"Alemania tiene 4: 1954, 1974, 1990 y 2014. Brasil tiene 5.","src":"https://en.wikipedia.org/wiki/List_of_FIFA_World_Cup_finals"},
   {"id":"vf-03","s":"España ganó la final de la Eurocopa 2012 por 3-0 a Italia.","v":false,"e":"Fue un 4-0 en Kiev.","src":"https://en.wikipedia.org/wiki/List_of_UEFA_European_Championship_finals"},
   {"id":"vf-04","s":"Argentina ganó el Mundial de 2022 en los penaltis tras empatar 3-3 con Francia.","v":true,"e":"La final acabó 3-3 tras la prórroga y Argentina ganó 4-2 en los penaltis.","src":"https://en.wikipedia.org/wiki/List_of_FIFA_World_Cup_finals"},
   {"id":"vf-05","s":"Cristiano Ronaldo ha ganado seis Balones de Oro (hasta 2025).","v":false,"e":"Ganó 5 (2008, 2013, 2014, 2016, 2017). Messi tiene 8.","src":"https://en.wikipedia.org/wiki/Ballon_d%27Or"},
@@ -15,7 +15,7 @@ module.exports = [
   {"id":"vf-14","s":"El Sevilla ha ganado ocho veces la Europa League o Copa de la UEFA (hasta 2025).","v":false,"e":"Tiene 7 títulos: 2006, 2007, 2014, 2015, 2016, 2020 y 2023.","src":"https://en.wikipedia.org/wiki/UEFA_Europa_League"},
   {"id":"vf-15","s":"Andrés Iniesta marcó el gol de la final del Mundial 2010 en el minuto 116.","v":true,"e":"España ganó 1-0 a Países Bajos en la prórroga, con gol de Iniesta en el 116.","src":"https://en.wikipedia.org/wiki/2010_FIFA_World_Cup_final"},
   {"id":"vf-16","s":"El Arsenal 2003-04 ganó la Premier League sin perder ningún partido.","v":true,"e":"Acabó con 26 victorias, 12 empates y 0 derrotas, 90 puntos.","src":"https://en.wikipedia.org/wiki/2003%E2%80%9304_FA_Premier_League"},
-  {"id":"vf-17","s":"Países Bajos ha ganado un Mundial (hasta 2022).","v":false,"e":"Perdió las finales de 1974, 1978 y 2010 y nunca ha sido campeón.","src":"https://en.wikipedia.org/wiki/List_of_FIFA_World_Cup_finals"},
+  {"id":"vf-17","s":"Países Bajos ha ganado alguna vez un Mundial (hasta 2026).","v":false,"e":"Perdió las finales de 1974, 1978 y 2010 y nunca ha sido campeón.","src":"https://en.wikipedia.org/wiki/List_of_FIFA_World_Cup_finals"},
   {"id":"vf-18","s":"Dinamarca ganó la Eurocopa 1992 tras entrar como sustituta de Yugoslavia.","v":true,"e":"Yugoslavia fue vetada por la ONU y Dinamarca ganó 2-0 a Alemania en la final.","src":"https://en.wikipedia.org/wiki/UEFA_Euro_1992"},
   {"id":"vf-19","s":"Francia ganó la final del Mundial 2018 por 3-1 a Croacia.","v":false,"e":"Fue un 4-2 en Moscú.","src":"https://en.wikipedia.org/wiki/List_of_FIFA_World_Cup_finals"},
   {"id":"vf-20","s":"Iniesta marcó el gol de la final del Mundial 2010 en el minuto 90.","v":false,"e":"Marcó en el minuto 116 de la prórroga.","src":"https://en.wikipedia.org/wiki/2010_FIFA_World_Cup_final"},
@@ -38,5 +38,5 @@ module.exports = [
   {"id":"vf-37","s":"El Real Madrid ganó cinco Copas de Europa seguidas entre 1956 y 1960.","v":true,"e":"Ganó las cinco primeras ediciones, de 1956 a 1960.","src":"https://en.wikipedia.org/wiki/List_of_European_Cup_and_UEFA_Champions_League_finals"},
   {"id":"vf-38","s":"Argentina ganó el primer Mundial, el de 1930.","v":false,"e":"Lo ganó Uruguay 4-2; Argentina fue subcampeona.","src":"https://en.wikipedia.org/wiki/1930_FIFA_World_Cup"},
   {"id":"vf-39","s":"El PSG ganó su primera Champions en 2025 con un 5-0 al Inter en la final.","v":true,"e":"Es la mayor goleada en una final de la competición.","src":"https://en.wikipedia.org/wiki/List_of_European_Cup_and_UEFA_Champions_League_finals"},
-  {"id":"vf-40","s":"Brasil es la selección con más Mundiales, con cinco (hasta 2022).","v":true,"e":"1958, 1962, 1970, 1994 y 2002. Alemania e Italia tienen cuatro.","src":"https://en.wikipedia.org/wiki/Brazil_at_the_FIFA_World_Cup"}
+  {"id":"vf-40","s":"Brasil es la selección con más Mundiales, con cinco (hasta 2026).","v":true,"e":"1958, 1962, 1970, 1994 y 2002. Alemania e Italia tienen cuatro.","src":"https://en.wikipedia.org/wiki/Brazil_at_the_FIFA_World_Cup"}
 ];

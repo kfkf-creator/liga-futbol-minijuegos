@@ -31,7 +31,7 @@ if(ks.size!==LINEUPS.length) throw new Error("claves de alineacion repetidas");
 
 const cfg=fs.existsSync(path.join(__dirname,"config.js"))?require("./config.js"):{supabaseUrl:"",supabaseKey:""};
 const chk=(name,arr,f)=>{const ids=new Set();arr.forEach(x=>{if(ids.has(x.id))throw new Error(name+" id repetido "+x.id);ids.add(x.id);f(x);});};
-const TRAY=require("./data/tray.js"),VF=require("./data/vf.js"),ODD=require("./data/intruso.js"),CON=[].concat(require("./data/conexiones.js"),require("./data/conexiones2.js").filter(x=>!["con-16","con-20"].includes(x.id))),  /* con-16 y con-20 con dudas de verificacion: fuera hasta revisarlos */
+const TRAY=require("./data/tray.js"),VF=require("./data/vf.js"),ODD=require("./data/intruso.js"),CON=[].concat(require("./data/conexiones.js"),require("./data/conexiones2.js")),
   LINE=require("./data/linea.js"),MIST=require("./data/misterioso.js");
 chk("tray",TRAY,x=>{if(x.career.length<4)throw new Error("carrera corta "+x.id);});
 chk("vf",VF,x=>{if(typeof x.v!=="boolean")throw new Error("vf "+x.id);});
@@ -40,11 +40,15 @@ chk("con",CON,x=>{const all=x.groups.flatMap(g=>g.items);if(x.groups.length!==4|
 chk("line",LINE,x=>{if(x.items.length!==6||new Set(x.items.map(i=>i.y)).size!==6)throw new Error("line "+x.id);});
 if(new Set(MIST.players.map(p=>p.n)).size!==MIST.players.length)throw new Error("misterioso repetidos");
 const data={MM,TRAY,VF,ODD,CON,LINE,MIST,LINEUPS,T10:{total:levels.length},CFG:{supabaseUrl:cfg.supabaseUrl||"",supabaseKey:cfg.supabaseKey||""}};
-const html=read("template.html").replace("/*__GAMES__*/",()=>read("games.js")).replace("/*__DATA__*/null",()=>JSON.stringify(data));
+const mk=(tpl,gms)=>read(tpl).replace("/*__GAMES__*/",()=>read(gms)).replace("/*__DATA__*/null",()=>JSON.stringify(data));
+const html=mk("template.html","games.js");
 const out=path.join(root,"app");
 fs.mkdirSync(out,{recursive:true});
 fs.writeFileSync(path.join(out,"index.html"),html);
 fs.copyFileSync(path.join(__dirname,"pwa","manifest.webmanifest"),path.join(out,"manifest.webmanifest"));
+/* version anterior de la interfaz, guardada tal cual en /app/classic/ (sin PWA propia) */
+fs.mkdirSync(path.join(out,"classic"),{recursive:true});
+fs.writeFileSync(path.join(out,"classic","index.html"),mk("template.classic.html","games.classic.js").replace(/<link rel="manifest"[^>]*>/,""));
 const ver=require("crypto").createHash("sha1").update(html).digest("hex").slice(0,10);
 fs.writeFileSync(path.join(out,"sw.js"),read("pwa/sw.template.js").replace("__VERSION__",ver));
 console.log("app/index.html",html.length,"bytes; MM sets",MM.length,"lineups",LINEUPS.length);

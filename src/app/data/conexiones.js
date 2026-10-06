@@ -46,7 +46,7 @@ module.exports = [
     { name: "Apodos de clubes españoles", items: ["Colchoneros", "Pericos", "Txuri-urdin", "Submarino Amarillo"], diff: 3, src: [W + "Atl%C3%A9tico_Madrid", W + "RCD_Espanyol", W + "Real_Sociedad", W + "Villarreal_CF"] },
     { name: "Apodos de selecciones nacionales", items: ["Albiceleste", "Canarinho", "Azzurri", "Die Mannschaft"], diff: 4, src: [W + "Argentina_national_football_team", W + "Brazil_national_football_team", W + "Italy_national_football_team", W + "Germany_national_football_team"] }
   ]},
-  { id: "con-07", note: "Trampa: Hugo Sanchez gano el Pichichi con el Atletico (1985) y con el Real Madrid (1986-1990), pero el grupo del Real Madrid tiene ya cuatro seguros (Di Stefano, Puskas, Raul, Benzema) y el del Atletico necesita a Hugo para llegar a cuatro.", groups: [
+  { id: "con-07", note: "Trampa: Hugo Sanchez gano el Pichichi con el Atletico (1985) y con el Real Madrid (1986, 1987, 1988 y 1990; en 1989 lo gano Baltazar, del Atletico), pero el grupo del Real Madrid tiene ya cuatro seguros (Di Stefano, Puskas, Raul, Benzema) y el del Atletico necesita a Hugo para llegar a cuatro. Alos comparte el Pichichi de 1957-58 (Valencia) con Badenes y Di Stefano, y Wikipedia lo cuenta como ganador.", groups: [
     { name: "Pichichis con el Real Madrid", items: ["Di Stéfano", "Puskás", "Raúl", "Benzema"], diff: 1, src: [PI] },
     { name: "Pichichis con el Barcelona", items: ["Romário", "Eto'o", "Luis Suárez", "Lewandowski"], diff: 2, src: [PI] },
     { name: "Pichichis con el Valencia", items: ["Mundo", "Waldo", "Kempes", "Alós"], diff: 3, src: [PI] },
@@ -76,7 +76,7 @@ module.exports = [
     { name: "Clubes españoles campeones de la Recopa", items: ["Atlético de Madrid", "Valencia", "Real Zaragoza", "Barcelona"], diff: 3, src: [RC] },
     { name: "Clubes alemanes campeones de la Recopa (RFA y RDA)", items: ["Borussia Dortmund", "Werder Bremen", "Hamburgo", "Magdeburgo"], diff: 4, src: [RC] }
   ]},
-  { id: "con-12", note: "Despiste: Manchester City (iglesia) y Manchester United (trabajadores) se separan por su origen. Espanyol lo fundo un estudiante y fue el primer club de solo españoles, asi que no va con los fundados por extranjeros.", groups: [
+  { id: "con-12", note: "Despiste: Manchester City (iglesia) y Manchester United (trabajadores) se separan por su origen. Espanyol lo fundo un estudiante y fue el primer club de solo españoles, asi que no va con los fundados por extranjeros. Tottenham lo fundaron colegiales del Hotspur Cricket Club; la clase biblica de All Hallows llego un año despues, por lo que no va con los nacidos de una iglesia.", groups: [
     { name: "Clubes fundados por trabajadores de una empresa", items: ["Arsenal", "West Ham", "Manchester United", "PSV"], diff: 1, src: [W + "Arsenal_F.C.", W + "West_Ham_United_F.C.", W + "Manchester_United_F.C.", W + "PSV_Eindhoven"] },
     { name: "Clubes fundados por extranjeros en su país", items: ["Barcelona", "AC Milan", "Genoa", "Sevilla"], diff: 2, src: [W + "FC_Barcelona", W + "AC_Milan", W + "Genoa_C.F.C.", W + "Sevilla_FC"] },
     { name: "Clubes fundados por estudiantes", items: ["Juventus", "Atlético de Madrid", "Tottenham", "Espanyol"], diff: 3, src: [W + "Juventus_F.C.", W + "Atl%C3%A9tico_Madrid", W + "Tottenham_Hotspur_F.C.", W + "RCD_Espanyol"] },
