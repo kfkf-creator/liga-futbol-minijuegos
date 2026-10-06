@@ -1,0 +1,26 @@
+name: Ampliar base de jugadores
+on:
+  workflow_dispatch:
+    inputs:
+      enlaces:
+        description: "Minimo de enlaces a Wikipedias (menos = mas jugadores, mas obscuros)"
+        default: "5"
+permissions:
+  contents: write
+jobs:
+  ampliar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node tools/jugadores/ampliar.js ${{ inputs.enlaces }}
+      - name: Guardar resultados
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@users.noreply.github.com"
+          git add top10/entidades/jugadores.json tools/jugadores/informe.md
+          git commit -m "Base de jugadores ampliada con Wikidata" || echo "sin cambios"
+          git pull --rebase origin main
+          git push
