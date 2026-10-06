@@ -150,6 +150,6 @@ Solo diseño; nada de esto esta en el codigo todavia salvo lo indicado en seccio
 - Temporada de 4 semanas fijas (lunes a domingo), calculada por fecha; luego empieza otra con todos a cero. Campeon con medalla e historico de campeones en la liga.
 - Nota semanal = suma de los 5 mejores dias de 7 (los 2 peores se descartan).
 - Puntos de liga por semana: 1.º 5, 2.º 3, 3.º 2, resto con >=3 dias jugados 1, menos de 3 dias 0. Empate: ambos reciben los puntos de la posicion mas alta.
-- MVP de la jornada: +1 punto extra para quien tenga el mejor dia individual de la semana (mayor total diario de los 4 obligatorios); empate: +1 para cada uno; solo si cumple el minimo de 3 dias.
+- MVP DIARIO: cada dia, quien tenga el mayor total de los 4 obligatorios (habiendo jugado los 4) recibe +1 punto de liga; empate: +1 cada uno. Pendiente de decidir la escala frente a los puntos semanales (ver propuesta 10/6/4/2 + 1 por MVP diario).
 - Desempate de temporada: puntos brutos de la temporada.
 - Opcional: insignia de "MVP del dia" cosmetica.
