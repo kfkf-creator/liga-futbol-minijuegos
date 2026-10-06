@@ -28,5 +28,12 @@ const URL=process.env.URL||"http://localhost:8123/app/index.html";
  await p.click("#sub");await p.waitForSelector("#solb");
  await p.click("#solb");await p.waitForSelector("#sol .tli");
  out.solRows=(await p.$$("#sol .tli")).length;
+ /* dato curioso en Trayectoria y en Once */
+ await p.evaluate(()=>{S.ads=null;S.days={};startGame("tray",today());});
+ const tn=await p.evaluate(()=>chunkOfDay(DATA.TRAY,1,today())[0].n);
+ await p.fill("#gi",tn.toLowerCase());await p.press("#gi","Enter");await p.waitForSelector("#funb");
+ await p.click("#funb");await p.waitForSelector("#funx .card");
+ out.fun=(await p.textContent("#funx .card")).length>10;
+ out.funCover=await p.evaluate(()=>({tray:DATA.TRAY.filter(x=>x.fun||DATA.FUN[x.id]).length+"/"+DATA.TRAY.length,road:DATA.ROAD.filter(x=>x.fun||DATA.FUN[x.id]).length+"/"+DATA.ROAD.length,table:DATA.TABLE.filter(x=>x.fun||DATA.FUN[x.id]).length+"/"+DATA.TABLE.length,line:DATA.LINE.filter(x=>x.fun||DATA.FUN[x.id]).length+"/"+DATA.LINE.length,con:DATA.CON.filter(x=>x.fun||DATA.FUN[x.id]).length+"/"+DATA.CON.length,once:DATA.LINEUPS.filter(x=>DATA.FUN[x.k]).length+"/"+DATA.LINEUPS.length}));
  out.errs=errs;console.log(JSON.stringify(out,null,1));await b.close();
 })();

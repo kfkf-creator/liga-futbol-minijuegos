@@ -15,6 +15,18 @@ function endScreen(day,id,score,line){
   const a=$("#e1");if(a)a.onclick=()=>share(shareText());
   $("#e2").onclick=closeGame;
 }
+/* dato curioso detras de un video: item.fun o DATA.FUN[id] */
+const funOf=(o,key)=>(o&&o.fun)||((DATA.FUN||{})[key||(o&&o.id)])||"";
+function funAttach(txt){
+  if(!txt)return;
+  const anchor=document.getElementById("e1")||document.getElementById("e2");if(!anchor)return;
+  anchor.insertAdjacentHTML("beforebegin",`<button class="btn block ghost" style="margin-top:10px" id="funb">Dato curioso (vídeo)</button><div id="funx"></div>`);
+  document.getElementById("funb").onclick=async()=>{
+    if(!await Rewards.request("Ver el dato curioso"))return;
+    document.getElementById("funb").remove();
+    document.getElementById("funx").innerHTML=`<div class="card" style="margin-top:12px;font-size:14px">${esc(txt)}</div>`;
+  };
+}
 function runClock(fn){stopTimer();TIMER=setInterval(fn,250);}
 const INPUT_HTML=`<div class="inp"><input id="gi" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Escribe un jugador..."><button class="btn" id="gs">OK</button><div class="sug" id="sg" style="display:none"></div></div>`;
 function bindNameInput(sugFn,onSubmit){
@@ -132,7 +144,7 @@ function playOrder(id,day,cfg){
       const idx=its.map((_,k)=>k).sort((p,q)=>keyOf(p)-keyOf(q));
       $("#sol").innerHTML=`<div class="mut" style="text-align:center;margin-top:14px">Orden correcto</div><div class="tl">${idx.map(k=>`<div class="tli"><b>${cfg.tag(its[k])}</b><span>${esc(its[k].t)}</span>${cfg.sub?`<span class="mut" style="margin-left:auto">${esc(cfg.sub(its[k]))}</span>`:""}</div>`).join("")}</div>`;};
     const a=$("#e1");if(a)a.onclick=()=>share(shareText());
-    $("#e2").onclick=closeGame;
+    funAttach(funOf(puz,id));$("#e2").onclick=closeGame;
   }
   if(rem()<=0)end(true);
   else{draw();if(hoy)runClock(()=>{if(rem()<=0)end(true);else hud();});}
@@ -251,7 +263,7 @@ function playRoad(day){
     stopTimer();recordScore(day,"road",score);$("#gsc").textContent="";
     const all=M.slice(shown);
     $("#endbox").innerHTML=`${all.length?`<div class="mut" style="margin-top:8px">Resto del camino</div><div class="tl">${all.map(line).join("")}</div>`:""}<div class="big">${score}/100</div><button class="btn block ghost" style="margin-top:10px" id="e2">Cerrar</button>`;
-    $("#e2").onclick=closeGame;
+    funAttach(funOf(P));$("#e2").onclick=closeGame;
   }
   if(wrong>=3+extra){over=true;draw(`Era ${P.team} en ${P.year}.`);finish(0);}
   else draw("");
@@ -308,7 +320,7 @@ function playCon(day){
     const line=`${timeout?"Se acabó el tiempo. ":mist>=4&&n<4?"Sin fallos disponibles. ":""}${n} de 4 grupos, ${mist} fallo${mist===1?"":"s"}`;
     $("#gb").insertAdjacentHTML("beforeend",`<div class="mut" style="text-align:center;margin-top:16px">${line}</div><div class="big">${score}/100</div>${hoy?`<button class="btn block" id="e1">Compartir</button>`:""}<button class="btn block ghost" style="margin-top:10px" id="e2">Cerrar</button>`);
     const a=$("#e1");if(a)a.onclick=()=>share(shareText());
-    $("#e2").onclick=closeGame;
+    funAttach(funOf(puz));$("#e2").onclick=closeGame;
   }
   if(found.length===4||mist>=4)end(false);
   else if(rem()<=0)end(true);
@@ -355,7 +367,7 @@ function playTray(day){
     $("#endbox").innerHTML=`<div class="tl">${rows.map(r=>`<div class="tli"><b style="min-width:82px">${esc(r.y)}</b><span>${esc(r.c)}</span></div>`).join("")}</div>
     <div class="mut" style="text-align:center">${esc(line)}</div><div class="big">${score}/100</div>${hoy?`<button class="btn block" id="e1">Compartir</button>`:""}<button class="btn block ghost" style="margin-top:10px" id="e2">Cerrar</button>`;
     const a=$("#e1");if(a)a.onclick=()=>share(shareText());
-    $("#e2").onclick=closeGame;showPhoto(P.n);
+    funAttach(funOf(P));$("#e2").onclick=closeGame;showPhoto(P.n);
   }
   if(wrong>=3+extra){over=true;draw("");finish(0,`Era ${P.n}`);}
   else draw("");

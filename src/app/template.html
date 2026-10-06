@@ -199,11 +199,31 @@ const today=()=>ymd(NOW());
 const dayNum=s=>Math.floor(Date.UTC(+s.slice(0,4),+s.slice(5,7)-1,+s.slice(8,10))/86400000);
 /* ---- Recompensas con video. Hoy el anuncio es SIMULADO: para conectar uno real, sustituir show() por el SDK de la red publicitaria
    (debe devolver una promesa true si el usuario lo vio entero). Si el anuncio falla, se concede la recompensa igualmente. ---- */
-const ADS={provider:"sim",cap:6,secs:5};
+const ADS={provider:"sim",cap:6,secs:5,gptUnit:""};   /* provider "gpt" + gptUnit "/RED/unidad" activa Google Ad Manager (ver docs/ANUNCIOS.md) */
+/* Google Publisher Tag, anuncio recompensado. SIN PROBAR contra Ad Manager real (hace falta cuenta aprobada y consentimiento TCF). Si no hay anuncio en 9 s, se concede la recompensa. */
+function showGpt(){
+  return new Promise(res=>{
+    let done=false;const fin=v=>{if(!done){done=true;clearTimeout(t);res(v);}};
+    const t=setTimeout(()=>fin(true),9000);
+    toast("Cargando anuncio...");
+    window.googletag=window.googletag||{cmd:[]};
+    if(!document.querySelector('script[src*="gpt.js"]')){const sc=document.createElement("script");sc.async=true;sc.src="https://securepubads.g.doubleclick.net/tag/js/gpt.js";sc.onerror=()=>fin(true);document.head.appendChild(sc);}
+    googletag.cmd.push(()=>{
+      const slot=googletag.defineOutOfPageSlot(ADS.gptUnit,googletag.enums.OutOfPageFormat.REWARDED);
+      if(!slot)return fin(true);
+      slot.addService(googletag.pubads());
+      googletag.pubads().addEventListener("rewardedSlotReady",e=>{clearTimeout(t);e.makeRewardedVisible();});
+      googletag.pubads().addEventListener("rewardedSlotGranted",()=>fin(true));
+      googletag.pubads().addEventListener("rewardedSlotClosed",()=>{fin(false);try{googletag.destroySlots([slot]);}catch(e){}});
+      googletag.enableServices();googletag.display(slot);
+    });
+  });
+}
 const Rewards={
   state(){const t=today();if(!S.ads||S.ads.d!==t)S.ads={d:t,n:0};return S.ads;},
   left(){return Math.max(0,ADS.cap-this.state().n);},
   show(label){
+    if(ADS.provider==="gpt"&&ADS.gptUnit)return showGpt();
     return new Promise(res=>{
       if(ADS.secs<=0)return res(true);
       const el=document.createElement("div");el.className="sheet";el.setAttribute("role","dialog");
@@ -227,9 +247,9 @@ function toast(t){const e=document.createElement("div");e.className="toast";e.te
 
 /* ================= almacenamiento ================= */
 const KEY="minijuegos.v1";
-let S={days:{},arch:{},prog:{},mmBest:0,alias:"",avatar:"",pending:[],leagues:[],tokens:{hint:0,life:0},medals:{},claimed:{},unlock:{},paid:{},saved:{},ads:null,lastSave:""};
+let S={days:{},arch:{},prog:{},mmBest:0,alias:"",avatar:"",pending:[],leagues:[],tokens:{hint:0,life:0},medals:{},claimed:{},account:null,unlock:{},paid:{},saved:{},ads:null,lastSave:""};
 try{const r=JSON.parse(localStorage.getItem(KEY));if(r&&r.days)S=Object.assign(S,r);}catch(e){}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}if(S.account&&typeof Cloud!=="undefined")Cloud.push();}
 /* un dia cuenta para la racha si juegas al menos un reto obligatorio (antes de RULE_DAY, cualquier juego) */
 function dayCounts(ds){
   if(S.saved&&S.saved[ds])return true;
@@ -256,6 +276,56 @@ const LADDER=[
 const tokN=k=>(S.tokens&&S.tokens[k])||0;
 function tokUse(k){if(tokN(k)<1)return false;S.tokens[k]--;save();return true;}
 function tokGive(k,n){S.tokens=S.tokens||{hint:0,life:0};S.tokens[k]=Math.min(2,tokN(k)+n);}
+/* racha en peligro: ayer no se jugo pero antes de ayer si; se puede salvar con un video, como mucho una vez cada 7 dias */
+function streakRescue(){
+  const n=dayNum(today()),y=dstrUTC(n-1);
+  if(dayCounts(y)||!dayCounts(dstrUTC(n-2)))return null;
+  if(S.lastSave&&n-dayNum(S.lastSave)<7)return null;
+  let d=n-2,len=0;while(dayCounts(dstrUTC(d))){len++;d--;}
+  return len>=3?{day:y,len}:null;
+}
+function checkStreak(){
+  const cur=streak(),got=[];
+  S.claimed=S.claimed||{};S.medals=S.medals||{};
+  for(const L of LADDER){
+    if(cur<L.n||S.claimed[L.n])continue;
+    S.claimed[L.n]=today();
+    if(L.medal)S.medals["streak"+L.n]={t:"streak",n:L.n,name:L.medal,day:today()};
+    if(L.hint)tokGive("hint",L.hint);if(L.life)tokGive("life",L.life);
+    got.push(L);
+  }
+  if(got.length){save();const L=got[got.length-1];setTimeout(()=>{try{toast("¡Racha de "+L.n+" días! "+L.txt);}catch(e){}},400);}
+}
+/* progreso en un objeto: sirve para la copia de seguridad en texto y para la nube */
+function progressObj(){return {v:1,days:S.days,arch:S.arch,medals:S.medals,claimed:S.claimed,tokens:S.tokens,saved:S.saved,paid:S.paid,lastSave:S.lastSave,alias:S.alias,avatar:S.avatar};}
+function mergeProgress(o){
+  if(!o||o.v!==1||typeof o.days!=="object")throw new Error("Código no válido");
+  for(const d in o.days){S.days[d]=S.days[d]||{};for(const g in o.days[d])if(S.days[d][g]==null)S.days[d][g]=o.days[d][g];}
+  for(const d in (o.arch||{})){S.arch[d]=S.arch[d]||{};for(const g in o.arch[d])if(S.arch[d][g]==null)S.arch[d][g]=o.arch[d][g];}
+  S.medals=Object.assign({},o.medals||{},S.medals);S.claimed=Object.assign({},o.claimed||{},S.claimed);
+  S.saved=Object.assign({},o.saved||{},S.saved);S.paid=Object.assign({},o.paid||{},S.paid);
+  S.tokens=S.tokens||{hint:0,life:0};for(const k of ["hint","life"])S.tokens[k]=Math.max(tokN(k),(o.tokens&&o.tokens[k])||0);
+  if((o.lastSave||"")>(S.lastSave||""))S.lastSave=o.lastSave;
+  if(!S.alias&&o.alias)S.alias=o.alias;if(!S.avatar&&o.avatar)S.avatar=o.avatar;
+  save();
+}
+function backupCode(){return "MJ1:"+btoa(unescape(encodeURIComponent(JSON.stringify(progressObj()))));}
+function restoreCode(c){
+  if(!/^MJ1:/.test(c))throw new Error("Código no válido");
+  let o;try{o=JSON.parse(decodeURIComponent(escape(atob(c.slice(4)))));}catch(e){throw new Error("Código no válido");}
+  mergeProgress(o);
+}
+/* ---- cuenta (correo) y progreso en la nube ---- */
+const Cloud={
+  t:null,
+  push(now){clearTimeout(this.t);const go=async()=>{try{await Backend.saveProgress(progressObj());}catch(e){}};if(now)return go();this.t=setTimeout(go,4000);},
+  async pull(){const o=await Backend.loadProgress();if(o)mergeProgress(o);await this.push(true);},
+  async init(){
+    if(Backend.kind==="local"||!Backend.tok)return;                 /* sin sesion todavia: no crear usuario solo por abrir la app */
+    try{const u=await Backend.userInfo();const acc=u&&u.email&&!u.is_anonymous?{email:u.email}:null;if(JSON.stringify(acc)!==JSON.stringify(S.account)){S.account=acc;save();}
+      if(acc)await this.pull();}catch(e){}
+  }
+};
 /* racha en peligro: ayer no se jugo pero antes de ayer si; se puede salvar con un video, como mucho una vez cada 7 dias */
 function streakRescue(){
   const n=dayNum(today()),y=dstrUTC(n-1);
@@ -348,7 +418,25 @@ const SupabaseBackend={
   async myLeagues(){return await this.rpc("my_leagues");},
   async board(id,from,to){return await this.rpc("league_board",{p_league:id,p_from:from,p_to:to});},
   async days(id,from,to){return await this.rpc("league_days",{p_league:id,p_from:from,p_to:to});},
-  async submit(day,game,score){await this.rpc("submit_score",{p_day:day,p_game:game,p_score:score});}
+  async submit(day,game,score){await this.rpc("submit_score",{p_day:day,p_game:game,p_score:score});},
+  /* cuentas: el usuario anonimo se convierte en cuenta con correo y codigo de 6 cifras */
+  async authReq(path,method,body,bearer){
+    const h={apikey:SB.supabaseKey,"Content-Type":"application/json"};
+    if(bearer){await this.auth();h.Authorization="Bearer "+this.tok.access_token;}
+    const r=await fetch(SB.supabaseUrl+"/auth/v1/"+path,{method,headers:h,body:body?JSON.stringify(body):undefined});
+    let j=null;try{j=await r.json();}catch(e){}
+    if(!r.ok){const m=(j&&(j.msg||j.message||j.error_description))||"No se pudo completar";throw new Error(/rate|seconds|limit/i.test(m)?"Espera un poco antes de pedir otro código":/already|registered/i.test(m)?"Ese correo ya tiene cuenta: usa «Ya tengo cuenta»":/invalid|expired|token/i.test(m)?"Código incorrecto o caducado":m);}
+    return j;
+  },
+  async userInfo(){try{return await this.authReq("user","GET",null,true);}catch(e){return null;}},
+  async linkEmail(email){await this.authReq("user","PUT",{email},true);},
+  async loginEmail(email){await this.authReq("otp","POST",{email,create_user:false});},
+  async verify(type,email,code){
+    const j=await this.authReq("verify","POST",{type,email,token:code});
+    if(j&&j.access_token){this.tok={access_token:j.access_token,refresh_token:j.refresh_token,exp:Math.floor(Date.now()/1000)+(j.expires_in||3600)};localStorage.setItem("minijuegos.sb",JSON.stringify(this.tok));}
+  },
+  async saveProgress(o){await this.rpc("save_progress",{p_data:o});},
+  async loadProgress(){return await this.rpc("load_progress");}
 };
 const Backend=(SB.supabaseUrl&&SB.supabaseKey)?(SupabaseBackend.load(),SupabaseBackend):LocalBackend;
 async function flushPending(){
@@ -572,6 +660,37 @@ function rewardsCard(){
   <div class="mut" style="font-size:12.5px;margin:8px 0">Copia este código para pasar tus notas, medallas y comodines a otro móvil. No incluye tus ligas.</div>
   <div class="row"><button class="btn ghost" id="bk-c">Copiar código</button><button class="btn ghost" id="bk-r">Restaurar</button></div></details></div>`;
 }
+let ACC={mode:"",email:"",sent:false};
+function accountCard(){
+  if(Backend.kind==="local")return "";
+  if(S.account)return `<div class="card"><b>Tu cuenta</b><div class="mut" style="font-size:13.5px;margin:4px 0 10px">${esc(S.account.email)}. Tu progreso, medallas y comodines se guardan en la nube y los recuperas en cualquier móvil entrando con este correo.</div><button class="btn ghost block" id="acc-sync">Sincronizar ahora</button></div>`;
+  const m=ACC.mode;
+  return `<div class="card"><b>Guarda tu progreso</b><div class="mut" style="font-size:13.5px;margin:4px 0 10px">Con tu correo no pierdes racha, medallas, comodines ni ligas si cambias de móvil. Te enviamos un código de 6 cifras, sin contraseña.</div>
+  ${m?`<input class="alias" id="acc-mail" type="email" inputmode="email" autocomplete="email" placeholder="Tu correo" value="${esc(ACC.email)}" ${ACC.sent?"readonly":""}>
+  ${ACC.sent?`<input class="alias" id="acc-code" inputmode="numeric" maxlength="8" autocomplete="one-time-code" placeholder="Código del correo"><button class="btn block" id="acc-ok">Confirmar</button>`:`<button class="btn block" id="acc-send">Enviar código</button>`}
+  <button class="btn ghost block" id="acc-cancel" style="margin-top:8px">Cancelar</button>`
+  :`<div class="row"><button class="btn" id="acc-new">Guardar mi progreso</button><button class="btn ghost" id="acc-old">Ya tengo cuenta</button></div>`}</div>`;
+}
+function bindAccount(){
+  const q=id=>document.getElementById(id);
+  if(q("acc-sync"))q("acc-sync").onclick=async()=>{try{await Cloud.pull();toast("Sincronizado");renderPerfil();}catch(e){toast(e.message);}};
+  if(q("acc-new"))q("acc-new").onclick=()=>{ACC={mode:"new",email:"",sent:false};renderPerfil();};
+  if(q("acc-old"))q("acc-old").onclick=()=>{ACC={mode:"old",email:"",sent:false};renderPerfil();};
+  if(q("acc-cancel"))q("acc-cancel").onclick=()=>{ACC={mode:"",email:"",sent:false};renderPerfil();};
+  if(q("acc-send"))q("acc-send").onclick=async()=>{
+    const e=q("acc-mail").value.trim().toLowerCase();if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)){toast("Escribe un correo válido");return;}
+    try{if(ACC.mode==="new")await Backend.linkEmail(e);else await Backend.loginEmail(e);ACC.email=e;ACC.sent=true;toast("Código enviado. Mira tu correo");renderPerfil();}catch(x){toast(x.message);}
+  };
+  if(q("acc-ok"))q("acc-ok").onclick=async()=>{
+    const c=q("acc-code").value.trim();if(c.length<6){toast("Escribe el código de 6 cifras");return;}
+    try{
+      await Backend.verify(ACC.mode==="new"?"email_change":"email",ACC.email,c);
+      S.account={email:ACC.email};save();
+      if(ACC.mode==="old"){await Cloud.pull();try{S.leagues=await Backend.myLeagues();}catch(e){}}else await Cloud.push(true);
+      ACC={mode:"",email:"",sent:false};toast("Cuenta lista");flushPending();renderPerfil();
+    }catch(x){toast(x.message);}
+  };
+}
 function renderPerfil(){
   const t10=top10Stats();
   const days=Object.keys(S.days).length;
@@ -579,6 +698,7 @@ function renderPerfil(){
   const avg=scores.length?Math.round(scores.reduce((a,b)=>a+b,0)/scores.length):0;
   $("#v-perfil").innerHTML=`<h1>Perfil</h1>
   <div class="card prof"><div style="display:flex;align-items:center;gap:14px"><span id="pav">${avatarHtml(S.avatar,64,S.alias)}</span><div style="flex:1"><b>${esc(S.alias||"Tu perfil")}</b><div class="mut" style="font-size:13px">Lo verán los miembros de tus ligas</div></div></div><button class="btn block ghost" id="av-ch" style="margin-top:12px">Cambiar foto o icono</button></div>
+  ${accountCard()}
   ${rewardsCard()}
   <div class="card"><b>Tu alias</b><input class="alias" id="al" maxlength="20" placeholder="Cómo te verán en las ligas" value="${esc(S.alias)}"><button class="btn block" id="al-save">Guardar alias</button></div>
   <div class="card"><table>
@@ -594,6 +714,7 @@ function renderPerfil(){
   <div class="mut" style="font-size:13px;margin-top:8px">Es el progreso guardado en esta app. El Top 10 instalado por separado tiene el suyo.</div></div>`;
   $("#v-perfil").insertAdjacentHTML("beforeend",`<details class="card" id="cred"><summary style="font-weight:700;cursor:pointer">Créditos de las fotos</summary><div class="mut" style="font-size:13px;margin-top:8px">Las fotos de jugadores proceden de Wikimedia Commons con licencias libres. Cada foto enlaza a su página con autor y licencia. Cargando...</div></details>`);
   loadPhotos().then(()=>{const d=$("#cred");if(!d)return;d.innerHTML=`<summary style="font-weight:700;cursor:pointer">Créditos de las fotos (${PHOTOS.list.length})</summary><div class="mut" style="font-size:12.5px;margin-top:8px;line-height:1.5">Fotos de Wikimedia Commons con licencias libres (Creative Commons y dominio público). Autor y licencia de cada una:<br>${PHOTOS.list.map(e=>`${esc(e.n)}: ${esc(e.artist||"autor desconocido")}, <a href="${esc(e.page)}" target="_blank" rel="noopener" style="color:var(--mut)">${esc(e.lic)}</a>`).join("<br>")}</div>`;});
+  bindAccount();
   $("#bk-c").onclick=()=>share(backupCode());
   $("#bk-r").onclick=()=>{const c=prompt("Pega aquí tu código de copia de seguridad:");if(!c)return;try{restoreCode(c.trim());toast("Progreso restaurado");renderPerfil();}catch(e){toast(e.message);}};
   $("#av-ch").onclick=()=>avatarSheet("Tu foto o icono",S.avatar,async a=>{
@@ -913,7 +1034,7 @@ function playOnce(day){
     ${hoy?`<button class="btn block" id="e1">Compartir</button>`:""}
     <button class="btn block ghost" style="margin-top:10px" id="e2">Cerrar</button>`;
     const a=$("#e1");if(a)a.onclick=()=>share(shareText());
-    $("#e2").onclick=closeGame;
+    funAttach(funOf(null,L.k));$("#e2").onclick=closeGame;
   }
   draw(timedOut?"Se acabó el tiempo":"");
   if(hoy&&!over)TIMER=setInterval(()=>{
@@ -929,6 +1050,7 @@ function playOnce(day){
 checkStreak();
 show("hoy");
 flushPending();
+Cloud.init().then(()=>{if(document.querySelector(".view.on")&&document.querySelector(".view.on").id==="v-hoy")renderHoy();});
 /* ================= app instalable (PWA) ================= */
 (function(){
   const standalone=()=>(window.matchMedia&&matchMedia("(display-mode: standalone)").matches)||navigator.standalone===true;
