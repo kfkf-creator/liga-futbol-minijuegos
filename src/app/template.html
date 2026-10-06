@@ -112,6 +112,9 @@ td.n,th.n{text-align:right}
 .mrow{margin:6px 0}.mn{font-weight:800;font-size:14px;margin-bottom:2px}
 .mc{border-radius:8px;padding:6px 3px;text-align:center;font-size:10.5px;line-height:1.15;font-weight:700;min-height:48px;min-width:0;display:flex;align-items:center;justify-content:center;overflow-wrap:break-word;word-break:normal;hyphens:auto;background:#2a3560}
 .mc.ok{background:#1f9d5b;color:#fff}.mc.near{background:#d98a1f;color:#fff}
+.tokb{margin-top:8px;border-color:var(--gold);color:var(--gold)}
+.toks{display:grid;gap:8px}.tok{display:flex;gap:12px;align-items:center;background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:10px 12px}.tok b{font-size:24px;min-width:26px;text-align:center;color:var(--gold)}.tok span{font-weight:700;font-size:14px}.tok small{display:block;color:var(--mut);font-weight:400;font-size:12px}
+.medals{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}.medal{width:64px;text-align:center;color:var(--c)}.medal svg{width:34px;height:34px;stroke:currentColor;fill:none;stroke-width:1.8;display:block;margin:0 auto 4px;padding:9px;border-radius:50%;border:1px solid color-mix(in srgb,var(--c) 50%,transparent);background:color-mix(in srgb,var(--c) 14%,var(--bg2));box-sizing:content-box}.medal small{font-size:11px;color:var(--mut)}
 .snav{display:flex;align-items:center;gap:10px;margin:12px 0 4px}.snav>div{flex:1;text-align:center}.snav b{display:block}.snav small{color:var(--mut);font-size:12.5px}.snav button{width:38px;height:38px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--txt);font-size:20px}.snav button:disabled{opacity:.35}
 .champ{display:flex;align-items:center;gap:8px;justify-content:center;color:var(--gold);margin-bottom:10px}.champ svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8}
 .mvp{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:800;color:var(--gold)}.mvp svg{width:13px;height:13px;stroke:currentColor;fill:currentColor}
@@ -198,14 +201,61 @@ function toast(t){const e=document.createElement("div");e.className="toast";e.te
 
 /* ================= almacenamiento ================= */
 const KEY="minijuegos.v1";
-let S={days:{},arch:{},prog:{},mmBest:0,alias:"",avatar:"",pending:[],leagues:[]};
+let S={days:{},arch:{},prog:{},mmBest:0,alias:"",avatar:"",pending:[],leagues:[],tokens:{hint:0,life:0},medals:{},claimed:{}};
 try{const r=JSON.parse(localStorage.getItem(KEY));if(r&&r.days)S=Object.assign(S,r);}catch(e){}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+/* un dia cuenta para la racha si juegas al menos un reto obligatorio (antes de RULE_DAY, cualquier juego) */
+function dayCounts(ds){
+  const r=S.days[ds];if(!r)return false;
+  const ks=Object.keys(r);if(!ks.length)return false;
+  return ds<RULE_DAY||ks.some(k=>requiredOf(ds).includes(k));
+}
 function streak(){
   let d=dayNum(today()),cur=0;
-  if(!S.days[dstrUTC(d)]) d--;                     /* si hoy aún no has jugado, la racha sigue viva hasta ayer */
-  while(S.days[dstrUTC(d)]){cur++;d--;}
+  if(!dayCounts(dstrUTC(d))) d--;                  /* si hoy aún no has jugado, la racha sigue viva hasta ayer */
+  while(dayCounts(dstrUTC(d))){cur++;d--;}
   return cur;
+}
+/* ---- premios de racha: medallas y comodines ---- */
+const LADDER=[
+ {n:3,medal:"Racha de 3 días",txt:"Medalla"},
+ {n:7,medal:"Racha de 7 días",hint:1,txt:"Medalla y comodín de pista"},
+ {n:10,life:1,txt:"Comodín de vida extra"},
+ {n:14,medal:"Racha de 14 días",txt:"Medalla"},
+ {n:30,medal:"Racha de 30 días",hint:1,life:1,txt:"Medalla, comodín de pista y de vida extra"},
+ {n:100,medal:"Racha de 100 días",txt:"Medalla especial"},
+ {n:365,medal:"Racha de 365 días",txt:"Medalla especial"}
+];
+const tokN=k=>(S.tokens&&S.tokens[k])||0;
+function tokUse(k){if(tokN(k)<1)return false;S.tokens[k]--;save();return true;}
+function tokGive(k,n){S.tokens=S.tokens||{hint:0,life:0};S.tokens[k]=Math.min(2,tokN(k)+n);}
+function checkStreak(){
+  const cur=streak(),got=[];
+  S.claimed=S.claimed||{};S.medals=S.medals||{};
+  for(const L of LADDER){
+    if(cur<L.n||S.claimed[L.n])continue;
+    S.claimed[L.n]=today();
+    if(L.medal)S.medals["streak"+L.n]={t:"streak",n:L.n,name:L.medal,day:today()};
+    if(L.hint)tokGive("hint",L.hint);if(L.life)tokGive("life",L.life);
+    got.push(L);
+  }
+  if(got.length){save();const L=got[got.length-1];setTimeout(()=>{try{toast("¡Racha de "+L.n+" días! "+L.txt);}catch(e){}},400);}
+}
+/* copia de seguridad en texto para pasar el progreso a otro movil */
+function backupCode(){
+  const o={v:1,days:S.days,arch:S.arch,medals:S.medals,claimed:S.claimed,tokens:S.tokens,alias:S.alias,avatar:S.avatar};
+  return "MJ1:"+btoa(unescape(encodeURIComponent(JSON.stringify(o))));
+}
+function restoreCode(c){
+  if(!/^MJ1:/.test(c))throw new Error("Código no válido");
+  let o;try{o=JSON.parse(decodeURIComponent(escape(atob(c.slice(4)))));}catch(e){throw new Error("Código no válido");}
+  if(!o||o.v!==1||typeof o.days!=="object")throw new Error("Código no válido");
+  for(const d in o.days){S.days[d]=S.days[d]||{};for(const g in o.days[d])if(S.days[d][g]==null)S.days[d][g]=o.days[d][g];}
+  for(const d in (o.arch||{})){S.arch[d]=S.arch[d]||{};for(const g in o.arch[d])if(S.arch[d][g]==null)S.arch[d][g]=o.arch[d][g];}
+  Object.assign(S.medals,o.medals||{});Object.assign(S.claimed,o.claimed||{});
+  for(const k of ["hint","life"])S.tokens[k]=Math.max(tokN(k),(o.tokens&&o.tokens[k])||0);
+  if(!S.alias&&o.alias)S.alias=o.alias;if(!S.avatar&&o.avatar)S.avatar=o.avatar;
+  save();
 }
 function dstrUTC(n){const d=new Date(n*86400000);return d.getUTCFullYear()+"-"+pad(d.getUTCMonth()+1)+"-"+pad(d.getUTCDate());}
 
@@ -289,7 +339,7 @@ function recordDaily(game,score){
   if(S.days[t][game]!=null)return;              /* el primer resultado del día es el que cuenta */
   S.days[t][game]=score;
   if(isReq(game,t))S.pending.push({day:t,game,score});   /* solo los 4 retos obligatorios del dia cuentan en las ligas */
-  save();flushPending();
+  save();checkStreak();flushPending();
 }
 
 /* ================= vistas principales ================= */
@@ -465,6 +515,19 @@ function renderJuegos(){
   ${days.length?`<div class="card">${days.map(d=>`<div style="padding:8px 0;border-bottom:1px solid var(--line)"><b>${dayLabel(d)}</b><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">${GAMES.map(g=>cell(d,g)).join("")}</div></div>`).join("")}</div>`:`<div class="card mut">Todavía no hay retos anteriores. El archivo se irá llenando a partir de mañana.</div>`}`;
   document.querySelectorAll("[data-arch]").forEach(b=>b.onclick=()=>{const [g,d]=b.dataset.arch.split("|");startGame(g,d);});
 }
+function medalIcon(m){const c=m.t==="champ"?"#f2c14e":m.n>=100?"#b58cff":m.n>=30?"#ff6b4a":m.n>=14?"#2ee6c5":m.n>=7?"#5bb8ff":"#9be564";
+  return `<div class="medal" style="--c:${c}" title="${esc(m.name)}">${svg(m.t==="champ"?"crown":"flame")}<small>${esc(m.t==="champ"?"Campeón":m.n+" días")}</small></div>`;}
+function rewardsCard(){
+  const cur=streak(),next=LADDER.find(L=>!(S.claimed||{})[L.n]&&L.n>cur),ms=Object.values(S.medals||{});
+  return `<div class="card"><b>Racha y premios</b>
+  <div class="mut" style="font-size:13.5px;margin:4px 0 10px">${cur?`Llevas ${cur} ${cur===1?"día":"días"} seguidos jugando al menos un reto obligatorio.`:"Juega un reto obligatorio hoy para empezar tu racha."}${next?` Próximo premio a los ${next.n} días: ${next.txt.toLowerCase()}.`:""}</div>
+  <div class="toks"><div class="tok"><b>${tokN("hint")}</b><span>Comodín de pista<small>destapa un club o partido gratis (Trayectoria, Camino a la final)</small></span></div>
+  <div class="tok"><b>${tokN("life")}</b><span>Comodín de vida extra<small>un fallo o intento más (Once, Misterioso, Trayectoria, Camino)</small></span></div></div>
+  ${ms.length?`<div class="medals">${ms.sort((a,b)=>String(a.day).localeCompare(String(b.day))).map(medalIcon).join("")}</div>`:`<div class="mut" style="font-size:13px">Aún no tienes medallas.</div>`}
+  <details style="margin-top:12px"><summary style="cursor:pointer;color:var(--mut);font-size:13.5px">Copia de seguridad del progreso</summary>
+  <div class="mut" style="font-size:12.5px;margin:8px 0">Copia este código para pasar tus notas, medallas y comodines a otro móvil. No incluye tus ligas.</div>
+  <div class="row"><button class="btn ghost" id="bk-c">Copiar código</button><button class="btn ghost" id="bk-r">Restaurar</button></div></details></div>`;
+}
 function renderPerfil(){
   const t10=top10Stats();
   const days=Object.keys(S.days).length;
@@ -472,6 +535,7 @@ function renderPerfil(){
   const avg=scores.length?Math.round(scores.reduce((a,b)=>a+b,0)/scores.length):0;
   $("#v-perfil").innerHTML=`<h1>Perfil</h1>
   <div class="card prof"><div style="display:flex;align-items:center;gap:14px"><span id="pav">${avatarHtml(S.avatar,64,S.alias)}</span><div style="flex:1"><b>${esc(S.alias||"Tu perfil")}</b><div class="mut" style="font-size:13px">Lo verán los miembros de tus ligas</div></div></div><button class="btn block ghost" id="av-ch" style="margin-top:12px">Cambiar foto o icono</button></div>
+  ${rewardsCard()}
   <div class="card"><b>Tu alias</b><input class="alias" id="al" maxlength="20" placeholder="Cómo te verán en las ligas" value="${esc(S.alias)}"><button class="btn block" id="al-save">Guardar alias</button></div>
   <div class="card"><table>
   <tr><td>Racha actual</td><td class="n"><b>${streak()}</b></td></tr>
@@ -486,6 +550,8 @@ function renderPerfil(){
   <div class="mut" style="font-size:13px;margin-top:8px">Es el progreso guardado en esta app. El Top 10 instalado por separado tiene el suyo.</div></div>`;
   $("#v-perfil").insertAdjacentHTML("beforeend",`<details class="card" id="cred"><summary style="font-weight:700;cursor:pointer">Créditos de las fotos</summary><div class="mut" style="font-size:13px;margin-top:8px">Las fotos de jugadores proceden de Wikimedia Commons con licencias libres. Cada foto enlaza a su página con autor y licencia. Cargando...</div></details>`);
   loadPhotos().then(()=>{const d=$("#cred");if(!d)return;d.innerHTML=`<summary style="font-weight:700;cursor:pointer">Créditos de las fotos (${PHOTOS.list.length})</summary><div class="mut" style="font-size:12.5px;margin-top:8px;line-height:1.5">Fotos de Wikimedia Commons con licencias libres (Creative Commons y dominio público). Autor y licencia de cada una:<br>${PHOTOS.list.map(e=>`${esc(e.n)}: ${esc(e.artist||"autor desconocido")}, <a href="${esc(e.page)}" target="_blank" rel="noopener" style="color:var(--mut)">${esc(e.lic)}</a>`).join("<br>")}</div>`;});
+  $("#bk-c").onclick=()=>share(backupCode());
+  $("#bk-r").onclick=()=>{const c=prompt("Pega aquí tu código de copia de seguridad:");if(!c)return;try{restoreCode(c.trim());toast("Progreso restaurado");renderPerfil();}catch(e){toast(e.message);}};
   $("#av-ch").onclick=()=>avatarSheet("Tu foto o icono",S.avatar,async a=>{
     S.avatar=a;save();renderPerfil();
     try{await Backend.setAvatar(a);}catch(e){toast("Guardado en este móvil; el servidor aún no admite fotos");}
@@ -568,6 +634,7 @@ async function renderBoard(){
   let h="";
   if(v==="temp"){
     const champ=done&&C.table.length&&C.table[0].pts>0?C.table[0]:null;
+    if(champ&&champ.me){const id="champ:"+l.id+":"+LGS.n;if(!S.medals[id]){S.medals[id]={t:"champ",name:"Campeón de "+l.name+", temporada "+(LGS.n+1),day:s1};save();toast("¡Medalla de campeón!");}}
     h=(champ?`<div class="champ">${svg("crown")}<span>Campeón: <b>${esc(champ.alias)}</b></span></div>`:"")+
     (C.table.length?`<table><tr><th>#</th><th>Jugador</th><th class="n">Pts</th></tr>${C.table.map((m,i)=>`<tr><td>${i+1}</td><td>${who(m,`${m.wp} por semanas · ${m.mv} MVP · ${m.raw} brutos`)}</td><td class="n"><b>${m.pts}</b></td></tr>`).join("")}</table>`:`<div class="mut">Nadie ha jugado todavía.</div>`)+
     `<div class="mut" style="font-size:12.5px;margin-top:8px">Semana: 10, 6 y 4 puntos a los tres primeros y 2 a quien juega 3 o más días. MVP: +1 al mejor día. ${done?"":"La semana en curso es provisional. "}Desempate: puntos brutos.</div>`;
@@ -754,13 +821,13 @@ function playOnce(day){
   const t0=(svo&&svo.t0)||Date.now();
   const remaining=()=>hoy?T_ONCE-(Date.now()-t0)/1000:Infinity;
   let timedOut=false;
-  const found=new Set(svo?svo.f:[]),MAXL=5;let lives=svo?svo.l:MAXL,over=!!svo&&(svo.l<=0||svo.f.length===10),slotOf=[],k=0;
+  const found=new Set(svo?svo.f:[]);let xl=svo&&svo.x||0,MAXL=5+xl;let lives=svo?svo.l:MAXL,over=!!svo&&(svo.l<=0||svo.f.length===10),slotOf=[],k=0;
   if(!over&&hoy&&remaining()<=0){over=true;timedOut=true;}
   /* cada respuesta ocupa su hueco según el orden de la formación (de defensa a ataque) */
   L.rows.forEach((n,r)=>{for(let j=0;j<n;j++)slotOf.push({r,j,idx:k++});});
   const R=L.rows.length;
   function draw(msg){
-    progSet(day,"once",{f:[...found],l:lives,t0});
+    progSet(day,"once",{f:[...found],l:lives,t0,x:xl});
     const rowsHtml=[];
     for(let r=R-1;r>=0;r--){
       rowsHtml.push(`<div class="prow">${slotOf.filter(s=>s.r===r).map(s=>{const a=L.ans[s.idx],g=found.has(s.idx);return `<div class="slot ${g?"got":over?"miss":""}">${(g||over)?esc(a.n):`?<small>${rowLabel(r,R)}</small>`}</div>`;}).join("")}</div>`);
@@ -771,10 +838,12 @@ function playOnce(day){
     <div class="pitch">${rowsHtml.join("")}<div class="prow"><div class="slot gk got" style="width:auto;max-width:none;flex:0 0 auto;min-height:0;padding:8px 18px;font-size:14px;white-space:nowrap;background:#fff;color:#111">🧤 ${esc(L.gk||"Portero")}</div></div></div>
     <div class="mut" style="text-align:center;margin-bottom:6px">${found.size}/10 jugadores · escribe el apellido o el nombre</div>
     ${over?"":`<div class="inp"><input id="gi" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Jugador de campo..."><button class="btn" id="gs">OK</button><div class="sug" id="sg" style="display:none"></div></div>`}
+    ${over?"":tokBtns("o",{life:xl<1&&lives<=2})}
     ${over?"":`<button class="btn ghost block" id="giveup" style="margin-top:8px">Rendirme</button>`}
     <div class="fb" id="fb">${msg||""}</div><div id="endbox"></div>`;
     if(!over){
       $("#giveup").onclick=()=>{if(confirm("¿Rendirte? Te quedas con "+found.size+" acierto"+(found.size===1?"":"s")+".")){lives=0;over=true;draw("Te has rendido");}};
+      const ol=$("#ol");if(ol)ol.onclick=()=>{if(xl<1&&tokUse("life")){xl=1;MAXL=6;lives++;draw("Comodín usado: una vida más.");}};
       const inp=$("#gi");
       const submit=v=>{const val=(v??inp.value);if(!val.trim())return;try2(val);};
       $("#gs").onclick=()=>submit();
@@ -813,6 +882,7 @@ function playOnce(day){
 /*__GAMES__*/
 
 /* ================= arranque ================= */
+checkStreak();
 show("hoy");
 flushPending();
 /* ================= app instalable (PWA) ================= */

@@ -196,28 +196,37 @@ function suggestSel(raw){
   const q=norm(raw);if(q.length<2)return [];
   return SEL.list.map(n=>({n,k:norm(n)})).filter(x=>x.k.startsWith(q)||x.k.includes(" "+q)).slice(0,6).map(x=>({n:x.n,sub:""}));
 }
+/* botones de comodines (se consumen al usarlos; se muestran solo si hay) */
+function tokBtns(id,o){
+  return (o.hint&&tokN("hint")>0?`<button class="btn ghost block tokb" id="${id}h">Usar comodín de pista: gratis (${tokN("hint")})</button>`:"")+
+         (o.life&&tokN("life")>0?`<button class="btn ghost block tokb" id="${id}l">Usar comodín de vida extra (${tokN("life")})</button>`:"");
+}
 function playRoad(day){
   const g=meta("road");
   openGame(g.name+(day===today()?" · hoy":" · "+dayLabel(day)),g.c);loadSel();
   const P=chunkOfDay(DATA.ROAD,1,day)[0],M=P.matches;
   let sv=progGet(day,"road");
   if(!sv){sv={shown:1,wrong:0,gs:[]};progSet(day,"road",sv);}
-  let {shown,wrong}=sv,gs=sv.gs.slice(),over=false,ye="";
-  const cost=()=>10*(shown-1)+10*wrong;
+  let {shown,wrong}=sv,gs=sv.gs.slice(),over=false,ye="",free=sv.free||0,extra=sv.extra||0;
+  const cost=()=>10*(shown-1-free)+10*wrong;
   const hud=()=>{$("#gsc").textContent="Vale "+Math.max(20,90-cost())+" pts";};
-  const save=()=>progSet(day,"road",{shown,wrong,gs});
+  const save=()=>progSet(day,"road",{shown,wrong,gs,free,extra});
   const line=(m,k)=>`<div class="tli"><b style="min-width:112px;font-size:13px">${esc(m.r)}</b><span>Selección misteriosa <b style="color:var(--txt)">${esc(m.s)}</b> ${esc(m.opp)}${m.pen?` <span class="mut">(penaltis ${esc(m.pen)})</span>`:""}</span></div>`;
   function draw(msg){
     hud();
     $("#gb").innerHTML=`<div class="mut" style="text-align:center;margin-top:8px">${esc(P.comp)}: ¿qué selección es y en qué año?</div>
     <div class="tl">${M.slice(0,shown).map(line).join("")}${shown<M.length?`<div class="tli mut"><span>${M.length-shown} partido${M.length-shown===1?"":"s"} más hasta el final</span></div>`:""}</div>
     ${over?"":`<button class="btn ghost block" id="rmore" ${shown>=M.length?"disabled":""}>Destapar otro partido (−10)</button>
+    ${tokBtns("r",{hint:shown<M.length,life:extra<1&&wrong>=1})}
     <input class="alias" id="gy" inputmode="numeric" maxlength="4" placeholder="Año (opcional, +10)" value="${esc(ye)}" style="margin-top:12px">
     <div class="inp"><input id="gi" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Selección"><button class="btn" id="gs">OK</button><div class="sug" id="sg" style="display:none"></div></div>`}
     ${gs.length?`<div class="mut" style="font-size:14px;margin-top:8px">Ya has probado: ${gs.map(esc).join(", ")}</div>`:""}
     <div class="fb" id="fb">${msg||""}</div><div id="endbox"></div>`;
     if(!over){
       $("#rmore").onclick=()=>{if(shown<M.length){shown++;save();draw();}};
+      const rh=$("#rh"),rl=$("#rl");
+      if(rh)rh.onclick=()=>{if(shown<M.length&&tokUse("hint")){shown++;free++;save();draw("Comodín de pista usado: partido gratis.");}};
+      if(rl)rl.onclick=()=>{if(extra<1&&tokUse("life")){extra=1;save();draw("Comodín usado: un fallo más permitido.");}};
       $("#gy").oninput=e=>{ye=e.target.value;};
       bindNameInput(suggestSel,guess);
     }
@@ -232,7 +241,7 @@ function playRoad(day){
       finish(base+bonus);return;
     }
     wrong++;gs.push(raw.trim());save();
-    if(wrong>=3){over=true;draw(`Era ${P.team} en ${P.year}.`);finish(0);return;}
+    if(wrong>=3+extra){over=true;draw(`Era ${P.team} en ${P.year}.`);finish(0);return;}
     draw("No es. Pierdes 10 puntos.");
   }
   function finish(score){
@@ -241,7 +250,7 @@ function playRoad(day){
     $("#endbox").innerHTML=`${all.length?`<div class="mut" style="margin-top:8px">Resto del camino</div><div class="tl">${all.map(line).join("")}</div>`:""}<div class="big">${score}/100</div><button class="btn block ghost" style="margin-top:10px" id="e2">Cerrar</button>`;
     $("#e2").onclick=closeGame;
   }
-  if(wrong>=3){over=true;draw(`Era ${P.team} en ${P.year}.`);finish(0);}
+  if(wrong>=3+extra){over=true;draw(`Era ${P.team} en ${P.year}.`);finish(0);}
   else draw("");
 }
 
@@ -310,28 +319,31 @@ function playTray(day){
   const P=chunkOfDay(DATA.TRAY,1,day)[0];
   let sv=progGet(day,"tray");
   if(!sv){sv={shown:2,nat:0,pos:0,wrong:0,gs:[]};progSet(day,"tray",sv);}
-  let {shown,nat,pos,wrong}=sv,gs=sv.gs.slice(),over=false;
-  const cost=()=>10*(shown-2)+15*wrong;
+  let {shown,nat,pos,wrong}=sv,gs=sv.gs.slice(),over=false,free=sv.free||0,extra=sv.extra||0;
+  const cost=()=>10*(shown-2-free)+15*wrong;
   const hud=()=>{$("#gsc").textContent="Valor "+Math.max(10,100-cost())+" pts";};
-  function save(){progSet(day,"tray",{shown,nat,pos,wrong,gs});}
+  function save(){progSet(day,"tray",{shown,nat,pos,wrong,gs,free,extra});}
   function draw(msg){
     hud();
     const rows=P.career.slice(0,shown);
     $("#gb").innerHTML=`<div class="mut" style="text-align:center;margin-top:8px">¿Quién es? Sus clubes, en orden</div>
     ${over?"":`<div class="tl">${rows.map(r=>`<div class="tli"><b style="min-width:82px">${esc(r.y)}</b><span>${esc(r.c)}</span></div>`).join("")}${shown<P.career.length?`<div class="tli mut"><b style="min-width:82px">?</b><span>${P.career.length-shown} club${P.career.length-shown===1?"":"es"} más</span></div>`:""}</div>
-    <div class="row" style="margin:10px 0"><button class="btn ghost block" id="tmore" ${shown>=P.career.length?"disabled":""}>Otro club (−10)</button></div>`}
+    <div class="row" style="margin:10px 0"><button class="btn ghost block" id="tmore" ${shown>=P.career.length?"disabled":""}>Otro club (−10)</button></div>${tokBtns("t",{hint:shown<P.career.length,life:extra<1&&wrong>=1})}`}
     ${gs.length?`<div class="mut" style="font-size:14px">Ya has probado: ${gs.map(esc).join(", ")}</div>`:""}
     ${over?"":INPUT_HTML}<div class="fb" id="fb">${msg||""}</div><div id="endbox"></div>`;
     if(msg==="¡Correcto!"){const f=$("#fb");f.style.cssText="text-align:center;font-size:30px;font-weight:900;color:#fff;background:var(--ok);border-radius:16px;padding:14px;margin:10px 0";}
     if(!over){
       $("#tmore").onclick=()=>{if(shown<P.career.length){shown++;save();draw();}};
+      const th=$("#th"),tl=$("#tl");
+      if(th)th.onclick=()=>{if(shown<P.career.length&&tokUse("hint")){shown++;free++;save();draw("Comodín de pista usado: club gratis.");}};
+      if(tl)tl.onclick=()=>{if(extra<1&&tokUse("life")){extra=1;save();draw("Comodín usado: un fallo más permitido.");}};
       bindNameInput(raw=>suggestAny(raw),guess);
     }
   }
   function guess(raw){
     if(matchesName(raw,P)){over=true;const score=Math.max(10,100-cost());draw("¡Correcto!");finish(score,`Era ${P.n}`);return;}
     wrong++;gs.push(raw.trim());save();
-    if(wrong>=3){over=true;draw("");finish(0,`Era ${P.n}`);return;}
+    if(wrong>=3+extra){over=true;draw("");finish(0,`Era ${P.n}`);return;}
     draw("No es. Pierdes 15 puntos.");
   }
   function finish(score,line){
@@ -342,19 +354,19 @@ function playTray(day){
     const a=$("#e1");if(a)a.onclick=()=>share(shareText());
     $("#e2").onclick=closeGame;showPhoto(P.n);
   }
-  if(wrong>=3){over=true;draw("");finish(0,`Era ${P.n}`);}
+  if(wrong>=3+extra){over=true;draw("");finish(0,`Era ${P.n}`);}
   else draw("");
 }
 
 /* ---------- Jugador misterioso ---------- */
 function playMist(day){
-  const hoy=day===today(),g=meta("mist"),MAXT=6,SC=[100,85,70,55,40,25];
+  const hoy=day===today(),g=meta("mist"),SC=[100,85,70,55,40,25,10];
   openGame(g.name+(hoy?" · hoy":" · "+dayLabel(day)),g.c);
   const list=DATA.MIST.players,pool=list.filter(p=>p.fame>=3);
   const T=chunkOfDay(pool,1,day)[0];
   let sv=progGet(day,"mist");
   if(!sv){sv={gs:[]};progSet(day,"mist",sv);}
-  const gs=sv.gs.slice();let over=false;
+  const gs=sv.gs.slice();let over=false,extra=sv.extra||0,MAXT=6+extra;
   const find=raw=>{const q=norm(raw);if(!q)return null;
     return list.find(p=>matchesName(raw,p))||null;};
   const cell=(ok,txt,extra)=>`<div class="mc ${ok}">${esc(txt)}${extra||""}</div>`;
@@ -370,14 +382,15 @@ function playMist(day){
     $("#gb").innerHTML=`<div class="mut" style="text-align:center;margin-top:8px">Adivina el jugador. Verde: coincide. Naranja: año cercano. Flecha: el secreto nació antes (↓) o después (↑).</div>
     <div class="mhead"><span>País</span><span>Liga</span><span>Club</span><span>Puesto</span><span>Nació</span></div>
     ${gs.map(n=>row(list.find(p=>p.n===n))).join("")}
-    ${over?"":INPUT_HTML}<div class="fb" id="fb">${msg||""}</div><div id="endbox"></div>`;
+    ${over?"":INPUT_HTML}${over?"":tokBtns("m",{life:extra<1&&gs.length>=4})}<div class="fb" id="fb">${msg||""}</div><div id="endbox"></div>`;
+    const ml=$("#ml");if(ml)ml.onclick=()=>{if(extra<1&&tokUse("life")){extra=1;MAXT=7;progSet(day,"mist",{gs,extra});draw("Comodín usado: un intento más.");}};
     if(!over)bindNameInput(raw=>{const q=norm(raw);if(q.length<2)return [];return list.filter(p=>!gs.includes(p.n)&&(norm(p.n).includes(q)||(p.a||[]).some(a=>norm(a).startsWith(q)))).slice(0,6).map(p=>({n:p.n,sub:p.club}));},guess);
   }
   function guess(raw){
     const p=find(raw);
     if(!p){draw("No tengo a ese jugador en la lista. Elige uno de las sugerencias.");return;}
     if(gs.includes(p.n)){draw("Ya lo has probado.");return;}
-    gs.push(p.n);progSet(day,"mist",{gs});
+    gs.push(p.n);progSet(day,"mist",{gs,extra});
     if(p.n===T.n){over=true;draw("");finish(SC[gs.length-1],`Era ${T.n}, en ${gs.length} intento${gs.length===1?"":"s"}`);return;}
     if(gs.length>=MAXT){over=true;draw("");finish(0,`Era ${T.n}`);return;}
     draw("");

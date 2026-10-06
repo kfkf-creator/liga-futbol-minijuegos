@@ -158,3 +158,11 @@ Solo diseño; nada de esto esta en el codigo todavia salvo lo indicado en seccio
 - `supabase/patch-06-temporadas.sql`: RPC `league_days` (total y n.º de retos por miembro y dia, desde la creacion de la liga). La app calcula semanas, puntos, MVP y campeon (`seasonCalc` en template.html), asi la logica esta en un solo sitio y se puede probar.
 - Temporada 1 empieza el lunes 2026-10-05 (`SEASON_EPOCH`), 4 semanas de lunes a domingo. Vista Temporada / Semana / Hoy con navegacion entre temporadas y semanas. Sin el parche 6 la app cae a la tabla antigua.
 - Pendiente: guardar racha, medallas y comodines en el servidor; medalla de campeon; premios de racha; capa de recompensas.
+
+### Implementado: racha, medallas y comodines (2026-10-06)
+- La racha cuenta un dia si se juega al menos un reto obligatorio (antes del 2026-10-06, cualquier juego). `dayCounts`, `streak`, `checkStreak`, `LADDER` en template.html.
+- Premios: 3 dias medalla; 7 medalla + comodin de pista; 10 comodin de vida extra; 14 medalla; 30 medalla + pista + vida; 100 y 365 medalla. Maximo 2 de cada comodin guardados. Medalla de campeon al ganar una temporada de liga (se concede al ver la temporada terminada).
+- Comodin de pista: destapa un club (Trayectoria) o partido (Camino) sin coste. Comodin de vida: +1 fallo (Trayectoria, Camino), +1 intento (Mist), +1 vida (Once); solo uno por partida; el boton aparece cuando hay riesgo.
+- Perfil: tarjeta "Racha y premios" con comodines, medallas y copia de seguridad en texto (`backupCode`/`restoreCode`).
+- DECISION: no se guarda el progreso en el servidor. Cada movil es un usuario anonimo distinto, asi que el servidor no permitiria recuperarlo en otro dispositivo. Hace falta un sistema de cuentas (por ejemplo, correo) antes; mientras, copia de seguridad manual.
+- Pendiente: capa de recompensas con anuncio (solucion al fallar, desbloquear opcionales, archivo, salvar racha); cuentas de usuario.
