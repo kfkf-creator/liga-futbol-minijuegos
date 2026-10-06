@@ -126,3 +126,10 @@ Web instalable (PWA) con minijuegos diarios de futbol en castellano, con ligas p
 ### Avatares (2026-10-06)
 - Perfil y ligas pueden tener icono prediseñado (`p:<icono>:<color>`) o foto de galeria reducida a 96x96 JPEG (base64, <=14000 car.). Se ven en lista de ligas, cabecera y clasificacion.
 - Servidor: `supabase/patch-04-avatares.sql` (columnas avatar, set_avatar, set_league_avatar solo dueño, my_leagues y league_board con avatar). Sin el parche la app funciona igual pero no sincroniza avatares.
+
+### Modelo de retos (decidido 2026-10-06)
+- 12 juegos generados cada dia para todo el mundo (los 4 antes beta ya son definitivos).
+- 4 son obligatorios cada dia, iguales para todas las ligas y jugadores. Se eligen con una baraja de 3 dias (`requiredOf(day)`, semilla `req<ciclo>`): cada juego es obligatorio exactamente 1 de cada 3 dias.
+- Solo los 4 obligatorios se envian al servidor y cuentan en las ligas. Los otros 8 son opcionales: se juegan, salen en el perfil y el archivo, pero no suman a las ligas. Los puntos extra de los opcionales quedan como idea pendiente.
+- Servidor: `supabase/patch-05-doce-juegos.sql` (ampliar el check de scores.game).
+- Pendiente: Camino a la final y Reconstruye la tabla solo tienen 14 retos (se repiten tras 14 dias); revisar datos de una sola fuente.

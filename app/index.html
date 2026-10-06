@@ -219,7 +219,7 @@ const LocalBackend={
   async createLeague(name){const d=this.db();const code=Math.random().toString(36).slice(2,8).toUpperCase();d.leagues.push({id:code,code,name,since:today(),owner:true});this.put(d);return {code,id:code,name};},
   async joinLeague(code){const d=this.db();const l=d.leagues.find(x=>x.code===code.toUpperCase());if(!l)throw new Error("No existe esa liga");return l;},
   async myLeagues(){return this.db().leagues;},
-  async board(id,from,to){const g={};let total=0;const L=this.db().leagues.find(x=>x.id===id);if(L&&L.since&&L.since>from)from=L.since;for(let n=dayNum(from);n<=dayNum(to);n++){const r=S.days[dstrUTC(n)];if(r)for(const k in r){g[k]=(g[k]||0)+r[k];total+=r[k];}}return [{alias:S.alias||"Tú",avatar:S.avatar||"",total,g}];},
+  async board(id,from,to){const g={};let total=0;const L=this.db().leagues.find(x=>x.id===id);if(L&&L.since&&L.since>from)from=L.since;for(let n=dayNum(from);n<=dayNum(to);n++){const r=S.days[dstrUTC(n)];if(r)for(const k in r){if(dstrUTC(n)>=RULE_DAY&&!requiredOf(dstrUTC(n)).includes(k))continue;g[k]=(g[k]||0)+r[k];total+=r[k];}}return [{alias:S.alias||"Tú",avatar:S.avatar||"",total,g}];},
   async submit(){}
 };
 const SB=DATA.CFG;
@@ -278,7 +278,7 @@ function recordDaily(game,score){
   S.days[t]=S.days[t]||{};
   if(S.days[t][game]!=null)return;              /* el primer resultado del día es el que cuenta */
   S.days[t][game]=score;
-  if(!(GAMES.find(x=>x.id===game)||{}).beta)S.pending.push({day:t,game,score});   /* los juegos en pruebas no cuentan en las ligas */
+  if(isReq(game,t))S.pending.push({day:t,game,score});   /* solo los 4 retos obligatorios del dia cuentan en las ligas */
   save();flushPending();
 }
 
@@ -372,10 +372,10 @@ const GAMES=[
  {id:"vf",name:"Verdadero o falso",ic:"✅",c:"#9be564",desc:"10 afirmaciones de fútbol."},
  {id:"odd",name:"El intruso",ic:"🔍",c:"#ff8fb1",desc:"Cuatro opciones y una no encaja."},
  {id:"con",name:"Conexiones",ic:"🧠",c:"#f5d90a",desc:"16 palabras que forman 4 grupos."},
- {id:"score",name:"Marcador exacto",ic:"🔢",c:"#ff7ad9",desc:"Adivina el resultado de 10 partidos famosos.",beta:true},
- {id:"key",name:"Momentos clave",ic:"⚡",c:"#ffd23f",desc:"10 preguntas sobre goles, finales y penaltis.",beta:true},
- {id:"road",name:"Camino a la final",ic:"🚩",c:"#4fd1c5",desc:"Partidos que se destapan uno a uno: ¿qué selección?",beta:true},
- {id:"table",name:"Reconstruye la tabla",ic:"📊",c:"#7aa2ff",desc:"Ordena los 8 primeros de una liga.",beta:true}
+ {id:"score",name:"Marcador exacto",ic:"🔢",c:"#ff7ad9",desc:"Adivina el resultado de 10 partidos famosos."},
+ {id:"key",name:"Momentos clave",ic:"⚡",c:"#ffd23f",desc:"10 preguntas sobre goles, finales y penaltis."},
+ {id:"road",name:"Camino a la final",ic:"🚩",c:"#4fd1c5",desc:"Partidos que se destapan uno a uno: ¿qué selección?"},
+ {id:"table",name:"Reconstruye la tabla",ic:"📊",c:"#7aa2ff",desc:"Ordena los 8 primeros de una liga."}
 ];
 window.HELP={
 mm:"<b>Más o menos</b>Dos opciones por duelo: elige la que tiene la cifra mayor. Hoy hay 2 minutos para los 10 duelos. Cada acierto vale 9 puntos y, si vas rápido, hasta 10 más de bonus.",
@@ -408,19 +408,28 @@ async function share(text){
   try{if(navigator.share){await navigator.share({text});return;}}catch(e){if(e&&e.name==="AbortError")return;}
   try{await navigator.clipboard.writeText(text);toast("Copiado");}catch(e){prompt("Copia el texto:",text);}
 }
-const MAINS=()=>GAMES.filter(g=>!g.beta);
+/* Retos obligatorios del dia: 4 de los 12, iguales para todas las ligas. Baraja de 3 dias: cada juego es obligatorio exactamente 1 de cada 3 dias. */
+const RULE_DAY="2026-10-06";
+function requiredOf(day){
+  const n=dayNum(day),cyc=Math.floor(n/3),k=((n%3)+3)%3,ids=GAMES.map(g=>g.id),r=rng(hash("req"+cyc));
+  for(let i=ids.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[ids[i],ids[j]]=[ids[j],ids[i]];}
+  return ids.slice(k*4,k*4+4);
+}
+const isReq=(game,day)=>requiredOf(day||today()).includes(game);
+const MAINS=()=>GAMES.filter(g=>isReq(g.id));
 function nextIn(){const d=NOW(),m=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1),mins=Math.max(1,Math.round((m-d)/60000)),h=Math.floor(mins/60);return "retos nuevos en "+(h?h+" h "+(mins%60)+" min":mins+" min");}
 function gameCard(g,r){const sc=r[g.id];return `<button class="gcard" style="--c:${g.c}" data-play="${g.id}"><span class="ic">${svg(g.id)}</span><span class="tx"><b>${g.name}</b><small>${g.desc}</small></span>${sc!=null?`<span class="pill done">${sc}<i>/100</i></span>`:`<span class="pill">Jugar</span>`}</button>`;}
 function renderHoy(){
-  const r=S.days[today()]||{},M=MAINS(),B=GAMES.filter(g=>g.beta);
+  const r=S.days[today()]||{},M=MAINS(),B=GAMES.filter(g=>!isReq(g.id));
+  const xtra=B.reduce((a,g)=>a+(r[g.id]||0),0),xn=B.filter(g=>r[g.id]!=null).length;
   const total=M.reduce((a,g)=>a+(r[g.id]||0),0),n=M.filter(g=>r[g.id]!=null).length,any=GAMES.some(g=>r[g.id]!=null);
   const fecha=NOW().toLocaleDateString("es-ES",{weekday:"long",day:"numeric",month:"long"});
   $("#v-hoy").innerHTML=`<div class="top"><h1>Hoy</h1><div class="streak" title="Racha de días jugados">${svg("flame")}${streak()}</div></div>
   <div class="board"><div class="bd">${esc(fecha)}</div><div class="bt"><b>${total}</b><small>/ ${M.length*100} puntos</small></div>
   <div class="pips">${M.map(g=>`<i class="pip ${r[g.id]!=null?"on":""}" style="--c:${g.c}"></i>`).join("")}</div>
-  <div class="bm">${n===M.length?"Has completado los "+M.length+" retos de hoy":n+" de "+M.length+" retos jugados"} · ${nextIn()}</div></div>
+  <div class="bm">${n===M.length?"Has completado los "+M.length+" retos de hoy":n+" de "+M.length+" retos del día jugados"} · ${nextIn()}</div></div>
   ${M.map(g=>gameCard(g,r)).join("")}
-  ${B.length?`<div class="sec"><h2>En pruebas</h2><span>No cuentan en las ligas</span></div>${B.map(g=>gameCard(g,r)).join("")}`:""}
+  ${B.length?`<div class="sec"><h2>Opcionales</h2><span>${xn?xn+"/"+B.length+" · "+xtra+" pts · ":""}no suman a las ligas</span></div>${B.map(g=>gameCard(g,r)).join("")}`:""}
   <div class="mut" style="font-size:13px;margin:14px 2px">Solo cuenta el primer resultado de cada reto. Los retos de días anteriores están en la pestaña Juegos.</div>
   ${any?`<button class="btn block" style="margin-top:6px" id="sh">Compartir resultado</button>`:""}${window.installBarHtml?window.installBarHtml():""}`;
   if(window.bindInstallBar)window.bindInstallBar();
