@@ -36,11 +36,14 @@ const URL=process.env.URL||"http://localhost:8123/app/index.html";
  /* ligas modo local */
  await p.click('#tabs [data-v="ligas"]');
  await p.fill("#al","Marc");await p.click("#al-ok");
+ await p.click("#nav-ch");await p.click('[data-ic="star"]');await p.click("#avs");
  await p.fill("#ln","Los cracks");await p.click("#lc");
  await p.waitForSelector("[data-l]");
  await p.click("[data-l]");
  await p.waitForSelector("#bd table");
  out.board=await p.textContent("#bd");
+ out.avBoard=(await p.$$("#bd .av")).length;out.avOwner=!!(await p.$("#lav"));
+ out.avLeague=await p.evaluate(()=>(LG.sel.avatar||""));
  /* archivo: al dia siguiente, el reto de ayer aparece con sus notas y se puede repetir el que no se jugo */
  await p.evaluate(()=>{delete S.days[today()].once;save();});          /* ayer solo se jugo Más o menos */
  await p.evaluate(()=>{NOW=()=>new Date(2026,9,1,12,0,0);show("juegos");});

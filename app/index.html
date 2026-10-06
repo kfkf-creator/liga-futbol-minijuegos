@@ -140,6 +140,23 @@ td.n,th.n{text-align:right}
 .help b{display:block;margin-bottom:4px}
 .qbtn{background:var(--card);border:1px solid var(--line);border-radius:999px;width:36px;height:36px;color:var(--mut);font-weight:800}
 .upd{border-radius:var(--r2)}
+.av{display:inline-grid;place-items:center;flex:none;border-radius:50%;object-fit:cover;background:var(--card2);border:1px solid var(--line);font-weight:800;color:var(--mut);overflow:hidden}
+.av svg{width:56%;height:56%;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.sheet{position:fixed;inset:0;z-index:50;background:rgba(3,6,14,.62);display:flex;align-items:flex-end;justify-content:center}
+.sh{width:100%;max-width:560px;background:var(--bg2);border:1px solid var(--line);border-radius:var(--r3) var(--r3) 0 0;padding:16px 16px calc(18px + env(safe-area-inset-bottom));max-height:88vh;overflow:auto}
+.shh{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.x2{background:var(--card);border:1px solid var(--line);border-radius:999px;width:34px;height:34px;display:grid;place-items:center;color:var(--mut);padding:0}
+.x2 svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round}
+.avgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+.avb{aspect-ratio:1;border-radius:14px;border:1.5px solid var(--line);background:var(--card);display:grid;place-items:center;color:var(--txt);padding:0}
+.avb svg{width:60%;height:60%;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.avb.on{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 14%,var(--card))}
+.avcol{display:flex;gap:10px;justify-content:center;margin-top:14px}
+.avc{width:30px;height:30px;border-radius:50%;border:2px solid transparent;padding:0}
+.avc.on{border-color:#fff;box-shadow:0 0 0 2px var(--bg2) inset}
+.prof .btn{margin-top:12px}
+.btn svg,.av svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.av svg{width:58%;height:58%}
 .stp{display:flex;align-items:center;gap:10px}.stp b{min-width:26px;text-align:center;font-size:24px}.stp .btn{padding:8px 16px;font-size:20px;line-height:1}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 
@@ -178,7 +195,7 @@ function toast(t){const e=document.createElement("div");e.className="toast";e.te
 
 /* ================= almacenamiento ================= */
 const KEY="minijuegos.v1";
-let S={days:{},arch:{},prog:{},mmBest:0,alias:"",pending:[],leagues:[]};
+let S={days:{},arch:{},prog:{},mmBest:0,alias:"",avatar:"",pending:[],leagues:[]};
 try{const r=JSON.parse(localStorage.getItem(KEY));if(r&&r.days)S=Object.assign(S,r);}catch(e){}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
 function streak(){
@@ -197,10 +214,12 @@ const LocalBackend={
   db(){try{return JSON.parse(localStorage.getItem("minijuegos.local"))||{leagues:[]};}catch(e){return {leagues:[]};}},
   put(d){localStorage.setItem("minijuegos.local",JSON.stringify(d));},
   async setAlias(){},
-  async createLeague(name){const d=this.db();const code=Math.random().toString(36).slice(2,8).toUpperCase();d.leagues.push({id:code,code,name,since:today()});this.put(d);return {code,id:code,name};},
+  async setAvatar(){},
+  async setLeagueAvatar(id,a){const d=this.db();const l=d.leagues.find(x=>x.id===id);if(l){l.avatar=a;this.put(d);}},
+  async createLeague(name){const d=this.db();const code=Math.random().toString(36).slice(2,8).toUpperCase();d.leagues.push({id:code,code,name,since:today(),owner:true});this.put(d);return {code,id:code,name};},
   async joinLeague(code){const d=this.db();const l=d.leagues.find(x=>x.code===code.toUpperCase());if(!l)throw new Error("No existe esa liga");return l;},
   async myLeagues(){return this.db().leagues;},
-  async board(id,from,to){const g={};let total=0;const L=this.db().leagues.find(x=>x.id===id);if(L&&L.since&&L.since>from)from=L.since;for(let n=dayNum(from);n<=dayNum(to);n++){const r=S.days[dstrUTC(n)];if(r)for(const k in r){g[k]=(g[k]||0)+r[k];total+=r[k];}}return [{alias:S.alias||"Tú",total,g}];},
+  async board(id,from,to){const g={};let total=0;const L=this.db().leagues.find(x=>x.id===id);if(L&&L.since&&L.since>from)from=L.since;for(let n=dayNum(from);n<=dayNum(to);n++){const r=S.days[dstrUTC(n)];if(r)for(const k in r){g[k]=(g[k]||0)+r[k];total+=r[k];}}return [{alias:S.alias||"Tú",avatar:S.avatar||"",total,g}];},
   async submit(){}
 };
 const SB=DATA.CFG;
@@ -228,6 +247,8 @@ const SupabaseBackend={
   },
   rpc(n,args){return this.call("rpc/"+n,{method:"POST",body:JSON.stringify(args||{})});},
   async setAlias(a){await this.rpc("set_alias",{p_alias:a});},
+  async setAvatar(a){await this.rpc("set_avatar",{p_avatar:a||null});},
+  async setLeagueAvatar(id,a){await this.rpc("set_league_avatar",{p_league:id,p_avatar:a||null});},
   async createLeague(name){const r=await this.rpc("create_league",{p_name:name});return {code:r.code,id:r.id,name};},
   async joinLeague(code){const r=await this.rpc("join_league",{p_code:code.toUpperCase()});return {id:r.id,code:r.code,name:r.name};},
   async myLeagues(){return await this.rpc("my_leagues");},
@@ -280,8 +301,66 @@ cal:'<rect x="4" y="5" width="16" height="15" rx="2.5"/><path d="M8 3v4M16 3v4M4
 game:'<rect x="3" y="7" width="18" height="11" rx="4"/><path d="M8 10.5v4M6 12.5h4M15.5 11.5h.01M17.5 13.5h.01"/>',
 user:'<circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c.8-3.6 3.6-5.5 7-5.5s6.2 1.9 7 5.5"/>',
 flame:'<path d="M12 3c1 3.5 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 .3 1.5 1 2 2 2-.5-3 0-5 1-8z"/>',
-x:'<path d="M6 6l12 12M18 6L6 18"/>'
+x:'<path d="M6 6l12 12M18 6L6 18"/>',
+ball:'<circle cx="12" cy="12" r="9"/><path d="M12 8l3.5 2.5-1.3 4h-4.4l-1.3-4z"/><path d="M12 3v5M20.5 9.5l-5 1M18 19l-3.8-4.5M6 19l3.8-4.5M3.5 9.5l5 1"/>',
+goal:'<path d="M3 20V7h18v13"/><path d="M3 7l3 3M21 7l-3 3M8 7v13M16 7v13M3 12h18"/>',
+boot:'<path d="M4 16V5h5v5c0 1.6 1.2 2.6 3 3.1l6 1.6c1.2.3 2 1.2 2 2.3V19H4z"/><path d="M4 19h16M7 8h2"/>',
+glove:'<path d="M7 21v-4l-3-4V9a1.6 1.6 0 0 1 3.2 0v2m0-4.5a1.6 1.6 0 0 1 3.2 0V11m0-5.5a1.6 1.6 0 0 1 3.2 0V11m0-3a1.6 1.6 0 0 1 3.2 0v7c0 4-2 6-5.5 6H7"/>',
+whistle:'<circle cx="9" cy="14.5" r="5"/><path d="M13 11l8-3v4.5h-5M9 12v3"/>',
+shield:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/>',
+star:'<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>',
+crown:'<path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"/>',
+card:'<rect x="7" y="4" width="10" height="16" rx="1.8"/>',
+camera:'<path d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>'
 };
+const AV_ICONS=["ball","goal","boot","glove","whistle","shield","star","crown","card","top","flame","key"];
+const AV_COLORS=["#f2c14e","#ff6b4a","#2ee6c5","#5bb8ff","#b58cff","#ff7ad9","#9be564","#ff8fb1"];
+/* avatar: 'p:<icono>:<color>' (prediseñado), 'data:image/jpeg;base64,...' (foto de la galeria reducida) o vacio (iniciales) */
+function avatarHtml(a,size,name){
+  size=size||40;
+  if(typeof a==="string"&&/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+\/=]+$/.test(a))return `<img class="av" width="${size}" height="${size}" style="width:${size}px;height:${size}px" src="${a}" alt="">`;
+  const m=typeof a==="string"&&a.match(/^p:([a-z]{2,12}):(\d{1,2})$/);
+  if(m&&ICONS[m[1]]){const c=AV_COLORS[+m[2]%AV_COLORS.length];return `<span class="av" style="width:${size}px;height:${size}px;color:${c};background:color-mix(in srgb,${c} 18%,var(--bg2));border-color:color-mix(in srgb,${c} 45%,transparent)">${svg(m[1])}</span>`;}
+  const ini=String(name||"?").split(/\s+/).filter(Boolean).map(x=>x[0]).slice(0,2).join("").toUpperCase()||"?";
+  return `<span class="av" style="width:${size}px;height:${size}px;font-size:${Math.round(size*.38)}px">${esc(ini)}</span>`;
+}
+function resizeToAvatar(file){                       /* foto de la galeria -> cuadrado 96x96 JPEG */
+  return new Promise((ok,ko)=>{
+    const img=new Image(),url=URL.createObjectURL(file);
+    img.onload=()=>{
+      const s=Math.min(img.width,img.height),c=document.createElement("canvas");c.width=c.height=96;
+      c.getContext("2d").drawImage(img,(img.width-s)/2,(img.height-s)/2,s,s,0,0,96,96);
+      URL.revokeObjectURL(url);
+      let q=.78,d=c.toDataURL("image/jpeg",q);while(d.length>12000&&q>.3){q-=.1;d=c.toDataURL("image/jpeg",q);}
+      d.length>13500?ko(new Error("Imagen demasiado grande")):ok(d);
+    };
+    img.onerror=()=>{URL.revokeObjectURL(url);ko(new Error("No se pudo leer la imagen"));};
+    img.src=url;
+  });
+}
+/* hoja para elegir icono o foto. onSave(avatar|"") se llama al guardar */
+function avatarSheet(title,current,onSave){
+  const m=String(current||"").match(/^p:([a-z]+):(\d+)$/);
+  let ic=m?m[1]:"ball",ci=m?+m[2]:0,photo=/^data:image/.test(current||"")?current:"";
+  const el=document.createElement("div");el.className="sheet";el.setAttribute("role","dialog");
+  const draw=()=>{
+    const cur=photo||`p:${ic}:${ci}`;
+    el.innerHTML=`<div class="sh"><div class="shh"><b>${esc(title)}</b><button class="x2" id="avx" aria-label="Cerrar">${svg("x")}</button></div>
+    <div style="display:flex;justify-content:center;margin:6px 0 14px">${avatarHtml(cur,84)}</div>
+    <div class="avgrid">${AV_ICONS.map(k=>`<button class="avb ${!photo&&k===ic?"on":""}" data-ic="${k}" aria-label="${k}">${svg(k)}</button>`).join("")}</div>
+    <div class="avcol">${AV_COLORS.map((c,i)=>`<button class="avc ${!photo&&i===ci?"on":""}" data-ci="${i}" style="background:${c}" aria-label="Color ${i+1}"></button>`).join("")}</div>
+    <label class="btn ghost block" style="margin-top:14px;text-align:center;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer">${svg("camera")}<span>Elegir foto de la galería</span><input id="avf" type="file" accept="image/*" hidden></label>
+    <div class="row" style="margin-top:10px"><button class="btn ghost" id="avn">Quitar</button><button class="btn" id="avs">Guardar</button></div></div>`;
+    el.querySelector("#avx").onclick=()=>el.remove();
+    el.onclick=e=>{if(e.target===el)el.remove();};
+    el.querySelectorAll("[data-ic]").forEach(b=>b.onclick=()=>{ic=b.dataset.ic;photo="";draw();});
+    el.querySelectorAll("[data-ci]").forEach(b=>b.onclick=()=>{ci=+b.dataset.ci;photo="";draw();});
+    el.querySelector("#avf").onchange=async e=>{const f=e.target.files&&e.target.files[0];if(!f)return;try{photo=await resizeToAvatar(f);draw();}catch(err){toast(err.message);}};
+    el.querySelector("#avn").onclick=()=>{el.remove();onSave("");};
+    el.querySelector("#avs").onclick=()=>{el.remove();onSave(photo||`p:${ic}:${ci}`);};
+  };
+  draw();document.body.appendChild(el);
+}
 const svg=(k,cls)=>`<svg viewBox="0 0 24 24" ${cls?`class="${cls}" `:""}aria-hidden="true">${ICONS[k]||""}</svg>`;
 document.querySelectorAll("#tabs button").forEach(b=>b.insertAdjacentHTML("afterbegin",svg(b.dataset.i)));
 const GAMES=[
@@ -373,6 +452,7 @@ function renderPerfil(){
   const scores=Object.values(S.days).flatMap(d=>Object.values(d)).filter(x=>typeof x==='number');
   const avg=scores.length?Math.round(scores.reduce((a,b)=>a+b,0)/scores.length):0;
   $("#v-perfil").innerHTML=`<h1>Perfil</h1>
+  <div class="card prof"><div style="display:flex;align-items:center;gap:14px"><span id="pav">${avatarHtml(S.avatar,64,S.alias)}</span><div style="flex:1"><b>${esc(S.alias||"Tu perfil")}</b><div class="mut" style="font-size:13px">Lo verán los miembros de tus ligas</div></div></div><button class="btn block ghost" id="av-ch" style="margin-top:12px">Cambiar foto o icono</button></div>
   <div class="card"><b>Tu alias</b><input class="alias" id="al" maxlength="20" placeholder="Cómo te verán en las ligas" value="${esc(S.alias)}"><button class="btn block" id="al-save">Guardar alias</button></div>
   <div class="card"><table>
   <tr><td>Racha actual</td><td class="n"><b>${streak()}</b></td></tr>
@@ -387,6 +467,10 @@ function renderPerfil(){
   <div class="mut" style="font-size:13px;margin-top:8px">Es el progreso guardado en esta app. El Top 10 instalado por separado tiene el suyo.</div></div>`;
   $("#v-perfil").insertAdjacentHTML("beforeend",`<details class="card" id="cred"><summary style="font-weight:700;cursor:pointer">Créditos de las fotos</summary><div class="mut" style="font-size:13px;margin-top:8px">Las fotos de jugadores proceden de Wikimedia Commons con licencias libres. Cada foto enlaza a su página con autor y licencia. Cargando...</div></details>`);
   loadPhotos().then(()=>{const d=$("#cred");if(!d)return;d.innerHTML=`<summary style="font-weight:700;cursor:pointer">Créditos de las fotos (${PHOTOS.list.length})</summary><div class="mut" style="font-size:12.5px;margin-top:8px;line-height:1.5">Fotos de Wikimedia Commons con licencias libres (Creative Commons y dominio público). Autor y licencia de cada una:<br>${PHOTOS.list.map(e=>`${esc(e.n)}: ${esc(e.artist||"autor desconocido")}, <a href="${esc(e.page)}" target="_blank" rel="noopener" style="color:var(--mut)">${esc(e.lic)}</a>`).join("<br>")}</div>`;});
+  $("#av-ch").onclick=()=>avatarSheet("Tu foto o icono",S.avatar,async a=>{
+    S.avatar=a;save();renderPerfil();
+    try{await Backend.setAvatar(a);}catch(e){toast("Guardado en este móvil; el servidor aún no admite fotos");}
+  });
   $("#al-save").onclick=async()=>{
     const a=$("#al").value.trim();
     if(a.length<2){toast("Mínimo 2 letras");return;}
@@ -396,6 +480,7 @@ function renderPerfil(){
 
 /* ================= ligas ================= */
 let LG={sel:null,range:"hoy",rows:null,err:""};
+let NEWAV="p:top:0";
 async function renderLigas(){
   const el=$("#v-ligas");
   if(!S.alias){el.innerHTML=`<h1>Ligas</h1><div class="card"><b>Primero elige un alias</b><div class="mut">Es el nombre que verán tus amigos.</div><input class="alias" id="al" maxlength="20" placeholder="Tu alias"><button class="btn block" id="al-ok">Continuar</button></div>`;
@@ -405,29 +490,32 @@ async function renderLigas(){
   const note=Backend.kind==="local"?`<div class="card mut">Modo de prueba: todavía no hay servidor conectado, así que las ligas solo existen en este móvil y solo apareces tú.</div>`:"";
   if(LG.sel){return renderBoard(list);}
   el.innerHTML=`<h1>Ligas privadas</h1>${note}
-  ${list.map(l=>`<button class="gcard" style="--c:var(--gold)" data-l="${esc(l.id)}"><span class="ic">${svg("top")}</span><span class="tx"><b>${esc(l.name)}</b><small>Código ${esc(l.code)}</small></span></button>`).join("")||`<div class="mut">Aún no estás en ninguna liga.</div>`}
-  <div class="card"><b>Crear liga</b><input class="alias" id="ln" maxlength="30" placeholder="Nombre de la liga"><button class="btn block" id="lc">Crear</button></div>
+  ${list.map(l=>`<button class="gcard" style="--c:var(--gold)" data-l="${esc(l.id)}"><span class="ic" style="background:none;border:0">${avatarHtml(l.avatar||"p:top:0",44,l.name)}</span><span class="tx"><b>${esc(l.name)}</b><small>Código ${esc(l.code)}</small></span></button>`).join("")||`<div class="mut">Aún no estás en ninguna liga.</div>`}
+  <div class="card"><b>Crear liga</b><div style="display:flex;align-items:center;gap:12px;margin-top:8px"><span id="nav">${avatarHtml(NEWAV,48)}</span><button class="btn ghost" id="nav-ch">Icono o foto</button></div><input class="alias" id="ln" maxlength="30" placeholder="Nombre de la liga"><button class="btn block" id="lc">Crear</button></div>
   <div class="card"><b>Unirme con código</b><input class="alias" id="lj" maxlength="8" placeholder="Código de 6 letras" autocapitalize="characters"><button class="btn block" id="ljb">Unirme</button></div>`;
   document.querySelectorAll("[data-l]").forEach(b=>b.onclick=()=>{LG.sel=list.find(x=>String(x.id)===b.dataset.l);LG.range="hoy";renderLigas();});
-  $("#lc").onclick=async()=>{const n=$("#ln").value.trim();if(n.length<2){toast("Pon un nombre");return;}try{const l=await Backend.createLeague(n);toast("Liga creada: "+l.code);renderLigas();}catch(e){toast(e.message);}};
+  $("#nav-ch").onclick=()=>avatarSheet("Icono de la liga",NEWAV,a=>{NEWAV=a||"p:top:0";$("#nav").innerHTML=avatarHtml(NEWAV,48);});
+  $("#lc").onclick=async()=>{const n=$("#ln").value.trim();if(n.length<2){toast("Pon un nombre");return;}try{const l=await Backend.createLeague(n);let w="";try{await Backend.setLeagueAvatar(l.id,NEWAV);}catch(e){w=" (sin icono: el servidor aún no lo admite)";}NEWAV="p:top:0";toast("Liga creada: "+l.code+w);renderLigas();}catch(e){toast(e.message);}};
   $("#ljb").onclick=async()=>{const c=$("#lj").value.trim();if(c.length<4){toast("Código no válido");return;}try{const l=await Backend.joinLeague(c);toast("Te has unido a "+l.name);renderLigas();}catch(e){toast(e.message);}};
 }
 async function renderBoard(){
   const el=$("#v-ligas"),l=LG.sel;
   const t=dayNum(today());
   const rng_={hoy:[t,t],semana:[t-6,t],total:[t-400,t]}[LG.range];
-  el.innerHTML=`<div class="top"><button class="btn ghost" id="bk">←</button><h1 style="flex:1;margin-left:10px">${esc(l.name)}</h1></div>
+  el.innerHTML=`<div class="top"><button class="btn ghost" id="bk">←</button><span style="margin-left:10px">${avatarHtml(l.avatar||"p:top:0",34,l.name)}</span><h1 style="flex:1;margin-left:10px">${esc(l.name)}</h1></div>
+  ${l.owner?`<button class="btn block ghost" id="lav" style="margin-bottom:10px">Cambiar icono de la liga</button>`:""}
   <div class="card"><div class="mut" style="text-align:center">Código para invitar</div><div class="code">${esc(l.code)}</div><button class="btn block ghost" id="lsh">Compartir código</button></div>
   <div class="seg">${[["hoy","Hoy"],["semana","7 días"],["total","Total"]].map(([k,n])=>`<button data-r="${k}" class="${LG.range===k?"on":""}">${n}</button>`).join("")}</div>
   <div class="card" id="bd">Cargando...</div>`;
   $("#bk").onclick=()=>{LG.sel=null;renderLigas();};
+  const lav=$("#lav");if(lav)lav.onclick=()=>avatarSheet("Icono de la liga",l.avatar,async a=>{try{await Backend.setLeagueAvatar(l.id,a||"p:top:0");l.avatar=a||"p:top:0";renderBoard();}catch(e){toast("No se pudo guardar el icono");}});
   $("#lsh").onclick=()=>share("Únete a mi liga «"+l.name+"» en Minijuegos de fútbol con el código "+l.code+" "+location.href.split("#")[0]);
   el.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>{LG.range=b.dataset.r;renderBoard();});
   try{
     await flushPending();
-    const rows=(await Backend.board(l.id,dstrUTC(rng_[0]),dstrUTC(rng_[1]))).map(r=>{const g=r.g||{mm:r.mm||0,once:r.once||0};return {alias:r.alias,g,total:r.total!=null?r.total:Object.values(g).reduce((a,b)=>a+b,0)};}).sort((a,b)=>b.total-a.total);
+    const rows=(await Backend.board(l.id,dstrUTC(rng_[0]),dstrUTC(rng_[1]))).map(r=>{const g=r.g||{mm:r.mm||0,once:r.once||0};return {alias:r.alias,avatar:r.avatar||"",g,total:r.total!=null?r.total:Object.values(g).reduce((a,b)=>a+b,0)};}).sort((a,b)=>b.total-a.total);
     const detail=g=>GAMES.filter(x=>g[x.id]!=null).map(x=>x.ic+g[x.id]).join(" ");
-    $("#bd").innerHTML=rows.length?`<table><tr><th>#</th><th>Jugador</th><th class="n">Total</th></tr>${rows.map((r,i)=>`<tr><td>${i+1}</td><td>${esc(r.alias)}<div class="mut" style="font-size:12px">${detail(r.g)}</div></td><td class="n"><b>${r.total}</b></td></tr>`).join("")}</table>`:`<div class="mut">Nadie ha jugado todavía.</div>`;
+    $("#bd").innerHTML=rows.length?`<table><tr><th>#</th><th>Jugador</th><th class="n">Total</th></tr>${rows.map((r,i)=>`<tr><td>${i+1}</td><td><div style="display:flex;align-items:center;gap:9px">${avatarHtml(r.avatar,32,r.alias)}<div>${esc(r.alias)}<div class="mut" style="font-size:12px">${detail(r.g)}</div></div></div></td><td class="n"><b>${r.total}</b></td></tr>`).join("")}</table>`:`<div class="mut">Nadie ha jugado todavía.</div>`;
   }catch(e){$("#bd").innerHTML=`<div class="mut">${esc(e.message)}</div>`;}
 }
 

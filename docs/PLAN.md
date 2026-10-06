@@ -122,3 +122,7 @@ Web instalable (PWA) con minijuegos diarios de futbol en castellano, con ligas p
 - Datos verificados por agentes con fuentes: Trayectoria (4 correcciones de anos), Verdadero o falso (actualizado a 2026), notas de Conexiones; reactivados con-16 y con-20.
 - Juegos nuevos EN PRUEBAS (`beta:true`): Marcador exacto (40 partidos), Momentos clave (50 preguntas), Camino a la final (14 retos), Reconstruye la tabla (14 tablas). Salen en Hoy en la seccion "En pruebas", no suman al total ni se envian a las ligas. Para promoverlos hace falta quitar `beta` y un parche SQL que anada sus ids ('score','key','road','table') al check de `scores.game`.
 - Motor comun `playOrder` para Linea del tiempo y Reconstruye la tabla.
+
+### Avatares (2026-10-06)
+- Perfil y ligas pueden tener icono prediseñado (`p:<icono>:<color>`) o foto de galeria reducida a 96x96 JPEG (base64, <=14000 car.). Se ven en lista de ligas, cabecera y clasificacion.
+- Servidor: `supabase/patch-04-avatares.sql` (columnas avatar, set_avatar, set_league_avatar solo dueño, my_leagues y league_board con avatar). Sin el parche la app funciona igual pero no sincroniza avatares.
