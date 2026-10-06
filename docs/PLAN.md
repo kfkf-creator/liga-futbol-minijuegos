@@ -178,3 +178,8 @@ Solo diseño; nada de esto esta en el codigo todavia salvo lo indicado en seccio
 - Datos curiosos: `data/curiosos.js` (119 datos de los retos existentes) + campo `fun` en los nuevos. Se ven al terminar tras un video ("Dato curioso (video)", `funAttach` en games.js) en Trayectoria, Camino, Linea, Tabla, Conexiones y Once oculto.
 - Cuentas: correo + codigo de 6 cifras, sin contrasena. Convierte al usuario anonimo en cuenta (`PUT /auth/v1/user` + verify `email_change`) o inicia sesion en otro movil (`otp` + verify `email`). Progreso en la nube con `supabase/patch-07-cuentas.sql` (tabla progress, RPC save_progress/load_progress). Pruebas contra servidor simulado (accounts-test.js); SIN PROBAR contra Supabase real. Requiere en el panel de Supabase: Authentication > Providers > Email activado, y las plantillas "Confirm email change" y "Magic link" con {{ .Token }}.
 - Anuncios: ver docs/ANUNCIOS.md. Proveedor GPT rewarded preparado y desactivado.
+
+## Branding (2026-10-06)
+- Nombre: **Falso Nueve**. Eslogan: "Cuatro retos al día. Una liga con tus amigos." Firma corta posible: "Tu jornada diaria de fútbol."
+- Logo: un 9 dorado (#f2c14e) sobre azul noche (#090e1b) con balón en el bucle y cola afilada. Fuente SVG en `src/brand/` (`make-logo.js` genera los SVG, `render.js` los PNG de la PWA en `app/`).
+- Pendiente: comprobar dominio, handles (Instagram, TikTok) y marca (OEPM clases 9 y 41) antes de monetizar. "Tercer Hombre" descartado (colisión con la película, jerga menos conocida); se guarda como idea para un modo.
