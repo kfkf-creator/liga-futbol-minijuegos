@@ -7,7 +7,7 @@ const URL=process.env.URL||"http://localhost:8123/app/index.html";
  p.on("pageerror",e=>errs.push(String(e)));p.on("console",m=>{if(m.type()==="error"&&!/Failed to load resource|net::/.test(m.text()))errs.push(m.text());});
  const out={};
  await p.route("**/app/index.html",async r=>{const resp=await r.fetch();let t=await resp.text();t=t.replace(/"supabaseUrl":"[^"]*"/,'"supabaseUrl":""').replace(/"supabaseKey":"[^"]*"/,'"supabaseKey":""');r.fulfill({response:resp,body:t});});
- await p.goto(URL);
+ await p.goto(URL);await p.evaluate(()=>{ADS.secs=0;S.unlock[today()]=true;renderHoy();});
  out.title=await p.title();
  out.cards=await p.$$eval("[data-play]",e=>e.length);
  /* Más o menos diario: 10 duelos, siempre la primera opción */

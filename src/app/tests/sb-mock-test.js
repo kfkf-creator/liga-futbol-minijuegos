@@ -28,7 +28,7 @@ const MOCK="https://mock.supabase.test";
   t=t.replace(/"supabaseUrl":"[^"]*"/,'"supabaseUrl":"'+MOCK+'"').replace(/"supabaseKey":"[^"]*"/,'"supabaseKey":"anon-key"');
   r.fulfill({response:resp,body:t});
  });
- await p.goto(URL);
+ await p.goto(URL);await p.evaluate(()=>{ADS.secs=0;S.unlock[today()]=true;renderHoy();});
  await p.click('[data-play="mm"]');
  for(let i=0;i<10;i++){await p.click('.opt[data-o="0"]');await p.click("#go");}
  await p.click("#e2");

@@ -166,3 +166,9 @@ Solo diseño; nada de esto esta en el codigo todavia salvo lo indicado en seccio
 - Perfil: tarjeta "Racha y premios" con comodines, medallas y copia de seguridad en texto (`backupCode`/`restoreCode`).
 - DECISION: no se guarda el progreso en el servidor. Cada movil es un usuario anonimo distinto, asi que el servidor no permitiria recuperarlo en otro dispositivo. Hace falta un sistema de cuentas (por ejemplo, correo) antes; mientras, copia de seguridad manual.
 - Pendiente: capa de recompensas con anuncio (solucion al fallar, desbloquear opcionales, archivo, salvar racha); cuentas de usuario.
+
+### Implementado: capa de recompensas con video (2026-10-06)
+- `Rewards.request(etiqueta)` en template.html. Hoy el anuncio es SIMULADO (`ADS.secs`=5 s de cuenta atras). Para un anuncio real, sustituir `Rewards.show` por el SDK de la red (promesa true si se vio entero). Si falla, se concede igualmente. Tope de 6 videos al dia (`ADS.cap`).
+- Usos: desbloquear los 8 opcionales del dia (1 video), repetir un reto del archivo no jugado (1 video por reto; queda pagado), salvar la racha cuando ayer no se jugo y antes de ayer si (racha >= 3 dias, como mucho una vez cada 7 dias), ver el orden correcto en Linea del tiempo y Reconstruye la tabla.
+- Decision de diseño: en el resto de juegos la solucion ya se muestra gratis al terminar (cuestionarios con explicacion, Once, Trayectoria, Misterioso, Camino, Conexiones, Marcador). No se ha tapado nada que fuera gratis. Pendiente: contenido nuevo "dato curioso" para ofrecer detras del video en esos juegos.
+- Tests: ads-test.js. Los demas tests ponen `ADS.secs=0` y desbloquean opcionales.

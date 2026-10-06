@@ -127,7 +127,10 @@ function playOrder(id,day,cfg){
     $("#gb").innerHTML=`<div class="mut" style="text-align:center;margin-top:8px">Así lo entregaste (verde: en su sitio)</div>
     <div class="tl">${ord.map((k,i)=>`<div class="tli" style="border-color:${ok(k,i)?"var(--ok)":"var(--bad)"}"><b>${cfg.tag(its[k])}</b><span>${esc(its[k].t)}</span>${cfg.sub?`<span class="mut" style="margin-left:auto">${esc(cfg.sub(its[k]))}</span>`:""}</div>`).join("")}</div><div id="endbox"></div>`;
     recordScore(day,id,score);$("#gsc").textContent="";
-    $("#endbox").innerHTML=`<div class="mut" style="text-align:center;margin-top:16px">${line}</div><div class="big">${score}/100</div>${hoy?`<button class="btn block" id="e1">Compartir</button>`:""}<button class="btn block ghost" style="margin-top:10px" id="e2">Cerrar</button>`;
+    $("#endbox").innerHTML=`<div class="mut" style="text-align:center;margin-top:16px">${line}</div><div class="big">${score}/100</div><div id="sol"></div>${exact<N?`<button class="btn block ghost" style="margin-top:10px" id="solb">Ver el orden correcto (vídeo)</button>`:""}${hoy?`<button class="btn block" style="margin-top:10px" id="e1">Compartir</button>`:""}<button class="btn block ghost" style="margin-top:10px" id="e2">Cerrar</button>`;
+    const sb=$("#solb");if(sb)sb.onclick=async()=>{if(!await Rewards.request("Ver el orden correcto"))return;sb.remove();
+      const idx=its.map((_,k)=>k).sort((p,q)=>keyOf(p)-keyOf(q));
+      $("#sol").innerHTML=`<div class="mut" style="text-align:center;margin-top:14px">Orden correcto</div><div class="tl">${idx.map(k=>`<div class="tli"><b>${cfg.tag(its[k])}</b><span>${esc(its[k].t)}</span>${cfg.sub?`<span class="mut" style="margin-left:auto">${esc(cfg.sub(its[k]))}</span>`:""}</div>`).join("")}</div>`;};
     const a=$("#e1");if(a)a.onclick=()=>share(shareText());
     $("#e2").onclick=closeGame;
   }

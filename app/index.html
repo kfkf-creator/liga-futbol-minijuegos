@@ -197,15 +197,42 @@ function ymd(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate
 let NOW=()=>new Date();               /* reemplazable en pruebas */
 const today=()=>ymd(NOW());
 const dayNum=s=>Math.floor(Date.UTC(+s.slice(0,4),+s.slice(5,7)-1,+s.slice(8,10))/86400000);
+/* ---- Recompensas con video. Hoy el anuncio es SIMULADO: para conectar uno real, sustituir show() por el SDK de la red publicitaria
+   (debe devolver una promesa true si el usuario lo vio entero). Si el anuncio falla, se concede la recompensa igualmente. ---- */
+const ADS={provider:"sim",cap:6,secs:5};
+const Rewards={
+  state(){const t=today();if(!S.ads||S.ads.d!==t)S.ads={d:t,n:0};return S.ads;},
+  left(){return Math.max(0,ADS.cap-this.state().n);},
+  show(label){
+    return new Promise(res=>{
+      if(ADS.secs<=0)return res(true);
+      const el=document.createElement("div");el.className="sheet";el.setAttribute("role","dialog");
+      let n=ADS.secs;
+      const draw=()=>{el.innerHTML=`<div class="sh" style="text-align:center"><div class="mut" style="font-size:12.5px">Anuncio (simulado)</div><div style="font:800 40px system-ui;margin:10px 0">${n>0?n:"✔"}</div><div style="margin-bottom:12px">${esc(label||"Mira el vídeo para conseguir la recompensa")}</div>
+        <div class="row"><button class="btn ghost" id="adx">Cancelar</button><button class="btn" id="adok" ${n>0?"disabled":""}>Recoger recompensa</button></div></div>`;
+        el.querySelector("#adx").onclick=()=>{clearInterval(iv);el.remove();res(false);};
+        el.querySelector("#adok").onclick=()=>{clearInterval(iv);el.remove();res(true);};};
+      const iv=setInterval(()=>{n--;if(n<=0)clearInterval(iv);draw();},1000);
+      draw();document.body.appendChild(el);
+    });
+  },
+  async request(label){
+    if(this.left()<=0){toast("Has visto todos los vídeos de hoy. Vuelve mañana.");return false;}
+    let ok;try{ok=await this.show(label);}catch(e){ok=true;}
+    if(ok){this.state().n++;save();}
+    return ok;
+  }
+};
 function toast(t){const e=document.createElement("div");e.className="toast";e.textContent=t;document.body.appendChild(e);setTimeout(()=>e.remove(),1800);}
 
 /* ================= almacenamiento ================= */
 const KEY="minijuegos.v1";
-let S={days:{},arch:{},prog:{},mmBest:0,alias:"",avatar:"",pending:[],leagues:[],tokens:{hint:0,life:0},medals:{},claimed:{}};
+let S={days:{},arch:{},prog:{},mmBest:0,alias:"",avatar:"",pending:[],leagues:[],tokens:{hint:0,life:0},medals:{},claimed:{},unlock:{},paid:{},saved:{},ads:null,lastSave:""};
 try{const r=JSON.parse(localStorage.getItem(KEY));if(r&&r.days)S=Object.assign(S,r);}catch(e){}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
 /* un dia cuenta para la racha si juegas al menos un reto obligatorio (antes de RULE_DAY, cualquier juego) */
 function dayCounts(ds){
+  if(S.saved&&S.saved[ds])return true;
   const r=S.days[ds];if(!r)return false;
   const ks=Object.keys(r);if(!ks.length)return false;
   return ds<RULE_DAY||ks.some(k=>requiredOf(ds).includes(k));
@@ -229,6 +256,14 @@ const LADDER=[
 const tokN=k=>(S.tokens&&S.tokens[k])||0;
 function tokUse(k){if(tokN(k)<1)return false;S.tokens[k]--;save();return true;}
 function tokGive(k,n){S.tokens=S.tokens||{hint:0,life:0};S.tokens[k]=Math.min(2,tokN(k)+n);}
+/* racha en peligro: ayer no se jugo pero antes de ayer si; se puede salvar con un video, como mucho una vez cada 7 dias */
+function streakRescue(){
+  const n=dayNum(today()),y=dstrUTC(n-1);
+  if(dayCounts(y)||!dayCounts(dstrUTC(n-2)))return null;
+  if(S.lastSave&&n-dayNum(S.lastSave)<7)return null;
+  let d=n-2,len=0;while(dayCounts(dstrUTC(d))){len++;d--;}
+  return len>=3?{day:y,len}:null;
+}
 function checkStreak(){
   const cur=streak(),got=[];
   S.claimed=S.claimed||{};S.medals=S.medals||{};
@@ -485,15 +520,18 @@ function renderHoy(){
   const total=M.reduce((a,g)=>a+(r[g.id]||0),0),n=M.filter(g=>r[g.id]!=null).length,any=GAMES.some(g=>r[g.id]!=null);
   const fecha=NOW().toLocaleDateString("es-ES",{weekday:"long",day:"numeric",month:"long"});
   $("#v-hoy").innerHTML=`<div class="top"><h1>Hoy</h1><div class="streak" title="Racha de días jugados">${svg("flame")}${streak()}</div></div>
+  ${(()=>{const q=streakRescue();return q?`<button class="gcard rescue" style="--c:#ff6b4a" id="resc"><span class="ic">${svg("flame")}</span><span class="tx"><b>Tu racha de ${q.len} días está en peligro</b><small>Ayer no jugaste. Mira un vídeo para salvarla.</small></span><span class="pill">Salvar</span></button>`:"";})()}
   <div class="board"><div class="bd">${esc(fecha)}</div><div class="bt"><b>${total}</b><small>/ ${M.length*100} puntos</small></div>
   <div class="pips">${M.map(g=>`<i class="pip ${r[g.id]!=null?"on":""}" style="--c:${g.c}"></i>`).join("")}</div>
   <div class="bm">${n===M.length?"Has completado los "+M.length+" retos de hoy":n+" de "+M.length+" retos del día jugados"} · ${nextIn()}</div></div>
   ${M.map(g=>gameCard(g,r)).join("")}
-  ${B.length?`<div class="sec"><h2>Opcionales</h2><span>${xn?xn+"/"+B.length+" · "+xtra+" pts · ":""}no suman a las ligas</span></div>${B.map(g=>gameCard(g,r)).join("")}`:""}
+  ${B.length?`<div class="sec"><h2>Opcionales</h2><span>${xn?xn+"/"+B.length+" · "+xtra+" pts · ":""}no suman a las ligas</span></div>${(S.unlock||{})[today()]||xn?B.map(g=>gameCard(g,r)).join(""):`<button class="gcard" style="--c:var(--gold)" id="unl"><span class="ic">${svg("star")}</span><span class="tx"><b>Desbloquear los 8 opcionales de hoy</b><small>Mira un vídeo corto. Son solo por diversión.</small></span><span class="pill">Vídeo</span></button>`}`:""}
   <div class="mut" style="font-size:13px;margin:14px 2px">Solo cuenta el primer resultado de cada reto. Los retos de días anteriores están en la pestaña Juegos.</div>
   ${any?`<button class="btn block" style="margin-top:6px" id="sh">Compartir resultado</button>`:""}${window.installBarHtml?window.installBarHtml():""}`;
   if(window.bindInstallBar)window.bindInstallBar();
   document.querySelectorAll("[data-play]").forEach(b=>b.onclick=()=>startGame(b.dataset.play,today()));
+  const unl=$("#unl");if(unl)unl.onclick=async()=>{if(await Rewards.request("Desbloquear los opcionales de hoy")){S.unlock=S.unlock||{};S.unlock[today()]=true;save();renderHoy();}};
+  const resc=$("#resc");if(resc)resc.onclick=async()=>{const q=streakRescue();if(!q)return;if(await Rewards.request("Salvar tu racha")){S.saved=S.saved||{};S.saved[q.day]=true;S.lastSave=today();save();checkStreak();toast("Racha salvada: "+streak()+" días");renderHoy();}};
   const sh=$("#sh");if(sh)sh.onclick=()=>share(shareText());
 }
 function top10Stats(){
@@ -513,7 +551,13 @@ function renderJuegos(){
   <h2>Archivo de retos</h2>
   <div class="mut" style="font-size:14px;margin-bottom:8px">Repite los retos de días anteriores. No cuentan para la racha ni para las ligas.</div>
   ${days.length?`<div class="card">${days.map(d=>`<div style="padding:8px 0;border-bottom:1px solid var(--line)"><b>${dayLabel(d)}</b><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">${GAMES.map(g=>cell(d,g)).join("")}</div></div>`).join("")}</div>`:`<div class="card mut">Todavía no hay retos anteriores. El archivo se irá llenando a partir de mañana.</div>`}`;
-  document.querySelectorAll("[data-arch]").forEach(b=>b.onclick=()=>{const [g,d]=b.dataset.arch.split("|");startGame(g,d);});
+  document.querySelectorAll("[data-arch]").forEach(b=>b.onclick=async()=>{
+    const [g,d]=b.dataset.arch.split("|"),k=g+"|"+d;
+    if(scoreOf(d,g)==null&&!progGet(d,g)&&!(S.paid||{})[k]){                    /* repetir un reto antiguo cuesta un vídeo */
+      if(!await Rewards.request("Jugar un reto del archivo"))return;
+      S.paid=S.paid||{};S.paid[k]=true;save();
+    }
+    startGame(g,d);});
 }
 function medalIcon(m){const c=m.t==="champ"?"#f2c14e":m.n>=100?"#b58cff":m.n>=30?"#ff6b4a":m.n>=14?"#2ee6c5":m.n>=7?"#5bb8ff":"#9be564";
   return `<div class="medal" style="--c:${c}" title="${esc(m.name)}">${svg(m.t==="champ"?"crown":"flame")}<small>${esc(m.t==="champ"?"Campeón":m.n+" días")}</small></div>`;}
@@ -1008,7 +1052,10 @@ function playOrder(id,day,cfg){
     $("#gb").innerHTML=`<div class="mut" style="text-align:center;margin-top:8px">Así lo entregaste (verde: en su sitio)</div>
     <div class="tl">${ord.map((k,i)=>`<div class="tli" style="border-color:${ok(k,i)?"var(--ok)":"var(--bad)"}"><b>${cfg.tag(its[k])}</b><span>${esc(its[k].t)}</span>${cfg.sub?`<span class="mut" style="margin-left:auto">${esc(cfg.sub(its[k]))}</span>`:""}</div>`).join("")}</div><div id="endbox"></div>`;
     recordScore(day,id,score);$("#gsc").textContent="";
-    $("#endbox").innerHTML=`<div class="mut" style="text-align:center;margin-top:16px">${line}</div><div class="big">${score}/100</div>${hoy?`<button class="btn block" id="e1">Compartir</button>`:""}<button class="btn block ghost" style="margin-top:10px" id="e2">Cerrar</button>`;
+    $("#endbox").innerHTML=`<div class="mut" style="text-align:center;margin-top:16px">${line}</div><div class="big">${score}/100</div><div id="sol"></div>${exact<N?`<button class="btn block ghost" style="margin-top:10px" id="solb">Ver el orden correcto (vídeo)</button>`:""}${hoy?`<button class="btn block" style="margin-top:10px" id="e1">Compartir</button>`:""}<button class="btn block ghost" style="margin-top:10px" id="e2">Cerrar</button>`;
+    const sb=$("#solb");if(sb)sb.onclick=async()=>{if(!await Rewards.request("Ver el orden correcto"))return;sb.remove();
+      const idx=its.map((_,k)=>k).sort((p,q)=>keyOf(p)-keyOf(q));
+      $("#sol").innerHTML=`<div class="mut" style="text-align:center;margin-top:14px">Orden correcto</div><div class="tl">${idx.map(k=>`<div class="tli"><b>${cfg.tag(its[k])}</b><span>${esc(its[k].t)}</span>${cfg.sub?`<span class="mut" style="margin-left:auto">${esc(cfg.sub(its[k]))}</span>`:""}</div>`).join("")}</div>`;};
     const a=$("#e1");if(a)a.onclick=()=>share(shareText());
     $("#e2").onclick=closeGame;
   }
