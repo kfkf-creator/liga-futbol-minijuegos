@@ -153,3 +153,8 @@ Solo diseño; nada de esto esta en el codigo todavia salvo lo indicado en seccio
 - MVP DIARIO (decidido): cada dia, quien tenga el mayor total de los 4 obligatorios, habiendo jugado los 4, recibe +1 punto de liga; empate: +1 cada uno; sin MVP si la liga tiene un solo jugador.
 - Desempate de temporada: puntos brutos de la temporada.
 - Opcional: insignia de "MVP del dia" cosmetica.
+
+### Implementado: ligas por temporadas (2026-10-06)
+- `supabase/patch-06-temporadas.sql`: RPC `league_days` (total y n.º de retos por miembro y dia, desde la creacion de la liga). La app calcula semanas, puntos, MVP y campeon (`seasonCalc` en template.html), asi la logica esta en un solo sitio y se puede probar.
+- Temporada 1 empieza el lunes 2026-10-05 (`SEASON_EPOCH`), 4 semanas de lunes a domingo. Vista Temporada / Semana / Hoy con navegacion entre temporadas y semanas. Sin el parche 6 la app cae a la tabla antigua.
+- Pendiente: guardar racha, medallas y comodines en el servidor; medalla de campeon; premios de racha; capa de recompensas.

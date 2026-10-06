@@ -18,6 +18,7 @@ const MOCK="https://mock.supabase.test";
   if(path==="/rest/v1/rpc/create_league"){const l={id:"uuid-1",code:"ABC123",name:JSON.parse(q.postData()).p_name};leagues=[l];return j(l);}
   if(path==="/rest/v1/rpc/my_leagues")return j(leagues);
   if(path==="/rest/v1/rpc/league_board")return j([{alias:"Marc",mm:80,once:60,total:140},{alias:"Ana",mm:90,once:70,total:160}]);
+  if(path==="/rest/v1/rpc/league_days")return j([{k:1,alias:"Marc",avatar:"",me:true,day:"2026-10-06",tot:140,ng:4},{k:2,alias:"Ana",avatar:"p:star:2",me:false,day:"2026-10-06",tot:210,ng:4}]);
   if(path==="/rest/v1/rpc/submit_score")return r.fulfill({status:204,headers:{"access-control-allow-origin":"*"}});
   r.fulfill({status:404,body:"{}"});
  });

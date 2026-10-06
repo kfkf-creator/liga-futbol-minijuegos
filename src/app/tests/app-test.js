@@ -42,6 +42,16 @@ const URL=process.env.URL||"http://localhost:8123/app/index.html";
  await p.click("[data-l]");
  await p.waitForSelector("#bd table");
  out.board=await p.textContent("#bd");
+ out.season=await p.evaluate(()=>{
+  const t="2026-10-12",R=[];       /* semana 2: Ana, Luis, Marc (+ Eva con 2 dias) */
+  const add=(k,al,day,tot,ng)=>R.push({k,alias:al,avatar:"",me:k===3,day,tot,ng});
+  const days=["2026-10-12","2026-10-13","2026-10-14"];
+  [[1,"Ana",[300,350,380]],[2,"Luis",[320,340,330]],[3,"Marc",[200,250,300]]].forEach(([k,a,v])=>days.forEach((d,i)=>add(k,a,d,v[i],4)));
+  add(4,"Eva","2026-10-12",100,2);add(4,"Eva","2026-10-13",150,3);
+  const C=seasonCalc(R,1,"2026-10-14");        /* temporada 2 empieza el 2026-11-02: usamos la 0 */
+  const C0=seasonCalc(R,0,"2026-10-14");
+  return {n1:C.table.length,wk:C0.weeks.length,tab:C0.table.map(m=>m.alias+":"+m.pts+"/"+m.wp+"/"+m.mv),mvp:C0.mvp};
+ });
  out.avBoard=(await p.$$("#bd .av")).length;out.avOwner=!!(await p.$("#lav"));
  out.avLeague=await p.evaluate(()=>(LG.sel.avatar||""));
  /* archivo: al dia siguiente, el reto de ayer aparece con sus notas y se puede repetir el que no se jugo */

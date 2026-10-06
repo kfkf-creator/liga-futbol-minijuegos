@@ -112,6 +112,9 @@ td.n,th.n{text-align:right}
 .mrow{margin:6px 0}.mn{font-weight:800;font-size:14px;margin-bottom:2px}
 .mc{border-radius:8px;padding:6px 3px;text-align:center;font-size:10.5px;line-height:1.15;font-weight:700;min-height:48px;min-width:0;display:flex;align-items:center;justify-content:center;overflow-wrap:break-word;word-break:normal;hyphens:auto;background:#2a3560}
 .mc.ok{background:#1f9d5b;color:#fff}.mc.near{background:#d98a1f;color:#fff}
+.snav{display:flex;align-items:center;gap:10px;margin:12px 0 4px}.snav>div{flex:1;text-align:center}.snav b{display:block}.snav small{color:var(--mut);font-size:12.5px}.snav button{width:38px;height:38px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--txt);font-size:20px}.snav button:disabled{opacity:.35}
+.champ{display:flex;align-items:center;gap:8px;justify-content:center;color:var(--gold);margin-bottom:10px}.champ svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8}
+.mvp{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:800;color:var(--gold)}.mvp svg{width:13px;height:13px;stroke:currentColor;fill:currentColor}
 .code{font:800 26px ui-monospace,Menlo,monospace;letter-spacing:4px;text-align:center}
 /* marcador de la jornada (pantalla Hoy) */
 .board{margin:16px 0 8px;padding:16px;border-radius:var(--r3);background:linear-gradient(160deg,#18265a 0,#101a38 70%);border:1px solid #2b3a74;box-shadow:var(--sh)}
@@ -220,6 +223,12 @@ const LocalBackend={
   async joinLeague(code){const d=this.db();const l=d.leagues.find(x=>x.code===code.toUpperCase());if(!l)throw new Error("No existe esa liga");return l;},
   async myLeagues(){return this.db().leagues;},
   async board(id,from,to){const g={};let total=0;const L=this.db().leagues.find(x=>x.id===id);if(L&&L.since&&L.since>from)from=L.since;for(let n=dayNum(from);n<=dayNum(to);n++){const r=S.days[dstrUTC(n)];if(r)for(const k in r){if(dstrUTC(n)>=RULE_DAY&&!requiredOf(dstrUTC(n)).includes(k))continue;g[k]=(g[k]||0)+r[k];total+=r[k];}}return [{alias:S.alias||"Tú",avatar:S.avatar||"",total,g}];},
+  async days(id,from,to){
+    const L=this.db().leagues.find(x=>x.id===id);if(L&&L.since&&L.since>from)from=L.since;
+    const out=[{k:1,alias:S.alias||"Tú",avatar:S.avatar||"",me:true,day:null,tot:0,ng:0}];
+    for(let n=dayNum(from);n<=dayNum(to);n++){const d=dstrUTC(n),r=S.days[d];if(!r)continue;let tot=0,ng=0;for(const k in r){if(d>=RULE_DAY&&!requiredOf(d).includes(k))continue;tot+=r[k];ng++;}if(ng)out.push({k:1,alias:S.alias||"Tú",avatar:S.avatar||"",me:true,day:d,tot,ng});}
+    return out;
+  },
   async submit(){}
 };
 const SB=DATA.CFG;
@@ -253,6 +262,7 @@ const SupabaseBackend={
   async joinLeague(code){const r=await this.rpc("join_league",{p_code:code.toUpperCase()});return {id:r.id,code:r.code,name:r.name};},
   async myLeagues(){return await this.rpc("my_leagues");},
   async board(id,from,to){return await this.rpc("league_board",{p_league:id,p_from:from,p_to:to});},
+  async days(id,from,to){return await this.rpc("league_days",{p_league:id,p_from:from,p_to:to});},
   async submit(day,game,score){await this.rpc("submit_score",{p_day:day,p_game:game,p_score:score});}
 };
 const Backend=(SB.supabaseUrl&&SB.supabaseKey)?(SupabaseBackend.load(),SupabaseBackend):LocalBackend;
@@ -507,7 +517,76 @@ async function renderLigas(){
   $("#lc").onclick=async()=>{const n=$("#ln").value.trim();if(n.length<2){toast("Pon un nombre");return;}try{const l=await Backend.createLeague(n);let w="";try{await Backend.setLeagueAvatar(l.id,NEWAV);}catch(e){w=" (sin icono: el servidor aún no lo admite)";}NEWAV="p:top:0";toast("Liga creada: "+l.code+w);renderLigas();}catch(e){toast(e.message);}};
   $("#ljb").onclick=async()=>{const c=$("#lj").value.trim();if(c.length<4){toast("Código no válido");return;}try{const l=await Backend.joinLeague(c);toast("Te has unido a "+l.name);renderLigas();}catch(e){toast(e.message);}};
 }
+/* ---------- ligas por temporadas ----------
+   Temporada = 4 semanas (lunes a domingo) desde SEASON_EPOCH. Cada dia suma el total de los 4 obligatorios.
+   Semana: gana quien mas suma; puntos 10/6/4 y 2 al resto con >=3 dias jugados. MVP diario: +1 al mejor dia (4 juegos jugados). */
+const SEASON_EPOCH="2026-10-05",SEASON_DAYS=28,WEEK_PTS=[10,6,4],PLAY_PTS=2,MIN_DAYS=3;
+const seasonOf=d=>Math.floor((dayNum(d)-dayNum(SEASON_EPOCH))/SEASON_DAYS);
+const seasonRange=n=>{const a=dayNum(SEASON_EPOCH)+n*SEASON_DAYS;return [dstrUTC(a),dstrUTC(a+SEASON_DAYS-1)];};
+function seasonCalc(rows,n,t){
+  const a=dayNum(seasonRange(n)[0]),tn=dayNum(t),M={};
+  for(const r of rows){const m=M[r.k]=M[r.k]||{k:r.k,alias:r.alias,avatar:r.avatar,me:!!r.me,days:{},wp:0,mv:0,raw:0};if(r.day){m.days[r.day]={tot:r.tot,ng:r.ng};m.raw+=r.tot;}}
+  const mem=Object.values(M),weeks=[];
+  for(let w=0;w<4;w++){
+    const from=a+w*7,to=from+6;if(from>tn)break;
+    const list=mem.map(m=>{let tot=0,days=0;for(let d=from;d<=Math.min(to,tn);d++){const x=m.days[dstrUTC(d)];if(x&&x.ng>0){tot+=x.tot;days++;}}return {m,tot,days};});
+    const elig=list.filter(x=>x.days>=MIN_DAYS).sort((p,q)=>q.tot-p.tot);
+    elig.forEach((x,i)=>{const rk=i>0&&elig[i-1].tot===x.tot?elig[i-1].rk:i+1;x.rk=rk;x.pts=WEEK_PTS[rk-1]!=null?WEEK_PTS[rk-1]:PLAY_PTS;x.m.wp+=x.pts;});
+    list.forEach(x=>{if(x.rk==null){x.rk=null;x.pts=0;}});
+    weeks.push({w,from:dstrUTC(from),to:dstrUTC(to),final:to<tn,rows:list.sort((p,q)=>(q.pts-p.pts)||(q.tot-p.tot))});
+  }
+  const mvp={};
+  if(mem.length>=2)for(let d=a;d<=Math.min(a+SEASON_DAYS-1,tn);d++){
+    const ds=dstrUTC(d),c=mem.filter(m=>m.days[ds]&&m.days[ds].ng>=4);if(!c.length)continue;
+    const mx=Math.max(...c.map(m=>m.days[ds].tot));if(mx<=0)continue;
+    mvp[ds]=c.filter(m=>m.days[ds].tot===mx).map(m=>m.k);mvp[ds].forEach(k=>M[k].mv++);
+  }
+  const table=mem.map(m=>Object.assign({pts:m.wp+m.mv},m)).sort((p,q)=>(q.pts-p.pts)||(q.raw-p.raw));
+  return {n,table,weeks,mvp,members:mem.length};
+}
+const LGS={n:null,w:null};
 async function renderBoard(){
+  const el=$("#v-ligas"),l=LG.sel,t=today(),cur=Math.max(0,seasonOf(t));
+  if(LGS.n==null||LGS.n>cur)LGS.n=cur;
+  const [s0,s1]=seasonRange(LGS.n);
+  el.innerHTML=`<div class="top"><button class="btn ghost" id="bk">←</button><span style="margin-left:10px">${avatarHtml(l.avatar||"p:top:0",34,l.name)}</span><h1 style="flex:1;margin-left:10px">${esc(l.name)}</h1></div>
+  ${l.owner?`<button class="btn block ghost" id="lav" style="margin-bottom:10px">Cambiar icono de la liga</button>`:""}
+  <div class="card"><div class="mut" style="text-align:center">Código para invitar</div><div class="code">${esc(l.code)}</div><button class="btn block ghost" id="lsh">Compartir código</button></div>
+  <div class="snav"><button id="sp" ${LGS.n<=0?"disabled":""} aria-label="Temporada anterior">‹</button><div><b>Temporada ${LGS.n+1}</b><small>${esc(dayLabel(s0))} a ${esc(dayLabel(s1))}</small></div><button id="sn" ${LGS.n>=cur?"disabled":""} aria-label="Temporada siguiente">›</button></div>
+  <div class="seg">${[["temp","Temporada"],["sem","Semana"],["hoy","Hoy"]].map(([k,n])=>`<button data-r="${k}" class="${(LG.view||"temp")===k?"on":""}">${n}</button>`).join("")}</div>
+  <div class="card" id="bd">Cargando...</div>`;
+  $("#bk").onclick=()=>{LG.sel=null;renderLigas();};
+  const lav=$("#lav");if(lav)lav.onclick=()=>avatarSheet("Icono de la liga",l.avatar,async a=>{try{await Backend.setLeagueAvatar(l.id,a||"p:top:0");l.avatar=a||"p:top:0";renderBoard();}catch(e){toast("No se pudo guardar el icono");}});
+  $("#lsh").onclick=()=>share("Únete a mi liga «"+l.name+"» en Minijuegos de fútbol con el código "+l.code+" "+location.href.split("#")[0]);
+  $("#sp").onclick=()=>{LGS.n--;LGS.w=null;renderBoard();};$("#sn").onclick=()=>{LGS.n++;LGS.w=null;renderBoard();};
+  el.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>{LG.view=b.dataset.r;renderBoard();});
+  let rows;
+  try{await flushPending();rows=await Backend.days(l.id,s0,s1);}
+  catch(e){return renderBoardOld();}                      /* servidor sin el parche 6: tabla antigua */
+  const C=seasonCalc(rows,LGS.n,t),v=LG.view||"temp",done=LGS.n<cur;
+  const who=(m,sub)=>`<div style="display:flex;align-items:center;gap:9px">${avatarHtml(m.avatar,32,m.alias)}<div>${esc(m.alias)}${m.me?" <span class='mut'>(tú)</span>":""}${sub?`<div class="mut" style="font-size:12px">${sub}</div>`:""}</div></div>`;
+  let h="";
+  if(v==="temp"){
+    const champ=done&&C.table.length&&C.table[0].pts>0?C.table[0]:null;
+    h=(champ?`<div class="champ">${svg("crown")}<span>Campeón: <b>${esc(champ.alias)}</b></span></div>`:"")+
+    (C.table.length?`<table><tr><th>#</th><th>Jugador</th><th class="n">Pts</th></tr>${C.table.map((m,i)=>`<tr><td>${i+1}</td><td>${who(m,`${m.wp} por semanas · ${m.mv} MVP · ${m.raw} brutos`)}</td><td class="n"><b>${m.pts}</b></td></tr>`).join("")}</table>`:`<div class="mut">Nadie ha jugado todavía.</div>`)+
+    `<div class="mut" style="font-size:12.5px;margin-top:8px">Semana: 10, 6 y 4 puntos a los tres primeros y 2 a quien juega 3 o más días. MVP: +1 al mejor día. ${done?"":"La semana en curso es provisional. "}Desempate: puntos brutos.</div>`;
+  }else if(v==="sem"){
+    if(!C.weeks.length)h=`<div class="mut">Esta temporada aún no ha empezado.</div>`;
+    else{
+      if(LGS.w==null||LGS.w>=C.weeks.length)LGS.w=C.weeks.length-1;
+      const W=C.weeks[LGS.w];
+      h=`<div class="snav" style="margin-top:0"><button id="wp" ${LGS.w<=0?"disabled":""}>‹</button><div><b>Semana ${W.w+1}${W.final?"":" (en curso)"}</b><small>${esc(dayLabel(W.from))} a ${esc(dayLabel(W.to))}</small></div><button id="wn" ${LGS.w>=C.weeks.length-1?"disabled":""}>›</button></div>`+
+      `<table><tr><th>#</th><th>Jugador</th><th class="n">Total</th><th class="n">Pts</th></tr>${W.rows.map((x,i)=>`<tr><td>${x.rk||"–"}</td><td>${who(x.m,x.days+" "+(x.days===1?"día":"días")+(x.days<MIN_DAYS?" · faltan "+(MIN_DAYS-x.days)+" para puntuar":""))}</td><td class="n">${x.tot}</td><td class="n"><b>${x.pts}</b></td></tr>`).join("")}</table>`;
+    }
+  }else{
+    const d=t>=s0&&t<=s1?t:s1,L=C.table.map(m=>({m,x:m.days[d]})).filter(o=>o.x).sort((p,q)=>q.x.tot-p.x.tot);
+    h=`<div class="mut" style="margin-bottom:6px">${esc(dayLabel(d))}</div>`+(L.length?`<table>${L.map((o,i)=>`<tr><td>${i+1}</td><td>${who(o.m,o.x.ng+"/4 retos")}</td><td class="n">${(C.mvp[d]||[]).includes(o.m.k)?`<span class="mvp" title="MVP del día">${svg("star")}MVP</span> `:""}<b>${o.x.tot}</b></td></tr>`).join("")}</table>`:`<div class="mut">Nadie ha jugado todavía hoy.</div>`);
+  }
+  $("#bd").innerHTML=h;
+  const wp=$("#wp"),wn=$("#wn");if(wp)wp.onclick=()=>{LGS.w--;renderBoard();};if(wn)wn.onclick=()=>{LGS.w++;renderBoard();};
+}
+async function renderBoardOld(){
   const el=$("#v-ligas"),l=LG.sel;
   const t=dayNum(today());
   const rng_={hoy:[t,t],semana:[t-6,t],total:[t-400,t]}[LG.range];
@@ -519,7 +598,7 @@ async function renderBoard(){
   $("#bk").onclick=()=>{LG.sel=null;renderLigas();};
   const lav=$("#lav");if(lav)lav.onclick=()=>avatarSheet("Icono de la liga",l.avatar,async a=>{try{await Backend.setLeagueAvatar(l.id,a||"p:top:0");l.avatar=a||"p:top:0";renderBoard();}catch(e){toast("No se pudo guardar el icono");}});
   $("#lsh").onclick=()=>share("Únete a mi liga «"+l.name+"» en Minijuegos de fútbol con el código "+l.code+" "+location.href.split("#")[0]);
-  el.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>{LG.range=b.dataset.r;renderBoard();});
+  el.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>{LG.range=b.dataset.r;renderBoardOld();});
   try{
     await flushPending();
     const rows=(await Backend.board(l.id,dstrUTC(rng_[0]),dstrUTC(rng_[1]))).map(r=>{const g=r.g||{mm:r.mm||0,once:r.once||0};return {alias:r.alias,avatar:r.avatar||"",g,total:r.total!=null?r.total:Object.values(g).reduce((a,b)=>a+b,0)};}).sort((a,b)=>b.total-a.total);
