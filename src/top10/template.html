@@ -443,7 +443,7 @@ function nearMiss(L, raw, found){
     if(found.has(i)) return;
     a.keys.forEach(k=>{
       if(k.length<5) return;
-      const lim=k.length>=10?2:1;   /* una letra de diferencia (dos en nombres largos): errata, no otra respuesta */
+      const lim=k.length>=8?2:1;   /* una letra de diferencia (dos en nombres de 8 o más): errata, no otra respuesta */
       if(Math.abs(k.length-n.length)>lim) return;
       const d=lev(n,k);
       if(d<=lim && (!best||d<best.d)) best={i,d};

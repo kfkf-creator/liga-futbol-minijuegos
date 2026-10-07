@@ -15,7 +15,7 @@ const {chromium}=require(require("child_process").execSync("npm root -g").toStri
   // Curiosidad: escribir "son h" y ver desplegable
   await p.fill("#input","hun");
   const acAfter=await p.locator("#ac li").allTextContents();
-  await p.fill("#input","taremy");
+  await p.fill("#input","shatsqiqh");
   await p.press("#input","Enter");
   const fb1=await p.textContent("#feedback"), lives1=await p.textContent("#progLives");
   console.log("title",await p.textContent("#title"));
