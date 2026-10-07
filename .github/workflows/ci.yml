@@ -18,7 +18,9 @@ jobs:
       - name: Compilar y comprobar que app/ esta al dia
         run: |
           cd src/app && node build.js
+          cd ../top10 && node build.js
           cd ../..
+          git diff --exit-code -- top10/index.html top10/sw.js || (echo "top10/ no coincide con src/top10. Ejecuta: cd src/top10 && node build.js y sube los cambios." && exit 1)
           git diff --exit-code -- app/index.html app/sw.js app/manifest.webmanifest app/classic || (echo "app/ no coincide con src/. Ejecuta: cd src/app && node build.js y sube los cambios." && exit 1)
       - name: Servidor local y tests
         run: |
@@ -26,3 +28,4 @@ jobs:
           python3 -m http.server 8123 >/dev/null 2>&1 &
           sleep 2
           node src/app/tests/run-all.js
+          node src/top10/tests/run-all.js

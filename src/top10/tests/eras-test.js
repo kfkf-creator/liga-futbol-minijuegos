@@ -1,6 +1,6 @@
 const {chromium}=require(require("child_process").execSync("npm root -g").toString().trim()+"/playwright");
 (async()=>{
-  const b=await chromium.launch({executablePath:"/opt/pw-browsers/chromium"});
+  const b=await chromium.launch({executablePath:process.env.CHROMIUM||"/opt/pw-browsers/chromium"});
   const p=await b.newPage(); const errs=[]; p.on("pageerror",e=>errs.push(e.message));
   await p.goto(process.env.URL);
   const count=()=>p.locator(".lvl").count();

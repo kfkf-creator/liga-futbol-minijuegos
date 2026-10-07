@@ -1,6 +1,6 @@
 const {chromium}=require(require("child_process").execSync("npm root -g").toString().trim()+"/playwright");
 (async()=>{
-  const b=await chromium.launch({executablePath:"/opt/pw-browsers/chromium"});
+  const b=await chromium.launch({executablePath:process.env.CHROMIUM||"/opt/pw-browsers/chromium"});
   const p=await b.newPage({viewport:{width:390,height:800}});
   const errs=[]; p.on("pageerror",e=>errs.push(e.message));
   await p.goto((process.env.URL||"file://"+process.cwd()+"/../../top10/index.html"));

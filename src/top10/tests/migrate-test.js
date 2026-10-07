@@ -1,6 +1,6 @@
 const {chromium}=require(require("child_process").execSync("npm root -g").toString().trim()+"/playwright");
 (async()=>{
-  const b=await chromium.launch({executablePath:"/opt/pw-browsers/chromium"});
+  const b=await chromium.launch({executablePath:process.env.CHROMIUM||"/opt/pw-browsers/chromium"});
   const c=await b.newContext(); const p=await c.newPage();
   await p.goto(process.env.URL);
   await p.evaluate(()=>{localStorage.clear();localStorage.setItem("top10futbol.v3",JSON.stringify({done:{1:3,68:2}}));});

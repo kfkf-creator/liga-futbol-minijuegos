@@ -1,6 +1,6 @@
 const {chromium}=require(require("child_process").execSync("npm root -g").toString().trim()+"/playwright");
 (async()=>{
-  const b=await chromium.launch({executablePath:"/opt/pw-browsers/chromium"});
+  const b=await chromium.launch({executablePath:process.env.CHROMIUM||"/opt/pw-browsers/chromium"});
   const c=await b.newContext({viewport:{width:390,height:800}});
   const p=await c.newPage(); const errs=[]; p.on("pageerror",e=>errs.push(e.message));
   p.on("console",m=>{ if(m.type()==="error"&&!/Failed to load resource: net::ERR_INTERNET_DISCONNECTED/.test(m.text())) errs.push(m.text()); });

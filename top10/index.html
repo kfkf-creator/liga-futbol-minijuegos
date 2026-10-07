@@ -12,6 +12,17 @@
 <meta name="apple-mobile-web-app-title" content="Top 10 Fútbol">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <title>Top 10 Fútbol</title>
+<meta name="description" content="Adivina el top 10 de fútbol: más de 160 niveles con vidas, pistas y sugerencias al escribir.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Top 10 Fútbol">
+<meta property="og:title" content="Top 10 Fútbol">
+<meta property="og:description" content="Adivina el top 10: más de 160 niveles de fútbol con vidas, pistas y sugerencias.">
+<meta property="og:image" content="https://kfkf-creator.github.io/liga-futbol-minijuegos/top10/og.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Top 10 Fútbol">
+<meta name="twitter:description" content="Adivina el top 10: más de 160 niveles de fútbol con vidas, pistas y sugerencias.">
+<meta name="twitter:image" content="https://kfkf-creator.github.io/liga-futbol-minijuegos/top10/og.png">
 <style>
 :root{
   --bg:#08150f; --panel:#112a1f; --panel2:#163526; --line:#24513b;
@@ -300,8 +311,10 @@ textarea{width:100%;background:var(--bg);color:var(--text);border:1px solid var(
         <div class="actions">
           <button class="btn primary" id="nextBtn" type="button">Siguiente nivel</button>
           <button class="btn" id="retryBtn" type="button">Repetir nivel</button>
+          <button class="btn" id="shareBtn" type="button">Compartir</button>
           <button class="btn" id="menuBtn" type="button">Menú</button>
         </div>
+        <p class="hint" id="shareMsg" aria-live="polite"></p>
       </div>
     </section>
   </main>
@@ -17120,6 +17133,7 @@ function endGame(won){
     $("resText").textContent="Acertaste "+state.found.size+" de "+L.answers.length+". Las que faltaban aparecen marcadas en rojo.";
   }
   $("gu").hidden=true;
+  $("shareMsg").textContent="";
   say("","");
   const pos=state.list.indexOf(state.idx);
   const hasNext=pos>=0 && pos<state.list.length-1;
@@ -17291,6 +17305,47 @@ $("bkAction").addEventListener("click",async()=>{
   }else{
     $("bkMsg").textContent=applyCode($("bkText").value).msg;
   }
+});
+
+/* ============ Compartir resultado (sin spoilers: solo cuadrados, no las respuestas) ============ */
+function shareInfo(){
+  const L=LEVELS[state.idx], n=L.answers.length, found=state.found.size, errors=MAX_LIVES-state.lives;
+  const squares="🟩".repeat(found)+"⬛".repeat(n-found);
+  const line=state.won?(starText(starsFor(errors))+" · "+(errors===0?"sin fallos":errors+(errors===1?" fallo":" fallos"))):("Acerté "+found+" de "+n);
+  const url=location.origin+location.pathname.replace(/index\.html$/,"");
+  return {L,n,found,squares,line,url,text:["Top 10 Fútbol",L.title,squares,line,url].join("\n")};
+}
+function shareCanvas(i){
+  const W=1080,H=1080,c=document.createElement("canvas"); c.width=W; c.height=H; const x=c.getContext("2d");
+  x.fillStyle="#08150f"; x.fillRect(0,0,W,H);
+  const g=x.createRadialGradient(W/2,0,0,W/2,0,900); g.addColorStop(0,"#15432e"); g.addColorStop(1,"rgba(8,21,15,0)"); x.fillStyle=g; x.fillRect(0,0,W,H);
+  x.textAlign="center"; x.fillStyle="#3ddc84"; x.font="900 64px system-ui,Arial,sans-serif"; x.fillText("TOP 10 FÚTBOL",W/2,130);
+  x.fillStyle="#eef7f1"; let fs=46,lines=[];
+  for(;fs>=30;fs-=4){
+    x.font="700 "+fs+"px system-ui,Arial,sans-serif"; lines=[]; let ln="";
+    i.L.title.split(" ").forEach(w=>{ if(x.measureText(ln+" "+w).width>940&&ln){ lines.push(ln); ln=w; } else ln=ln?ln+" "+w:w; }); lines.push(ln);
+    if(lines.length<=4) break;
+  }
+  let y=240; lines.forEach(t=>{ x.fillText(t,W/2,y); y+=Math.round(fs*1.3); });
+  const sz=70,gap=14,tot=i.n*sz+(i.n-1)*gap; let sx=(W-tot)/2; const sy=Math.max(y+40,520);
+  for(let k=0;k<i.n;k++){ x.fillStyle=k<i.found?"#3ddc84":"#24513b"; x.beginPath(); if(x.roundRect) x.roundRect(sx,sy,sz,sz,12); else x.rect(sx,sy,sz,sz); x.fill(); sx+=sz+gap; }
+  x.fillStyle="#ffd166"; x.font="800 84px system-ui,Arial,sans-serif"; x.fillText(state.won?starText(starsFor(MAX_LIVES-state.lives)):"",W/2,sy+190);
+  x.fillStyle="#eef7f1"; x.font="600 44px system-ui,Arial,sans-serif"; x.fillText(i.line.replace(/^[★☆]+ · /,""),W/2,sy+270);
+  x.fillStyle="#9dbcab"; x.font="500 34px system-ui,Arial,sans-serif"; x.fillText(i.url.replace(/^https?:\/\//,""),W/2,H-70);
+  return new Promise(r=>c.toBlob(r,"image/png"));
+}
+$("shareBtn").addEventListener("click",async()=>{
+  const i=shareInfo(), msg=$("shareMsg"); msg.textContent="";
+  try{
+    const blob=await shareCanvas(i);
+    if(blob&&navigator.canShare){
+      const f=new File([blob],"top10-futbol.png",{type:"image/png"});
+      if(navigator.canShare({files:[f]})){ await navigator.share({files:[f],text:i.text}); return; }
+    }
+    if(navigator.share){ await navigator.share({text:i.text}); return; }
+  }catch(e){ if(e&&e.name==="AbortError") return; }
+  try{ await navigator.clipboard.writeText(i.text); msg.textContent="Resultado copiado. Pégalo en un mensaje."; }
+  catch(e){ msg.textContent=i.text; }
 });
 
 /* ============ Reportar un problema (se comparte por WhatsApp, etc.) ============ */
