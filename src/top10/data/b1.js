@@ -2,7 +2,7 @@ module.exports=[
  {
   "tag": "Selecciones",
   "title": "Selecciones campeonas de la Eurocopa",
-  "desc": "Diez selecciones distintas han ganado el torneo (hasta 2024). Alemania Occidental cuenta como Alemania.",
+  "desc": "Diez selecciones distintas han ganado el torneo (hasta 2024). Las selecciones que cambiaron de nombre cuentan como una sola.",
   "answers": [
    {
     "n": "España",
@@ -1079,7 +1079,7 @@ module.exports=[
  {
   "tag": "Selecciones",
   "title": "Selecciones europeas que han jugado una final del Mundial (hasta 2026)",
-  "desc": "Diez selecciones en total. Alemania Occidental cuenta como Alemania. Ordenadas por número de finales.",
+  "desc": "Diez selecciones en total. Las selecciones que cambiaron de nombre cuentan como una sola. Ordenadas por número de finales.",
   "answers": [
    {
     "n": "Alemania",

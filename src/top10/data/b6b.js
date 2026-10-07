@@ -4,7 +4,7 @@ module.exports=[
   amb:["fernando","christian"],
   also:["bodo illgner","illgner","jaime","amavisca","suker","davor suker"],
   title:"Jugadores de campo titulares del Real Madrid en la final de la Copa de Europa 1998 (Real Madrid 1-0 Juventus, Ámsterdam)",
-  desc:"Sin contar al portero, Bodo Illgner. Los suplentes (Jaime, Amavisca y Šuker) no cuentan.",
+  desc:"Sin contar al portero, Bodo Illgner. Los suplentes no cuentan.",
   yrs:[1998,1998],
   answers:[
     {n:"Christian Panucci", a:["panucci"], d:"Lateral derecho"},
@@ -22,7 +22,7 @@ module.exports=[
 /* b6b-2 */ {
   tag:"Selecciones", diff:"medio", type:"selecciones",
   title:"Selecciones semifinalistas de los Mundiales de 1990, 1994 y 1998",
-  desc:"Diez selecciones distintas. Alemania Occidental y Alemania cuentan como la misma.",
+  desc:"Diez selecciones distintas. Las selecciones que cambiaron de nombre cuentan como una sola.",
   yrs:[1990,1998],
   answers:[
     {n:"Alemania", a:["alemania occidental","rfa","alemania federal","republica federal alemana","west germany","germany"], d:"Campeona en 1990 como Alemania Occidental"},
@@ -41,7 +41,7 @@ module.exports=[
   tag:"La Liga", cur:true, auto:true, diff:"medio", type:"jugadores",
   amb:["sanchez"],
   title:"Ganadores del Trofeo Pichichi entre las temporadas 1989/90 y 1998/99",
-  desc:"Diez pichichis distintos, uno por temporada. Ojo: Hugo Sánchez y Manolo comparten apellido, hay que decir el nombre completo del Sánchez.",
+  desc:"Diez pichichis distintos, uno por temporada. Ojo con los apellidos repetidos: hay que decir el nombre completo.",
   yrs:[1989,1999],
   answers:[
     {n:"Hugo Sánchez", a:["hugo sanchez","hugo"], d:"1989/90, 38 goles con el Real Madrid"},
@@ -78,7 +78,7 @@ module.exports=[
   tag:"Champions League", auto:true, diff:"dificil", type:"jugadores",
   also:["giovanni galli","galli","filippo galli","f galli","virdis","pietro paolo virdis"],
   title:"Jugadores de campo titulares del Milan en la final de la Copa de Europa 1989 (Milan 4-0 Steaua de Bucarest, Camp Nou)",
-  desc:"Sin contar al portero, Giovanni Galli. Costacurta y Gullit salieron en la segunda parte; sus suplentes (Filippo Galli y Virdis) no cuentan.",
+  desc:"Sin contar al portero, Giovanni Galli. Dos titulares salieron en la segunda parte: ellos cuentan, sus suplentes no.",
   yrs:[1989,1989],
   answers:[
     {n:"Mauro Tassotti", a:["tassotti","mauro"], d:"Lateral derecho"},
@@ -97,7 +97,7 @@ module.exports=[
   tag:"Selecciones", auto:true, diff:"dificil", type:"jugadores",
   also:["luis arconada","arconada","sarabia","manuel sarabia","roberto"],
   title:"Jugadores de campo titulares de España en la final de la Eurocopa 1984 (Francia 2-0 España, Parc des Princes)",
-  desc:"Sin contar al portero, Luis Arconada. Julio Alberto y Salva fueron sustituidos en la segunda parte por Sarabia y Roberto, que no cuentan.",
+  desc:"Sin contar al portero, Luis Arconada. Dos titulares fueron sustituidos en la segunda parte: ellos cuentan, sus suplentes no.",
   yrs:[1984,1984],
   answers:[
     {n:"Santiago Urquiaga", a:["urquiaga","santiago"], d:"Defensa del Athletic Club"},
@@ -117,7 +117,7 @@ module.exports=[
   amb:["kim","john"],
   also:["peter schmeichel","schmeichel","claus christiansen","christiansen"],
   title:"Jugadores de campo titulares de Dinamarca en la final de la Eurocopa 1992 (Dinamarca 2-0 Alemania, Gotemburgo)",
-  desc:"Sin contar al portero, Peter Schmeichel. Sivebæk fue sustituido en la segunda parte por Claus Christiansen, que no cuenta.",
+  desc:"Sin contar al portero, Peter Schmeichel. Un titular fue sustituido en la segunda parte: él cuenta, su suplente no.",
   yrs:[1992,1992],
   answers:[
     {n:"John Sivebæk", a:["sivebaek","sivebak"], d:"Lateral derecho, sustituido por Christiansen en la segunda parte"},
@@ -135,7 +135,7 @@ module.exports=[
 /* b6b-8 */ {
   tag:"Supercopa de Europa", cur:true, diff:"leyenda", type:"equipos",
   title:"Campeones de la Supercopa de Europa entre 1982 y 1993",
-  desc:"Diez clubes distintos: el Milan la ganó dos veces en ese periodo. Las ediciones de 1981 y 1985 no se jugaron.",
+  desc:"Diez clubes distintos: uno de ellos la ganó dos veces en ese periodo. Las ediciones de 1981 y 1985 no se jugaron.",
   yrs:[1982,1993],
   answers:[
     {n:"Aston Villa", a:["villa"], d:"1982, ganó al Barcelona por 3-1 en el global"},

@@ -3,7 +3,7 @@ module.exports=[
   tag:"Selecciones", auto:true, diff:"medio", type:"jugadores",
   amb:["walter"],
   title:"Jugadores de campo titulares de Alemania Occidental en la final del Mundial 1954 (Alemania Occidental 3-2 Hungría, Berna), el Milagro de Berna",
-  desc:"Sin contar al portero, Toni Turek. Hay dos Walter: hay que decir el nombre. Remontaron un 0-2 inicial.",
+  desc:"Sin contar al portero, Toni Turek. Ojo con los apellidos repetidos: hay que decir el nombre. Remontaron un 0-2 inicial.",
   yrs:[1954,1954],
   answers:[
     {n:"Josef Posipal", a:["posipal","jupp posipal","josef posipal"], d:"Lateral derecho"},
@@ -21,7 +21,7 @@ module.exports=[
 /* 2 */ {
   tag:"Selecciones", auto:true, diff:"dificil", type:"jugadores",
   title:"Jugadores de campo titulares de Hungría en la final del Mundial 1954 (Alemania Occidental 3-2 Hungría, Berna), el Equipo de Oro",
-  desc:"Sin contar al portero, Gyula Grosics. Puskás jugó tocado tras una lesión en la fase de grupos.",
+  desc:"Sin contar al portero, Gyula Grosics.",
   yrs:[1954,1954],
   answers:[
     {n:"Jenő Buzánszky", a:["buzanszky","jeno buzanszky"], d:"Lateral derecho"},
@@ -57,7 +57,7 @@ module.exports=[
 /* 4 */ {
   tag:"Champions League", auto:true, diff:"leyenda", type:"jugadores",
   title:"Jugadores de campo titulares del Inter en la final de la Copa de Europa 1965 (Inter 1-0 Benfica, San Siro), el Grande Inter de Herrera",
-  desc:"Sin contar al portero, Giuliano Sarti. El gol lo marcó un brasileño en la primera parte.",
+  desc:"Sin contar al portero, Giuliano Sarti.",
   yrs:[1965,1965],
   answers:[
     {n:"Tarcisio Burgnich", a:["burgnich","tarcisio burgnich","la roccia"], d:"Lateral derecho"},

@@ -2,7 +2,7 @@ module.exports=[
 /* b5b-1 */ {
   tag:"Selecciones", auto:true, diff:"facil", type:"jugadores",
   title:"Jugadores de campo titulares de Francia en la final del Mundial 1998 (Francia 3-0 Brasil, Stade de France)",
-  desc:"Sin contar al portero, Fabien Barthez. Blanc estaba sancionado y no jugó, así que no cuenta.",
+  desc:"Sin contar al portero, Fabien Barthez.",
   yrs:[1998,1998],
   answers:[
     {n:"Lilian Thuram", a:["thuram","lilian"], d:"Lateral derecho"},
@@ -20,7 +20,7 @@ module.exports=[
 /* b5b-2 */ {
   tag:"Selecciones", auto:true, diff:"facil", type:"jugadores",
   title:"Jugadores de campo titulares de Brasil en la final del Mundial 1994 (Brasil 0-0 Italia, 3-2 en los penaltis, Pasadena)",
-  desc:"Sin contar al portero, Taffarel. Jorginho se lesionó en el primer tiempo y lo sustituyó Cafu, que no cuenta.",
+  desc:"Sin contar al portero, Taffarel. Un titular se lesionó en el primer tiempo: él cuenta, su suplente no.",
   yrs:[1994,1994],
   answers:[
     {n:"Jorginho", a:[], d:"Lateral derecho, se lesionó hacia el minuto 21 y salió por Cafu"},
@@ -39,7 +39,7 @@ module.exports=[
   tag:"Selecciones", auto:true, diff:"medio", type:"jugadores",
   amb:["jorge","jose luis","jose"],
   title:"Jugadores de campo titulares de Argentina en la final del Mundial 1986 (Argentina 3-2 Alemania Occidental, Estadio Azteca)",
-  desc:"Sin contar al portero, Nery Pumpido. Trobbiani entró en el minuto 90 y no cuenta.",
+  desc:"Sin contar al portero, Nery Pumpido. Hubo un cambio en el minuto 90: el suplente no cuenta.",
   yrs:[1986,1986],
   answers:[
     {n:"José Luis Brown", a:["brown","jose luis brown","jose brown","tata brown"], d:"Central, marcó el 1-0 en el minuto 23"},
@@ -57,7 +57,7 @@ module.exports=[
 /* b5b-4 */ {
   tag:"Champions League", auto:true, diff:"medio", type:"jugadores",
   title:"Jugadores de campo titulares del Barcelona en la final de la Copa de Europa 1992 (Barcelona 1-0 Sampdoria en la prórroga, Wembley)",
-  desc:"Sin contar al portero, Zubizarreta. El gol lo marcó Koeman de falta en el minuto 112, el 20 de mayo de 1992.",
+  desc:"Sin contar al portero, Zubizarreta. El partido se decidió en la prórroga con un gol de falta.",
   yrs:[1992,1992],
   answers:[
     {n:"Albert Ferrer", a:["ferrer"], d:"Lateral derecho"},
@@ -75,7 +75,7 @@ module.exports=[
 /* b5b-5 */ {
   tag:"Copa UEFA", diff:"medio", type:"equipos",
   title:"Campeones de la Copa de la UEFA entre 1980/81 y 1991/92",
-  desc:"Los diez clubes distintos que ganaron el torneo en esas 12 ediciones. Göteborg y Real Madrid lo ganaron dos veces.",
+  desc:"Los diez clubes distintos que ganaron el torneo en esas 12 ediciones. Dos de ellos lo ganaron dos veces.",
   yrs:[1980,1992],
   answers:[
     {n:"Ipswich Town", a:["ipswich"], d:"1980/81, 5-2 global al AZ"},
@@ -93,7 +93,7 @@ module.exports=[
 /* b5b-6 */ {
   tag:"Selecciones", auto:true, diff:"dificil", type:"jugadores",
   title:"Jugadores de campo titulares de Italia en la final del Mundial 1982 (Italia 3-1 Alemania Occidental, Santiago Bernabéu)",
-  desc:"Sin contar al portero, Dino Zoff. Graziani se lesionó en el minuto 7 y lo sustituyó Altobelli, que no cuenta.",
+  desc:"Sin contar al portero, Dino Zoff. Un titular se lesionó en el minuto 7: él cuenta, su suplente no.",
   yrs:[1982,1982],
   answers:[
     {n:"Giuseppe Bergomi", a:["bergomi","giuseppe"], d:"Defensa"},
@@ -112,7 +112,7 @@ module.exports=[
   tag:"Selecciones", auto:true, diff:"dificil", type:"jugadores",
   amb:["thomas","jurgen"],
   title:"Jugadores de campo titulares de Alemania Occidental en la final del Mundial 1990 (RFA 1-0 Argentina, Estadio Olímpico de Roma)",
-  desc:"Sin contar al portero, Bodo Illgner. Alemania Occidental cuenta como Alemania. Reuter entró por Berthold y no cuenta.",
+  desc:"Sin contar al portero, Bodo Illgner. Un titular fue sustituido: él cuenta, su suplente no.",
   yrs:[1990,1990],
   answers:[
     {n:"Thomas Berthold", a:["berthold"], d:"Lateral derecho, sustituido por Reuter"},
@@ -166,7 +166,7 @@ module.exports=[
 /* b5b-10 */ {
   tag:"Champions League", diff:"leyenda", type:"equipos",
   title:"Finalistas derrotados de la Copa de Europa entre 1981 y 1992",
-  desc:"Los diez clubes distintos que perdieron una final en esas 12 ediciones. Bayern y Benfica perdieron dos.",
+  desc:"Los diez clubes distintos que perdieron una final en esas 12 ediciones. Dos de ellos perdieron dos.",
   yrs:[1981,1992],
   answers:[
     {n:"Real Madrid", a:["madrid"], d:"Perdió 1-0 ante el Liverpool en París, 1981"},

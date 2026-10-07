@@ -2,7 +2,7 @@ module.exports=[
 {
   tag:"Selecciones", auto:true, diff:"facil", type:"jugadores",
   title:"Jugadores de campo titulares de Francia en la final de la Eurocopa 2000 (Francia 2-1 Italia en la prórroga, Rotterdam)",
-  desc:"Sin contar al portero, Barthez. Wiltord y Trezeguet, autores del empate y del gol de oro (103'), entraron desde el banquillo.",
+  desc:"Sin contar al portero, Barthez. Los autores del empate y del gol de oro (103') entraron desde el banquillo y no cuentan.",
   yrs:[2000,2000],
   answers:[
     {n:"Lilian Thuram", a:["thuram","lilian thuram"], d:"Lateral derecho"},
@@ -20,7 +20,7 @@ module.exports=[
 {
   tag:"Selecciones", auto:true, diff:"dificil", type:"jugadores",
   title:"Jugadores de campo titulares de Italia en la final de la Eurocopa 2000 (Francia 2-1 Italia en la prórroga, Rotterdam)",
-  desc:"Sin contar al portero, Toldo. Italia jugó con tres centrales y se adelantó con gol de Delvecchio; Del Piero, Ambrosini y Montella entraron desde el banquillo.",
+  desc:"Sin contar al portero, Toldo. Italia jugó con tres centrales. Tres jugadores entraron desde el banquillo y no cuentan.",
   yrs:[2000,2000],
   answers:[
     {n:"Mark Iuliano", a:["iuliano","mark iuliano"], d:"Central"},
@@ -38,7 +38,7 @@ module.exports=[
 {
   tag:"Selecciones", auto:true, diff:"medio", type:"jugadores",
   title:"Jugadores de campo titulares de Grecia en la final de la Eurocopa 2004 (Portugal 0-1 Grecia, Lisboa)",
-  desc:"Sin contar al portero, Nikopolidis. Karagounis, sancionado, no jugó; Charisteas marcó de cabeza en el minuto 57.",
+  desc:"Sin contar al portero, Nikopolidis.",
   yrs:[2004,2004],
   answers:[
     {n:"Giourkas Seitaridis", a:["seitaridis","giourkas seitaridis"], d:"Lateral derecho"},
@@ -57,7 +57,7 @@ module.exports=[
   tag:"Selecciones", auto:true, diff:"facil", type:"jugadores",
   amb:["ricardo"],
   title:"Jugadores de campo titulares de Portugal en la final de la Eurocopa 2004 (Portugal 0-1 Grecia, Lisboa)",
-  desc:"Sin contar al portero, Ricardo. Ojo con el Ricardo de campo. Miguel salió antes del descanso, por lesión (Paulo Ferreira).",
+  desc:"Sin contar al portero, Ricardo. Ojo con los nombres repetidos: hay que decir el nombre completo. Un titular salió antes del descanso por lesión: él cuenta, su suplente no.",
   yrs:[2004,2004],
   answers:[
     {n:"Miguel", a:["miguel monteiro"], d:"Lateral derecho, sustituido por Paulo Ferreira antes del descanso"},
@@ -76,7 +76,7 @@ module.exports=[
   tag:"Champions League", auto:true, diff:"medio", type:"jugadores",
   amb:["ivan"],
   title:"Jugadores de campo titulares del Real Madrid en la final de la Champions 2000 (Real Madrid 3-0 Valencia, Stade de France)",
-  desc:"Sin contar al portero, Casillas. Hierro y Savio entraron desde el banquillo; marcaron Morientes, McManaman y Raúl.",
+  desc:"Sin contar al portero, Casillas. Dos jugadores entraron desde el banquillo y no cuentan.",
   yrs:[2000,2000],
   answers:[
     {n:"Míchel Salgado", a:["salgado","michel salgado"], d:"Lateral derecho, sustituido por Hierro al final"},
@@ -95,7 +95,7 @@ module.exports=[
   tag:"La Liga", diff:"medio", type:"equipos",
   amb:["madrid"],
   title:"Clasificación final de La Liga 2006/07, el título del Madrid de Capello: los diez primeros",
-  desc:"Del campeón, el Real Madrid, al décimo, el Racing de Santander. Madrid y Barcelona acabaron con los mismos puntos.",
+  desc:"Ordenados como en la tabla final. Los dos primeros acabaron con los mismos puntos.",
   yrs:[2006,2007],
   answers:[
     {n:"Real Madrid", a:["real madrid cf"], d:"1º, 76 puntos. Campeón por el desempate con el Barcelona"},
@@ -113,7 +113,7 @@ module.exports=[
 {
   tag:"Europa League", diff:"dificil", type:"equipos",
   title:"Finalistas derrotados de la Copa de la UEFA entre 1999/00 y 2008/09",
-  desc:"Diez finales, diez perdedores distintos, del Arsenal en 2000 al Werder Bremen en 2009.",
+  desc:"Diez finales, diez perdedores distintos.",
   yrs:[2000,2009],
   answers:[
     {n:"Arsenal", a:["arsenal fc"], d:"2000, perdió en los penaltis ante el Galatasaray (0-0)"},
@@ -131,7 +131,7 @@ module.exports=[
 {
   tag:"Europa League", diff:"leyenda", type:"estadios",
   title:"Estadios de las finales de la Copa de la UEFA entre 1999/00 y 2008/09",
-  desc:"Diez finales, diez estadios distintos, de Copenhague en 2000 a Estambul en 2009.",
+  desc:"Diez finales, diez estadios distintos.",
   yrs:[2000,2009],
   answers:[
     {n:"Parken Stadium", a:["parken","parken stadion","estadio parken"], d:"Copenhague, 2000: Galatasaray-Arsenal"},

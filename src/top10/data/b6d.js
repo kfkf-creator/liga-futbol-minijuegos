@@ -2,7 +2,7 @@ module.exports=[
 {
   tag:"Champions League", auto:true, diff:"facil", type:"jugadores",
   title:"Jugadores de campo titulares del Real Madrid en la final de la Champions 2016 (Real Madrid 1-1 Atlético, 5-3 en los penaltis, San Siro)",
-  desc:"Sin contar al portero, Keylor Navas. Carvajal se lesionó y salió en la segunda parte (Danilo).",
+  desc:"Sin contar al portero, Keylor Navas. Un titular se lesionó y salió en la segunda parte: él cuenta, su suplente no.",
   yrs:[2016,2016],
   answers:[
     {n:"Dani Carvajal", a:["carvajal","dani carvajal","daniel carvajal"], d:"Lateral derecho, salió lesionado en la segunda parte (Danilo)"},
@@ -20,7 +20,7 @@ module.exports=[
 {
   tag:"Selecciones", auto:true, diff:"facil", type:"jugadores",
   title:"Jugadores de campo titulares de Argentina en la final del Mundial 2014 (Alemania 1-0 Argentina en la prórroga, Maracaná)",
-  desc:"Sin contar al portero, Sergio Romero. Lavezzi salió al descanso (Agüero).",
+  desc:"Sin contar al portero, Sergio Romero. Un titular salió al descanso: él cuenta, su suplente no.",
   yrs:[2014,2014],
   answers:[
     {n:"Pablo Zabaleta", a:["zabaleta","pablo zabaleta"], d:"Lateral derecho"},
@@ -39,7 +39,7 @@ module.exports=[
   tag:"Selecciones", auto:true, diff:"medio", type:"jugadores",
   amb:["ivan"],
   title:"Jugadores de campo titulares de Croacia en la final del Mundial 2018 (Francia 4-2 Croacia, Moscú)",
-  desc:"Sin contar al portero, Danijel Subasic. Rebic y Strinic salieron en la segunda parte.",
+  desc:"Sin contar al portero, Danijel Subasic. Dos titulares salieron en la segunda parte: ellos cuentan, sus suplentes no.",
   yrs:[2018,2018],
   answers:[
     {n:"Šime Vrsaljko", a:["vrsaljko","sime vrsaljko"], d:"Lateral derecho"},
@@ -57,7 +57,7 @@ module.exports=[
 {
   tag:"Selecciones", auto:true, diff:"medio", type:"jugadores",
   title:"Jugadores de campo titulares de Portugal en la final de la Eurocopa 2016 (Portugal 1-0 Francia en la prórroga, Saint-Denis)",
-  desc:"Sin contar al portero, Rui Patrício. Cristiano Ronaldo se lesionó y salió en el minuto 25 (Quaresma).",
+  desc:"Sin contar al portero, Rui Patrício. Un titular se lesionó y salió en el minuto 25: él cuenta, su suplente no.",
   yrs:[2016,2016],
   answers:[
     {n:"Cédric Soares", a:["cedric","soares","cedric soares"], d:"Lateral derecho"},
@@ -75,7 +75,7 @@ module.exports=[
 {
   tag:"Champions League", auto:true, diff:"medio", type:"jugadores",
   title:"Jugadores de campo titulares del Chelsea en la final de la Champions 2012 (Bayern 1-1 Chelsea, 3-4 en los penaltis, Múnich)",
-  desc:"Sin contar al portero, Petr Cech. Bertrand jugó de extremo izquierdo y salió en el minuto 73 (Malouda).",
+  desc:"Sin contar al portero, Petr Cech. Un titular salió en el minuto 73: él cuenta, su suplente no.",
   yrs:[2012,2012],
   answers:[
     {n:"José Bosingwa", a:["bosingwa","jose bosingwa"], d:"Lateral derecho"},
@@ -93,7 +93,7 @@ module.exports=[
 {
   tag:"Champions League", auto:true, diff:"dificil", type:"jugadores",
   title:"Jugadores de campo titulares de la Juventus en la final de la Champions 2017 (Juventus 1-4 Real Madrid, Cardiff)",
-  desc:"Sin contar al portero, Buffon. Barzagli se lesionó y salió en la segunda parte (Cuadrado).",
+  desc:"Sin contar al portero, Buffon. Un titular se lesionó y salió en la segunda parte: él cuenta, su suplente no.",
   yrs:[2017,2017],
   answers:[
     {n:"Dani Alves", a:["dani alves","alves","daniel alves"], d:"Lateral derecho"},
@@ -111,7 +111,7 @@ module.exports=[
 {
   tag:"La Liga", diff:"dificil", type:"equipos",
   title:"Clasificación final de La Liga 2012/13, la de los 100 puntos del Barcelona: los diez primeros",
-  desc:"Ordenados como en la tabla final. Barcelona y Real Madrid acabaron 1º y 2º con 100 y 85 puntos.",
+  desc:"Ordenados como en la tabla final.",
   yrs:[2012,2013],
   answers:[
     {n:"Barcelona", a:["fc barcelona","barca"], d:"1º con 100 puntos. Campeón"},
@@ -129,7 +129,7 @@ module.exports=[
 {
   tag:"Serie A", diff:"leyenda", type:"equipos",
   title:"Clasificación final de la Serie A 2013/14, la de los 102 puntos de la Juventus: los diez primeros",
-  desc:"Ordenados como en la tabla final. Torino y Milan acabaron con 57 puntos.",
+  desc:"Ordenados como en la tabla final. Hay un empate a 57 puntos.",
   yrs:[2013,2014],
   answers:[
     {n:"Juventus", a:["juve","juventus fc"], d:"1º con 102 puntos. Campeón, récord de puntos en su momento"},

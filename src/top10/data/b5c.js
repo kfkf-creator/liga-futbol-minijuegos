@@ -2,7 +2,7 @@ module.exports=[
 {
   tag:"Selecciones", auto:true, diff:"facil", type:"jugadores",
   title:"Jugadores de campo titulares de Brasil en la final del Mundial 2002 (Brasil 2-0 Alemania, Yokohama)",
-  desc:"Sin contar al portero, Marcos. Brasil jugó con tres centrales y dos carrileros; Ronaldo marcó los dos goles (67' y 79').",
+  desc:"Sin contar al portero, Marcos. Brasil jugó con tres centrales y dos carrileros.",
   yrs:[2002,2002],
   answers:[
     {n:"Cafu", a:["cafu"], d:"Carrilero derecho y capitán"},
@@ -20,7 +20,7 @@ module.exports=[
 {
   tag:"Selecciones", auto:true, diff:"facil", type:"jugadores",
   title:"Jugadores de campo titulares de Francia en la final del Mundial 2006 (Italia 1-1 Francia, 5-3 en los penaltis, Berlín)",
-  desc:"Sin contar al portero, Barthez. Vieira se lesionó y fue sustituido por Diarra en la segunda parte.",
+  desc:"Sin contar al portero, Barthez. Un titular se lesionó y fue sustituido en la segunda parte: él cuenta, su suplente no.",
   yrs:[2006,2006],
   answers:[
     {n:"Willy Sagnol", a:["sagnol","willy sagnol"], d:"Lateral derecho"},
@@ -38,7 +38,7 @@ module.exports=[
 {
   tag:"Selecciones", auto:true, diff:"facil", type:"jugadores",
   title:"Jugadores de campo titulares de España en la final de la Eurocopa 2008 (Alemania 0-1 España, Viena)",
-  desc:"Sin contar al portero, Casillas. David Villa, lesionado en la semifinal, no jugó; el gol lo marcó Torres en el minuto 33.",
+  desc:"Sin contar al portero, Casillas. El partido lo decidió un solo gol en la primera parte.",
   yrs:[2008,2008],
   answers:[
     {n:"Sergio Ramos", a:["ramos","sergio ramos"], d:"Lateral derecho"},
@@ -56,7 +56,7 @@ module.exports=[
 {
   tag:"Champions League", auto:true, diff:"medio", type:"jugadores",
   title:"Jugadores de campo titulares del Real Madrid en la final de la Champions 2002 (Real Madrid 2-1 Bayer Leverkusen, Hampden Park)",
-  desc:"Sin contar al portero, César Sánchez, que se lesionó y fue sustituido por Casillas en el minuto 68. Goles de Raúl (8') y Zidane (45').",
+  desc:"Sin contar al portero, César Sánchez, que se lesionó y fue sustituido por Casillas en el minuto 68.",
   yrs:[2002,2002],
   answers:[
     {n:"Míchel Salgado", a:["salgado","michel salgado","michel"], d:"Lateral derecho"},
@@ -74,7 +74,7 @@ module.exports=[
 {
   tag:"Champions League", auto:true, diff:"medio", type:"jugadores",
   title:"Jugadores de campo titulares del Manchester United en la final de la Champions 2008 (Manchester United 1-1 Chelsea, 6-5 en los penaltis, Moscú)",
-  desc:"Sin contar al portero, Van der Sar. Ronaldo marcó de cabeza en el minuto 26; Giggs entró desde el banquillo.",
+  desc:"Sin contar al portero, Van der Sar.",
   yrs:[2008,2008],
   answers:[
     {n:"Wes Brown", a:["brown","wes brown"], d:"Lateral derecho, sustituido por Anderson antes de los penaltis"},
@@ -93,7 +93,7 @@ module.exports=[
   tag:"Premier League", diff:"medio", type:"equipos",
   amb:["manchester","united"],
   title:"Clasificación final de la Premier League 2007/08: los diez primeros",
-  desc:"Del campeón, el Manchester United, al décimo, el West Ham.",
+  desc:"Ordenados por puntos al terminar la temporada.",
   yrs:[2007,2008],
   answers:[
     {n:"Manchester United", a:["man united","man utd","manchester utd"], d:"1º, 87 puntos. Campeón"},
@@ -112,7 +112,7 @@ module.exports=[
   tag:"La Liga", diff:"medio", type:"equipos",
   amb:["madrid"],
   title:"Clasificación final de La Liga 2008/09, la del triplete de Guardiola: los diez primeros",
-  desc:"Del campeón, el Barcelona, al décimo, el Espanyol.",
+  desc:"Ordenados como en la tabla final.",
   yrs:[2008,2009],
   answers:[
     {n:"FC Barcelona", a:["barcelona","barca","fc barcelona"], d:"1º, 87 puntos y 105 goles a favor. Campeón"},
@@ -130,7 +130,7 @@ module.exports=[
 {
   tag:"Champions League", auto:true, diff:"dificil", type:"jugadores",
   title:"Jugadores de campo titulares del Liverpool en la final de la Champions 2005 (Milan 3-3 Liverpool, 2-3 en los penaltis, Estambul)",
-  desc:"Sin contar al portero, Dudek. Kewell se lesionó y salió en el minuto 23 (Šmicer); Finnan salió al descanso (Hamann).",
+  desc:"Sin contar al portero, Dudek. Dos titulares fueron sustituidos (uno en el minuto 23 y otro al descanso): ellos cuentan, sus suplentes no.",
   yrs:[2005,2005],
   answers:[
     {n:"Steve Finnan", a:["finnan","steve finnan"], d:"Lateral derecho, sustituido en el descanso por Hamann"},
@@ -148,7 +148,7 @@ module.exports=[
 {
   tag:"Champions League", auto:true, diff:"dificil", type:"jugadores",
   title:"Jugadores de campo titulares del Barcelona en la final de la Champions 2006 (Barcelona 2-1 Arsenal, París)",
-  desc:"Sin contar al portero, Valdés. Lehmann fue expulsado en el minuto 18 y el Barça remontó con goles de Eto'o y Belletti (suplente).",
+  desc:"Sin contar al portero, Valdés. El portero rival fue expulsado en el minuto 18 y el Barça remontó el partido.",
   yrs:[2006,2006],
   answers:[
     {n:"Oleguer Presas", a:["oleguer","oleguer presas","presas"], d:"Lateral derecho, sustituido por Belletti"},

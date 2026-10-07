@@ -36,7 +36,7 @@ module.exports=[
 {
   tag:"Segunda División", diff:"leyenda", type:"equipos",
   title:"Clasificación final de la Segunda División 2025/26: los diez primeros",
-  desc:"Ordenados como en la tabla final. Hay empates a puntos: Córdoba, Sporting y Ceuta acabaron con 61.",
+  desc:"Ordenados como en la tabla final. Hay un triple empate a 61 puntos.",
   answers:[
     {n:"Racing de Santander", a:["racing","racing santander","real racing club","racing de santander"], d:"1º con 82 puntos. Campeón y ascenso directo"},
     {n:"Deportivo de La Coruña", a:["deportivo","depor","dépor","deportivo coruna","deportivo la coruna","rc deportivo"], d:"2º con 77 puntos. Ascenso directo"},

@@ -3,7 +3,7 @@ module.exports=[
   tag:"Selecciones", auto:true, diff:"facil", type:"jugadores",
   amb:["santos"],
   title:"Jugadores de campo titulares de Brasil en la final del Mundial 1958 (Brasil 5-2 Suecia, Råsunda)",
-  desc:"Sin contar al portero, Gilmar. Hay dos Santos: hay que decir el nombre.",
+  desc:"Sin contar al portero, Gilmar. Ojo con los apellidos repetidos: hay que decir el nombre completo.",
   yrs:[1958,1958],
   answers:[
     {n:"Djalma Santos", a:["djalma","djalma santos"], d:"Lateral derecho"},
@@ -21,7 +21,7 @@ module.exports=[
 /* 2 */ {
   tag:"Champions League", auto:true, diff:"dificil", type:"jugadores",
   title:"Jugadores de campo titulares del Real Madrid en la final de la Copa de Europa 1960 (Real Madrid 7-3 Eintracht Frankfurt, Hampden Park)",
-  desc:"Sin contar al portero, Rogelio Domínguez. Di Stéfano marcó tres goles y Puskás cuatro.",
+  desc:"Sin contar al portero, Rogelio Domínguez. Fue una final con diez goles.",
   yrs:[1960,1960],
   answers:[
     {n:"Marquitos", a:["marquitos","marcos alonso"], d:"Defensa"},
@@ -39,7 +39,7 @@ module.exports=[
 /* 3 */ {
   tag:"Selecciones", auto:true, diff:"medio", type:"jugadores",
   title:"Jugadores de campo titulares de Alemania Occidental en la final del Mundial 1974 (Alemania Occidental 2-1 Países Bajos, Múnich)",
-  desc:"Sin contar al portero, Sepp Maier. No hubo cambios. Marcaron Breitner (penalti) y Gerd Müller.",
+  desc:"Sin contar al portero, Sepp Maier. No hubo cambios.",
   yrs:[1974,1974],
   answers:[
     {n:"Berti Vogts", a:["vogts","berti vogts"], d:"Lateral derecho. Marcó a Cruyff durante todo el partido"},
@@ -57,7 +57,7 @@ module.exports=[
 /* 4 */ {
   tag:"Selecciones", auto:true, diff:"dificil", type:"jugadores",
   title:"Jugadores de campo titulares de Países Bajos en la final del Mundial 1974 (Alemania Occidental 2-1 Países Bajos, Múnich)",
-  desc:"Sin contar al portero, Jan Jongbloed. Rijsbergen se lesionó y fue sustituido por Theo de Jong en la segunda parte. Rensenbrink dejó su sitio a René van de Kerkhof en el descanso.",
+  desc:"Sin contar al portero, Jan Jongbloed. Dos titulares fueron sustituidos: ellos cuentan, sus suplentes no.",
   yrs:[1974,1974],
   answers:[
     {n:"Wim Suurbier", a:["suurbier","wim suurbier"], d:"Lateral derecho"},
@@ -75,7 +75,7 @@ module.exports=[
 /* 5 */ {
   tag:"Selecciones", auto:true, diff:"dificil", type:"jugadores",
   title:"Jugadores de campo titulares de Argentina en la final del Mundial 1978 (Argentina 3-1 Países Bajos en la prórroga, Monumental)",
-  desc:"Sin contar al portero, Ubaldo Fillol. Ardiles salió en el 65 (Larrosa) y Ortiz en el 74 (Houseman).",
+  desc:"Sin contar al portero, Ubaldo Fillol. Dos titulares fueron sustituidos: ellos cuentan, sus suplentes no.",
   yrs:[1978,1978],
   answers:[
     {n:"Daniel Passarella", a:["passarella","daniel passarella"], d:"Capitán y central"},
@@ -111,7 +111,7 @@ module.exports=[
 /* 7 */ {
   tag:"Champions League", diff:"dificil", type:"equipos",
   title:"Campeones de la Copa de Europa entre 1955/56 y 1977/78",
-  desc:"Veintitrés ediciones y diez clubes distintos. Ojo con Milan e Inter.",
+  desc:"Veintitrés ediciones y diez clubes distintos.",
   yrs:[1956,1978],
   answers:[
     {n:"Real Madrid", a:["madrid","real madrid cf"], d:"Seis títulos: 1956, 1957, 1958, 1959, 1960 y 1966"},
@@ -148,7 +148,7 @@ module.exports=[
   tag:"Selecciones", diff:"leyenda", type:"estadios",
   amb:["estadio nacional","nacional","estadio olimpico","olimpico","stadion","estadio","stadium"],
   title:"Estadios de las finales del Mundial entre 1930 y 1974",
-  desc:"Diez estadios distintos. En 1950 no hubo final: cuenta el partido decisivo de la liguilla final. Ojo: hay dos Estadios Nacionales, el de Roma y el de Santiago.",
+  desc:"Diez estadios distintos. En 1950 no hubo final: cuenta el partido decisivo de la liguilla final. Ojo con los estadios de nombre repetido: hay que distinguir la ciudad.",
   yrs:[1930,1974],
   answers:[
     {n:"Estadio Centenario", a:["centenario","estadio centenario de montevideo","montevideo"], d:"1930, Montevideo. Uruguay 4-2 Argentina"},
@@ -166,7 +166,7 @@ module.exports=[
 /* 10 */ {
   tag:"Selecciones", diff:"medio", type:"selecciones",
   title:"Selecciones que jugaron una final del Mundial entre 1930 y 1978",
-  desc:"Diez selecciones distintas. En 1950 no hubo final: cuentan Uruguay y Brasil, del partido decisivo. Alemania Occidental cuenta como Alemania.",
+  desc:"Diez selecciones distintas. En 1950 no hubo final: cuentan las del partido decisivo. Las selecciones que cambiaron de nombre cuentan como una sola.",
   yrs:[1930,1978],
   answers:[
     {n:"Uruguay", a:[], d:"Campeón en 1930 y 1950"},

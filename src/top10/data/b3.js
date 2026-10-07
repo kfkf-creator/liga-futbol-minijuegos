@@ -2,7 +2,7 @@ module.exports=[
 /* 51 */ {
   tag:"Premier League", diff:"medio", type:"equipos",
   title:"Clasificación final de la Premier League 2015/16: los diez primeros",
-  desc:"La temporada del Leicester campeón. Ordenados por puntos.",
+  desc:"Ordenados por puntos. Fue la temporada más sorprendente de la historia reciente de la Premier League.",
   answers:[
     {n:"Leicester City", a:["leicester","foxes","leicester city fc"], d:"1º con 81 puntos. Campeón con una cuota de 5000 a 1"},
     {n:"Arsenal", a:["arsenal fc"], d:"2º con 71 puntos"},
@@ -36,7 +36,7 @@ module.exports=[
 /* 53 */ {
   tag:"Premier League", diff:"facil", type:"equipos",
   title:"Clasificación final de la Premier League 2011/12, la del gol de Agüero: los diez primeros",
-  desc:"Ordenados como en la tabla final. City y United acabaron con los mismos puntos.",
+  desc:"Ordenados como en la tabla final. Los dos primeros acabaron con los mismos puntos.",
   answers:[
     {n:"Manchester City", a:["man city"], d:"1º con 89 puntos. Campeón por diferencia de goles"},
     {n:"Manchester United", a:["man united","man utd","manchester utd","man u"], d:"2º con 89 puntos"},
@@ -88,7 +88,7 @@ module.exports=[
 /* 56 */ {
   tag:"Ligue 1", diff:"medio", type:"equipos",
   title:"Clasificación final de la Ligue 1 2025/26: los diez primeros",
-  desc:"Ordenados como en la tabla final. Toulouse y Lorient acabaron con 45 puntos.",
+  desc:"Ordenados como en la tabla final. Hay un empate a 45 puntos entre dos equipos.",
   answers:[
     {n:"PSG", a:["paris saint germain","paris sg","paris","psg fc"], d:"1º con 76 puntos. Campeón"},
     {n:"Lens", a:["rc lens","racing lens"], d:"2º con 70 puntos"},
@@ -228,7 +228,7 @@ module.exports=[
 /* 64 */ {
   tag:"Selecciones", diff:"medio", type:"selecciones",
   title:"Selecciones que han sido subcampeonas del mundo (hasta 2026)",
-  desc:"Diez selecciones distintas. Alemania Occidental cuenta como Alemania. En 1950 no hubo final: cuenta el equipo que perdió el partido decisivo.",
+  desc:"Diez selecciones distintas. Las selecciones que cambiaron de nombre cuentan como una sola. En 1950 no hubo final: cuenta el equipo que perdió el partido decisivo.",
   answers:[
     {n:"Argentina", a:[], d:"4 veces: 1930, 1990, 2014 y 2026"},
     {n:"Países Bajos", a:["holanda","netherlands","paises bajos","the netherlands"], d:"3 veces: 1974, 1978 y 2010"},
@@ -365,7 +365,7 @@ module.exports=[
   tag:"Champions League", auto:true, diff:"leyenda", type:"jugadores",
   amb:["neville"],
   title:"Jugadores de campo titulares del Manchester United en la final de la Champions 1999 (Manchester United 2-1 Bayern, Camp Nou)",
-  desc:"Sin contar al portero, Peter Schmeichel. Keane y Scholes estaban sancionados.",
+  desc:"Sin contar al portero, Peter Schmeichel.",
   answers:[
     {n:"Gary Neville", a:["gary neville","gary"], d:"Lateral derecho"},
     {n:"Ronny Johnsen", a:["johnsen"], d:"Central"},
@@ -383,7 +383,7 @@ module.exports=[
   tag:"Selecciones", auto:true, diff:"leyenda", type:"jugadores",
   amb:["charlton"],
   title:"Jugadores de campo titulares de Inglaterra en la final del Mundial 1966 (Inglaterra 4-2 Alemania Occidental, Wembley)",
-  desc:"Sin contar al portero, Gordon Banks. Ojo con los hermanos Charlton: hay que decir cuál.",
+  desc:"Sin contar al portero, Gordon Banks. Ojo con los apellidos repetidos: hay que decir el nombre completo.",
   answers:[
     {n:"George Cohen", a:["cohen"], d:"Lateral derecho"},
     {n:"Ray Wilson", a:["wilson"], d:"Lateral izquierdo"},

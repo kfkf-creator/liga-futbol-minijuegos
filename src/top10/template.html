@@ -395,6 +395,21 @@ buildKeys();
 
 function tolerance(k){ return k.length>=10?2:(k.length>=6?1:0); }
 
+/* ¿El texto es el nombre exacto de otra entidad real del mismo tipo (otra selección, otro jugador...)? Entonces no es una errata:
+   es una respuesta equivocada y no se corrige ni se sugiere ("Estonia" no es una errata de "Escocia"). */
+const KNOWN={};
+function isKnownEntity(L,n){
+  const t=L.type, tag=dbState==="ready"?"db":"pool";
+  let k=KNOWN[t];
+  if(!k||k.tag!==tag){
+    const set=new Set();
+    (POOLS[t]||[]).forEach(e=>{ set.add(e.nk); (e.keys||[]).forEach(x=>set.add(x)); });
+    if(tag==="db") (DB[t]||[]).forEach(e=>set.add(e.nk));
+    k=KNOWN[t]={tag,set};
+  }
+  return k.set.has(n);
+}
+
 /* Devuelve {t:"empty"|"amb"|"also"|"miss"|"hit"|"dup", i?, n?}. also: respuesta válida que no cuenta y no resta vida. */
 function judge(L, raw, found){
   const n=norm(raw);
@@ -402,7 +417,7 @@ function judge(L, raw, found){
   if(GLOBAL_AMBIG.includes(n) || (L.amb||[]).includes(n)) return {t:"amb"};
   let cands=[];
   L.answers.forEach((a,i)=>{ if(a.keys.includes(n)) cands.push(i); });
-  if(!cands.length){
+  if(!cands.length && !isKnownEntity(L,n)){
     L.answers.forEach((a,i)=>{
       const ok=a.keys.some(k=>{
         const d=tolerance(k);
@@ -422,13 +437,13 @@ function judge(L, raw, found){
    Devuelve el índice de la respuesta o null. */
 function nearMiss(L, raw, found){
   const n=norm(raw);
-  if(n.length<3) return null;
+  if(n.length<3 || isKnownEntity(L,n)) return null;
   let best=null;
   L.answers.forEach((a,i)=>{
     if(found.has(i)) return;
     a.keys.forEach(k=>{
-      if(k.length<4) return;
-      const lim=Math.max(1,Math.floor(k.length*0.34));
+      if(k.length<5) return;
+      const lim=k.length>=10?2:1;   /* una letra de diferencia (dos en nombres largos): errata, no otra respuesta */
       if(Math.abs(k.length-n.length)>lim) return;
       const d=lev(n,k);
       if(d<=lim && (!best||d<best.d)) best={i,d};

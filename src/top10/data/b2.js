@@ -53,7 +53,7 @@ module.exports=[
 /* 29 */ {
   tag:"Selecciones", auto:true, diff:"dificil", type:"entrenadores",
   title:"Seleccionadores de España desde 1992",
-  desc:"Diez técnicos de la absoluta desde 1992. Fernando Hierro y Robert Moreno cuentan aunque dirigieron pocos partidos.",
+  desc:"Diez técnicos de la absoluta desde 1992. Cuentan también los que dirigieron pocos partidos.",
   answers:[
     {n:"Javier Clemente", a:["clemente"], d:"1992 a 1998"},
     {n:"José Antonio Camacho", a:["camacho","jose antonio camacho"], d:"1998 a 2002. Dirigió el Mundial de Corea y Japón"},
@@ -177,7 +177,7 @@ module.exports=[
 /* 36 */ {
   tag:"Champions League", cur:true, diff:"medio", type:"selecciones",
   title:"Países cuyos clubes han ganado la Copa de Europa o la Champions League (hasta 2025/26)",
-  desc:"Diez países. Ordenados por número de títulos entre todos sus clubes. Yugoslavia cuenta como Serbia.",
+  desc:"Diez países. Ordenados por número de títulos entre todos sus clubes. Los países que ya no existen cuentan como su sucesor.",
   answers:[
     {n:"España", a:["spain"], d:"20 títulos: Real Madrid 15 y Barcelona 5"},
     {n:"Inglaterra", a:["england","reino unido"], d:"15 títulos: Liverpool 6, Manchester United 3, Nottingham Forest 2, Chelsea 2, Aston Villa 1 y Manchester City 1"},
@@ -347,7 +347,7 @@ module.exports=[
 /* 46 */ {
   tag:"Selecciones", auto:true, diff:"dificil", type:"jugadores",
   title:"Jugadores de campo titulares de Alemania en la final del Mundial 2014 (Alemania 1-0 Argentina, Maracanã)",
-  desc:"Sin contar al portero, Manuel Neuer. Ojo: Khedira se lesionó en el calentamiento.",
+  desc:"Sin contar al portero, Manuel Neuer.",
   answers:[
     {n:"Philipp Lahm", a:["lahm"], d:"Capitán. Jugó de lateral derecho"},
     {n:"Jérôme Boateng", a:["boateng","jerome boateng"], d:"Central"},

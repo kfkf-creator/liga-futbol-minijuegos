@@ -2,7 +2,7 @@ module.exports=[
 /* 76 */ {
   tag:"Selecciones", auto:true, diff:"facil", type:"jugadores",
   title:"Jugadores de campo titulares de España en la final del Mundial 2026 (España 1-0 Argentina en la prórroga, MetLife Stadium)",
-  desc:"Sin contar al portero, Unai Simón. El gol lo marcó Ferran Torres desde el banquillo, en el minuto 106.",
+  desc:"Sin contar al portero, Unai Simón. El partido se decidió en la prórroga.",
   answers:[
     {n:"Pedro Porro", a:["porro","pedro porro"], d:"Lateral derecho"},
     {n:"Pau Cubarsí", a:["cubarsi","pau cubarsi","pau"], d:"Central"},
@@ -20,7 +20,7 @@ module.exports=[
   tag:"Selecciones", auto:true, diff:"medio", type:"jugadores",
   amb:["martinez"],
   title:"Jugadores de campo titulares de Argentina en la final del Mundial 2026 (España 1-0 Argentina en la prórroga, MetLife Stadium)",
-  desc:"Sin contar al portero, Emiliano Martínez. Ojo con los apellidos: hay que decir el nombre completo del Martínez.",
+  desc:"Sin contar al portero, Emiliano Martínez. Ojo con los apellidos repetidos: hay que decir el nombre completo.",
   answers:[
     {n:"Gonzalo Montiel", a:["montiel"], d:"Lateral derecho"},
     {n:"Cristian Romero", a:["romero","cuti romero","cuti"], d:"Central"},
@@ -312,7 +312,7 @@ module.exports=[
   tag:"Recopa", cur:true, diff:"leyenda", type:"equipos",
   amb:["dinamo","dynamo"],
   title:"Campeones de la Recopa de Europa entre 1977/78 y 1988/89",
-  desc:"Doce ediciones y diez clubes distintos. Hay dos Dinamos: hay que decir la ciudad.",
+  desc:"Doce ediciones y diez clubes distintos. Ojo con los clubes de nombre repetido: hay que decir la ciudad.",
   answers:[
     {n:"Anderlecht", a:["rsc anderlecht"], d:"1978, ganó al Austria de Viena por 4-0"},
     {n:"Barcelona", a:["fc barcelona","barca","barsa"], d:"1979, 1982 y 1989"},
@@ -330,7 +330,7 @@ module.exports=[
   tag:"Balón de Oro", cur:true, auto:true, diff:"medio", type:"jugadores",
   amb:["ronaldo"],
   title:"Jugadores que han ganado el Balón de Oro más de una vez",
-  desc:"Diez jugadores hasta la edición de 2025. Ojo: hay dos Ronaldos, hay que decir cuál.",
+  desc:"Diez jugadores hasta la edición de 2025. Ojo con los apellidos repetidos: hay que decir el nombre completo.",
   answers:[
     {n:"Lionel Messi", a:["messi","leo messi","leo"], d:"8 veces"},
     {n:"Cristiano Ronaldo", a:["cristiano","cr7","cristiano ronaldo dos santos"], d:"5 veces"},
@@ -347,7 +347,7 @@ module.exports=[
 /* 96 */ {
   tag:"Bundesliga", diff:"medio", type:"equipos",
   title:"Clasificación final de la Bundesliga 2024/25: los diez primeros",
-  desc:"Ordenados como en la tabla final. Leipzig y Werder acabaron con 51 puntos.",
+  desc:"Ordenados como en la tabla final. Hay un empate a 51 puntos.",
   answers:[
     {n:"Bayern Múnich", a:["bayern","bayern munich","bayern munchen","fc bayern","munich"], d:"1º con 82 puntos. Campeón"},
     {n:"Bayer Leverkusen", a:["leverkusen","bayer 04","bayer 04 leverkusen","bayer"], d:"2º con 69 puntos"},
@@ -364,7 +364,7 @@ module.exports=[
 /* 97 */ {
   tag:"Serie A", diff:"medio", type:"equipos",
   title:"Clasificación final de la Serie A 2024/25: los diez primeros",
-  desc:"Ordenados como en la tabla final. Fiorentina y Lazio acabaron con 65 puntos.",
+  desc:"Ordenados como en la tabla final. Hay un empate a 65 puntos.",
   answers:[
     {n:"Nápoles", a:["napoli","ssc napoli","naples","napoles"], d:"1º con 82 puntos. Campeón por un punto"},
     {n:"Inter", a:["inter de milan","inter milan","internazionale","fc internazionale"], d:"2º con 81 puntos"},
