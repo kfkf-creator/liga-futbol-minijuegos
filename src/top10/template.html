@@ -190,7 +190,12 @@ textarea{width:100%;background:var(--bg);color:var(--text);border:1px solid var(
 .linkbtn{background:none;border:0;color:var(--muted);text-decoration:underline;padding:4px 0;font-size:14px}
 .linkbtn:hover{color:var(--text)}
 .rep{margin-top:18px}
-.rep .panel{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--panel)}
+.rep .panel,#revPanel,#revBar{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--panel)}
+#revPanel{margin-top:16px;display:grid;gap:10px}
+#revPanel[hidden],#revBar[hidden]{display:none}
+#revBar{margin:12px 0}
+#revBar .actions{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0}
+#revPanel textarea{width:100%;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit}
 .rep label{display:block;margin:4px 0}
 .install{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:0 0 14px;padding:10px 14px;border:1px solid var(--gold);border-radius:12px;background:var(--panel)}
 .install .msg{flex:1 1 220px;font-size:14px}
@@ -212,6 +217,7 @@ textarea{width:100%;background:var(--bg);color:var(--text);border:1px solid var(
     <section id="menu" aria-label="Menú de niveles">
       <div class="menu-head">
         <p class="summary" id="summary"></p>
+        <div class="panel" id="revBar" hidden></div>
         <button class="btn primary" id="playNext" type="button">Jugar</button>
       </div>
       <p class="rules">
@@ -316,6 +322,7 @@ textarea{width:100%;background:var(--bg);color:var(--text);border:1px solid var(
         </div>
         <p class="hint" id="shareMsg" aria-live="polite"></p>
       </div>
+      <div class="panel" id="revPanel" hidden></div>
     </section>
   </main>
 </div>
@@ -645,6 +652,7 @@ function renderMenu(){
   $("playNext").textContent=doneVis===0?"Empezar":(doneVis>=list.length?"Jugar otra vez":"Continuar");
   $("playNext").disabled=!list.length;
   renderFilters();
+  renderRevBar();
   const grid=$("levels"); grid.innerHTML="";
   if(!list.length){
     const p=document.createElement("p"); p.className="empty"; p.textContent="Ningún nivel coincide con este filtro todavía."; grid.appendChild(p); return;
@@ -659,7 +667,7 @@ function renderMenu(){
     const meta=document.createElement("span"); meta.className="meta";
     meta.textContent=(L.cur?"Curiosidad · ":"")+TYPE_NAME[L.type]+" · "+L.tag+" · "+yrsText(L);
     const st=document.createElement("span"); st.className="st";
-    st.textContent=progress.done[L.key]?starText(progress.done[L.key]):"Pendiente";
+    st.textContent=(progress.done[L.key]?starText(progress.done[L.key]):"Pendiente")+revMark(L);
     b.append(num,bd,meta,st);
     b.addEventListener("click",()=>startLevel(i,list));
     grid.appendChild(b);
@@ -698,6 +706,7 @@ function startLevel(i,list){
   $("tagPill").textContent=L.cur?"Curiosidad":L.tag;
   $("title").textContent=L.title;
   $("desc").textContent=L.desc;
+  renderRev();
   $("result").hidden=true;
   say("","");
   $("input").value="";
@@ -1035,6 +1044,82 @@ $("shareBtn").addEventListener("click",async()=>{
   try{ await navigator.clipboard.writeText(i.text); msg.textContent="Resultado copiado. Pégalo en un mensaje."; }
   catch(e){ msg.textContent=i.text; }
 });
+
+/* ============ Modo revisión (abrir con ?revisar=1; ?revisar=0 lo desactiva) ============ */
+const REV_KEY="top10futbol.review", REV_MODE_KEY="top10futbol.revmode";
+function revMode(){
+  try{
+    const q=new URLSearchParams(location.search).get("revisar");
+    if(q==="1") localStorage.setItem(REV_MODE_KEY,"1"); else if(q==="0") localStorage.removeItem(REV_MODE_KEY);
+    return localStorage.getItem(REV_MODE_KEY)==="1";
+  }catch(e){ return false; }
+}
+function revLoad(){ if(!window.__rev){ try{ window.__rev=JSON.parse(localStorage.getItem(REV_KEY))||{}; }catch(e){ window.__rev={}; } } return window.__rev; }
+function revSave(){ try{ localStorage.setItem(REV_KEY,JSON.stringify(revLoad())); }catch(e){} }
+function revDone(r){ return !!(r&&r.d&&r.q); }
+function revMark(L){ if(!revMode()) return ""; const r=revLoad()[L.key]; if(!r) return ""; return revDone(r)?" · ✓ revisado":" · revisión a medias"; }
+function revLabel(r){
+  const d=!r||!r.d?"":(r.d==="ok"?"nivel bien":(r.d.startsWith("bajar:")?"bajar a ":"subir a ")+DIFF_NAME[r.d.split(":")[1]]||"");
+  return d;
+}
+function renderRev(){
+  const box=$("revPanel"); if(!revMode()){ box.hidden=true; return; }
+  const L=LEVELS[state.idx], all=revLoad(), r=all[L.key]||(all[L.key]={});
+  box.hidden=false; box.innerHTML="";
+  const mk=(t,cls)=>{ const e=document.createElement(t); if(cls) e.className=cls; return e; };
+  const h=mk("p","hint"); h.textContent="Revisión del nivel "+L.id+" · dificultad actual: "+DIFF_NAME[L.diff]; box.appendChild(h);
+  const row=(label,items)=>{ const rr=mk("div","frow"); const l=mk("span","flabel"); l.textContent=label; rr.appendChild(l); items.forEach(c=>rr.appendChild(c)); box.appendChild(rr); };
+  const order=DIFFS.map(x=>x[0]), cur=order.indexOf(L.diff);
+  const opts=[["ok","Nivel bien"]];
+  for(let k=cur-1;k>=0;k--) opts.push(["bajar:"+order[k],"Bajar a "+DIFF_NAME[order[k]]]);
+  for(let k=cur+1;k<order.length;k++) opts.push(["subir:"+order[k],"Subir a "+DIFF_NAME[order[k]]]);
+  const upd=()=>{ revSave(); renderRev(); };
+  row("Dificultad",opts.map(([v,l])=>chip(l,r.d===v,()=>{ r.d=v; upd(); })));
+  row("Pregunta",[["queda","Se queda"],["quitar","Quitar"],["comentar","Comentar"]].map(([v,l])=>chip(l,r.q===v,()=>{ r.q=v; upd(); })));
+  if(r.q==="quitar"||r.q==="comentar"){
+    const ta=mk("textarea"); ta.rows=2; ta.value=r.c||""; ta.setAttribute("aria-label","Comentario");
+    ta.placeholder=r.q==="quitar"?"Motivo (opcional)":"Tu comentario";
+    ta.addEventListener("input",()=>{ r.c=ta.value; revSave(); });
+    box.appendChild(ta);
+  }
+  const st=mk("p","hint"); st.setAttribute("aria-live","polite");
+  st.textContent=revDone(r)?"Guardado.":"Elige una opción en cada fila.";
+  box.appendChild(st);
+}
+function revText(){
+  const all=revLoad(), by=k=>LEVELS.find(L=>L.key===k);
+  const rows=LEVELS.map(L=>({L,r:all[L.key]}));
+  const head=L=>"#"+L.id+" ["+DIFF_NAME[L.diff]+"] "+L.title;
+  const out=["REVISIÓN TOP 10 (revisados "+rows.filter(x=>revDone(x.r)).length+" de "+LEVELS.length+")"];
+  const sect=(name,list)=>{ if(list.length){ out.push("",name); list.forEach(x=>out.push(x)); } };
+  sect("CAMBIAR DIFICULTAD",rows.filter(x=>x.r&&x.r.d&&x.r.d!=="ok").map(x=>head(x.L)+" -> "+revLabel(x.r)));
+  sect("QUITAR",rows.filter(x=>x.r&&x.r.q==="quitar").map(x=>head(x.L)+(x.r.c?" · "+x.r.c.replace(/\s+/g," "):"")));
+  sect("COMENTAR",rows.filter(x=>x.r&&x.r.q==="comentar").map(x=>head(x.L)+" · "+(x.r.c||"(sin texto)").replace(/\s+/g," ")));
+  const ok=rows.filter(x=>x.r&&x.r.d==="ok"&&x.r.q==="queda").map(x=>x.L.id);
+  if(ok.length) out.push("","BIEN Y SE QUEDAN ("+ok.length+"): "+ok.join(", "));
+  const half=rows.filter(x=>x.r&&!revDone(x.r)).map(x=>x.L.id);
+  if(half.length) out.push("","A MEDIAS: "+half.join(", "));
+  const none=rows.filter(x=>!x.r).map(x=>x.L.id);
+  if(none.length) out.push("","SIN REVISAR ("+none.length+"): "+none.join(", "));
+  return out.join("\n");
+}
+function renderRevBar(){
+  const box=$("revBar"); if(!revMode()){ box.hidden=true; return; }
+  const all=revLoad(), n=LEVELS.filter(L=>revDone(all[L.key])).length;
+  box.hidden=false; box.innerHTML="";
+  const h=document.createElement("p"); h.className="hint"; h.textContent="Modo revisión: "+n+" de "+LEVELS.length+" niveles revisados.";
+  const a=document.createElement("div"); a.className="actions";
+  const bShare=document.createElement("button"); bShare.type="button"; bShare.className="btn primary"; bShare.textContent="Compartir revisión";
+  const bCopy=document.createElement("button"); bCopy.type="button"; bCopy.className="btn"; bCopy.textContent="Copiar";
+  const msg=document.createElement("p"); msg.className="hint"; msg.setAttribute("aria-live","polite");
+  bCopy.addEventListener("click",async()=>{ try{ await navigator.clipboard.writeText(revText()); msg.textContent="Copiado. Pégalo en el chat."; }catch(e){ msg.textContent="No se pudo copiar. Usa Compartir."; } });
+  bShare.addEventListener("click",async()=>{
+    const text=revText();
+    try{ if(navigator.share){ await navigator.share({title:"Revisión Top 10",text}); return; } }catch(e){ if(e&&e.name==="AbortError") return; }
+    try{ await navigator.clipboard.writeText(text); msg.textContent="Copiado. Pégalo en el chat."; }catch(e){ msg.textContent="No se pudo compartir."; }
+  });
+  a.append(bShare,bCopy); box.append(h,a,msg);
+}
 
 /* ============ Reportar un problema (se comparte por WhatsApp, etc.) ============ */
 function repOpen(){ $("repPanel").hidden=false; $("repMsg").textContent=""; $("repText").focus(); }
