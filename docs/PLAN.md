@@ -197,3 +197,11 @@ Solo diseño; nada de esto esta en el codigo todavia salvo lo indicado en seccio
 - Panel de racha (2026-10-07): la llama de Hoy es ahora un botón que abre una hoja con la racha, la mejor racha, el estado de hoy, la escalera de premios (conseguidos, siguiente con barra, bloqueados), comodines, medallas y la regla del salvavidas. Test: `streak-test.js`.
 - Corregido: la plantilla tenía duplicadas `streakRescue`, `checkStreak`, `backupCode` y `restoreCode`; las copias antiguas pisaban a las nuevas y el código de copia de seguridad perdía `saved`, `paid` y `lastSave`. Test: `backup-test.js`.
 
+
+## Top 10: sugerencias (2026-10-07)
+- Fuente unica de jugadores: data/entidades/jugadores.json (139.483, la que estaba publicada). La de 89.147 era un subconjunto y no incluia a Rudiger, Yamal, Mbappe ni Bellingham.
+- Orden de sugerencias: coincidencia exacta, luego fama (las respuestas de niveles valen 60), luego tipo de coincidencia. El apellido cuenta como comienzo del nombre.
+- Fusion de duplicados (Betis/Real Betis, Aberdeen/Aberdeen F.C.): alias curados y claves exclusivas de una respuesta. Cada grupo muestra un nombre y todas las respuestas aceptan ese nombre.
+- Nombres con fama <= 9, o nacidos antes de 1955 con fama < 15, solo se sugieren si se escribe casi entero (8 o mas letras). La validacion de respuestas no cambia.
+- Test de referencia: src/top10/tests/suggest-test.js (falla si una consulta no devuelve lo esperado, hay duplicados o una respuesta no acepta el nombre mostrado).
+- Pendiente: jugadores recientes ausentes de la base (Pedri, Gavi, Vinicius Junior no estan salvo como respuesta de nivel).

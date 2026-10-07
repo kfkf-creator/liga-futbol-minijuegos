@@ -16844,33 +16844,75 @@ async function loadEntities(){
       });
     });
     DB_TYPES.forEach((t,i)=>{
-      DB[t]=lists[i].map(r=>({n:r[0],nk:norm(r[0]),keys:null,sub:subLabel(r[1],r[2]),f:r[3]}));
+      DB[t]=lists[i].map(r=>({n:r[0],nk:norm(r[0]),keys:null,sub:subLabel(r[1],r[2]),f:r[3],y:r[2]||0}));
     });
+    buildGroups(al);
     dbState="ready";
   }catch(e){ dbState="failed"; }
+}
+
+/* Duplicados ("Betis" y "Real Betis", "Aberdeen" y "Aberdeen F.C."): se agrupan los nombres que son la misma entidad.
+   Dos nombres se unen solo si uno es alias explícito del otro (alias curados o claves de una respuesta). Cada grupo muestra un único nombre. */
+const GROUPS={};   /* tipo -> {find(nk), name(root)} */
+function buildGroups(al){
+  DB_TYPES.forEach(t=>{
+    const parent=new Map();
+    const find=x=>{ if(!parent.has(x)) return x; while(parent.get(x)!==x){ parent.set(x,parent.get(parent.get(x))); x=parent.get(x); } return x; };
+    const union=(a,b)=>{ if(!a||!b||a===b) return; if(!parent.has(a)) parent.set(a,a); if(!parent.has(b)) parent.set(b,b); const ra=find(a), rb=find(b); if(ra!==rb) parent.set(rb,ra); };
+    const pool=POOLS[t]||[], pset=new Set(pool.map(e=>e.nk));
+    const curated=new Set();
+    Object.keys(al[t]||{}).forEach(c=>{ const nc=norm(c); curated.add(nc); (al[t][c]||[]).forEach(a=>union(nc,norm(a))); });
+    /* una clave solo une si es exclusiva de esa respuesta ("ronaldo" la comparten dos jugadores: no une nada) */
+    const freq=new Map(); pool.forEach(e=>e.keys.forEach(k=>freq.set(k,(freq.get(k)||0)+1)));
+    pool.forEach(e=>e.keys.forEach(k=>{ if(k!==e.nk && pset.has(k) && freq.get(k)===1 && !GLOBAL_AMBIG.includes(k)) union(e.nk,k); }));
+    const names=new Map();   /* raíz -> nombre a mostrar */
+    const pick=(root,n,rank)=>{ const cur=names.get(root); if(!cur||rank>cur.rank||(rank===cur.rank&&n.length>cur.n.length)) names.set(root,{n,rank}); };
+    pool.forEach(e=>{ if(parent.has(e.nk)) pick(find(e.nk),e.n,curated.has(e.nk)?2:1); });
+    Object.keys(al[t]||{}).forEach(c=>{ const nc=norm(c); if(parent.has(nc)) pick(find(nc),c,3); });
+    GROUPS[t]={find,name:r=>names.has(r)?names.get(r).n:null};
+    /* toda respuesta acepta el nombre de su grupo (el que puede mostrar el desplegable) */
+    LEVELS.forEach(L=>{ if(L.type!==t) return; L.answers.forEach(a=>{
+      const r=find(norm(a.n)); if(!parent.has(norm(a.n))) return;
+      parent.forEach((_,k)=>{ if(find(k)===r && pset.has(k) && !a.keys.includes(k)) a.keys.push(k); });
+      const nm=names.get(r); if(nm){ const k=norm(nm.n); if(!a.keys.includes(k)) a.keys.push(k); }
+    }); });
+  });
 }
 loadEntities();
 
 function suggest(L, raw, found){
   const q=norm(raw);
   if(q.length<2) return [];
-  const foundNames=new Set([...found].map(i=>norm(L.answers[i].n)));
+  const G=GROUPS[L.type];
+  const gid=nk=>G?G.find(nk):nk;
+  const foundIds=new Set([...found].map(i=>gid(norm(L.answers[i].n))));
   const out=[];
   const scan=(e,src)=>{
-    if(foundNames.has(e.nk)) return;
+    if(foundIds.has(gid(e.nk))) return;
     let s=-1;
-    if(e.nk.startsWith(q)) s=0;
+    if(e.nk===q || (e.keys && e.keys.includes(q))) s=-1.5;
+    else if(e.nk.startsWith(q)) s=0;
     else if(e.keys && e.keys.some(k=>k.startsWith(q))) s=1;
-    else if(e.nk.indexOf(" "+q)>=0) s=2;
+    else if(e.nk.indexOf(" "+q)>=0) s=1;   /* apellido o palabra suelta: vale como el comienzo del nombre */
     else if(q.length>=3 && e.nk.includes(q)) s=3;
-    if(s>=0) out.push({e,s,src});
+    if(s===-1) return;
+    /* nombres poco conocidos y antiguos: solo si se escribe casi entero (la validación no depende de esto) */
+    if(src===1 && s>-1.5 && (e.f<=9 || (e.y && e.y<1955 && e.f<15)) && q.length<8) return;
+    out.push({e,s,src});
   };
   (POOLS[L.type]||[]).forEach(e=>scan(e,0));
   const seen=new Set(out.map(x=>x.e.nk));
   (DB[L.type]||[]).forEach(e=>{ if(!seen.has(e.nk)) scan(e,1); });
-  /* primero mejor coincidencia; dentro de cada una, lo más famoso; a igualdad, nombre corto */
-  out.sort((x,y)=>x.s-y.s || (y.e.f||60)-(x.e.f||60) || x.e.nk.length-y.e.nk.length || x.e.nk.localeCompare(y.e.nk));
-  return out.slice(0,7).map(x=>({n:x.e.n,sub:x.e.sub||""}));
+  /* exacto primero; luego lo más famoso (las respuestas de niveles valen 60); a igualdad, mejor coincidencia y nombre corto */
+  out.sort((x,y)=>(x.s===-1.5?0:1)-(y.s===-1.5?0:1) || (y.e.f||60)-(x.e.f||60) || x.s-y.s || x.e.nk.length-y.e.nk.length || x.e.nk.localeCompare(y.e.nk));
+  const ids=new Set(), res=[];
+  for(const x of out){
+    const g=gid(x.e.nk); if(ids.has(g)) continue; ids.add(g);
+    const nm=G&&G.name(g);
+    res.push({n:nm||x.e.n,sub:nm?"":(x.e.sub||"")});
+    if(res.length===7) break;
+  }
+  return res;
 }
 
 //__UI__
