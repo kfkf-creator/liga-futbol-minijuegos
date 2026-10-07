@@ -608,7 +608,7 @@ function starText(n){ return "★".repeat(n)+"☆".repeat(3-n); }
 function visible(){
   const out=[];
   LEVELS.forEach((L,i)=>{
-    if(flt.diff!=="all" && L.diff!==flt.diff) return;
+    if(flt.diff!=="all" && revMode() && L.diff!==flt.diff) return;   /* la dificultad solo se ve y filtra en modo revisión */
     if(flt.type!=="all" && L.type!==flt.type) return;
     if(flt.cur && !L.cur) return;
     if(!eraCovers(flt.eras,L)) return;
@@ -632,7 +632,7 @@ function renderFilters(){
     const l=document.createElement("span"); l.className="flabel"; l.textContent=label;
     r.appendChild(l); items.forEach(c=>r.appendChild(c)); box.appendChild(r);
   };
-  row("Dificultad",[chip("Todas",flt.diff==="all",()=>{flt.diff="all";renderMenu();})]
+  if(revMode()) row("Dificultad",[chip("Todas",flt.diff==="all",()=>{flt.diff="all";renderMenu();})]
     .concat(DIFFS.map(([k,l])=>chip(l,flt.diff===k,()=>{flt.diff=k;renderMenu();}))));
   row("Tipo",[chip("Todos",flt.type==="all"&&!flt.cur,()=>{flt.type="all";flt.cur=false;renderMenu();})]
     .concat(TYPES.map(([k,l])=>chip(l,flt.type===k,()=>{flt.type=(flt.type===k?"all":k);renderMenu();})))
@@ -668,7 +668,7 @@ function renderMenu(){
     b.type="button";
     b.className="lvl"+(progress.done[L.key]?" done":"");
     const num=document.createElement("span"); num.className="num"; num.textContent=L.id;
-    const bd=document.createElement("span"); bd.className="badge "+L.diff; bd.textContent=DIFF_NAME[L.diff];
+    const bd=document.createElement("span"); if(revMode()){ bd.className="badge "+L.diff; bd.textContent=DIFF_NAME[L.diff]; }
     const meta=document.createElement("span"); meta.className="meta";
     meta.textContent=(L.cur?"Curiosidad · ":"")+TYPE_NAME[L.type]+" · "+L.tag+" · "+yrsText(L);
     const st=document.createElement("span"); st.className="st";
@@ -706,7 +706,7 @@ function startLevel(i,list){
   $("menu").hidden=true;
   $("game").hidden=false;
   $("lvlPill").textContent="Nivel "+L.id+" de "+LEVELS.length;
-  const dp=$("diffPill"); dp.textContent=DIFF_NAME[L.diff]; dp.className="pill "+L.diff;
+  const dp=$("diffPill"); dp.hidden=!revMode(); dp.textContent=revMode()?DIFF_NAME[L.diff]:""; dp.className="pill "+L.diff;
   $("typePill").textContent=TYPE_NAME[L.type];
   $("tagPill").textContent=L.cur?"Curiosidad":L.tag;
   $("title").textContent=L.title;

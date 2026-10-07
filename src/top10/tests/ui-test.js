@@ -3,6 +3,7 @@ const {chromium}=require(require("child_process").execSync("npm root -g").toStri
   const b=await chromium.launch({executablePath:process.env.CHROMIUM||"/opt/pw-browsers/chromium"});
   const p=await b.newPage({viewport:{width:900,height:900}});
   const errs=[]; p.on("pageerror",e=>errs.push(e.message)); p.on("console",m=>{if(m.type()==="error")errs.push(m.text())});
+  await p.addInitScript(()=>{ try{ localStorage.setItem("top10futbol.revmode","1"); }catch(e){} });
   await p.goto((process.env.URL||"file://"+process.cwd()+"/../../top10/index.html"));
   const cards=await p.locator(".lvl").count();
   await p.click("button.chipbtn:text-is(\"Leyenda\")");

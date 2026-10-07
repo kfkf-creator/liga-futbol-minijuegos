@@ -3,8 +3,9 @@ const {chromium}=require(require("child_process").execSync("npm root -g").toStri
   const b=await chromium.launch({executablePath:process.env.CHROMIUM||"/opt/pw-browsers/chromium"});
   const ctx=await b.newContext({viewport:{width:400,height:850},permissions:["clipboard-read","clipboard-write"]});
   const p=await ctx.newPage(); const errs=[]; p.on("pageerror",e=>errs.push(e.message)); const r={};
-  await p.goto(process.env.URL); r.offByDefault=await p.evaluate(()=>document.getElementById("revBar").hidden);
-  await p.goto(process.env.URL+"?revisar=1"); r.bar=await p.evaluate(()=>!document.getElementById("revBar").hidden);
+  await p.goto(process.env.URL); r.noDiffUi=await p.evaluate(()=>({badges:[...document.querySelectorAll(".lvl .badge")].filter(b=>b.textContent).length,row:/Dificultad/.test(document.getElementById("filters").textContent)}));
+  r.offByDefault=await p.evaluate(()=>document.getElementById("revBar").hidden);
+  await p.goto(process.env.URL+"?revisar=1"); r.bar=await p.evaluate(()=>!document.getElementById("revBar").hidden); r.diffUiInReview=await p.evaluate(()=>({badges:[...document.querySelectorAll(".lvl .badge")].filter(b=>b.textContent).length>100,row:/Dificultad/.test(document.getElementById("filters").textContent)}));
   await p.locator(".lvl").nth(10).click(); r.panel=await p.evaluate(()=>!document.getElementById("revPanel").hidden);
   r.opts=await p.locator("#revPanel .chipbtn").allTextContents();
   await p.click("#revPanel .chipbtn:text-is('Nivel bien')"); await p.click("#revPanel .chipbtn:text-is('Se queda')");
@@ -25,5 +26,5 @@ const {chromium}=require(require("child_process").execSync("npm root -g").toStri
   r.toggleBefore=await p.textContent("#revToggle"); await p.click("#revToggle"); r.toggleAfter=await p.textContent("#revToggle"); r.barViaToggle=await p.evaluate(()=>!document.getElementById("revBar").hidden);
   r.hscroll=await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth); r.errs=errs;
   console.log(JSON.stringify(r,null,1)); await b.close();
-  if(errs.length||!r.bar||!r.panel||!r.offByDefault||!r.persist.bar||!r.off||r.persist.n<3||!r.barViaToggle) process.exit(1);
+  if(errs.length||!r.bar||!r.panel||!r.diffUiInReview.badges||!r.diffUiInReview.row||!r.offByDefault||!r.persist.bar||!r.off||r.persist.n<3||r.noDiffUi.badges||r.noDiffUi.row||!r.barViaToggle) process.exit(1);
 })();
