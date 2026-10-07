@@ -205,3 +205,4 @@ Solo diseño; nada de esto esta en el codigo todavia salvo lo indicado en seccio
 - Nombres con fama <= 9, o nacidos antes de 1955 con fama < 15, solo se sugieren si se escribe casi entero (8 o mas letras). La validacion de respuestas no cambia.
 - Test de referencia: src/top10/tests/suggest-test.js (falla si una consulta no devuelve lo esperado, hay duplicados o una respuesta no acepta el nombre mostrado).
 - Pendiente: jugadores recientes ausentes de la base (Pedri, Gavi, Vinicius Junior no estan salvo como respuesta de nivel).
+- Jugadores actuales: tools/jugadores/actuales.txt + actuales.js (idempotente) suben la fama de ~500 jugadores de 2025-26 y anaden 45 que faltaban (Pedri, Rodri, Dani Carvajal, Rodrygo...). Fama 36 estrellas, 32 titulares de grandes clubes, 28 resto de las 5 grandes ligas. Lista escrita de memoria: revisar si falta alguien.

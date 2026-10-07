@@ -11,7 +11,7 @@ const {chromium}=require(require("child_process").execSync("npm root -g").toStri
     ["jugadores","bellingham","Jude Bellingham"],["jugadores","lewandowski","Robert Lewandowski"],["jugadores","messi","Messi"],
     ["jugadores","cristiano","Cristiano Ronaldo"],["jugadores","ronaldo","Ronaldo"],["jugadores","benzema","Karim Benzema"],["jugadores","modric","Luka Modrić"],
     ["jugadores","valverde","Federico Valverde"],["jugadores","yamal","Lamine Yamal"],["jugadores","militao","Éder Militão"],
-    ["equipos","betis","Real Betis"],["equipos","real betis","Real Betis"],["equipos","barcelona","Barcelona"],["equipos","atletico","Atlético"],
+    ["jugadores","pedri","Pedri"],["jugadores","gavi","Gavi"],["jugadores","vinicius","Vinícius Júnior"],["jugadores","carvajal","Dani Carvajal"],["jugadores","kane","Harry Kane"],["jugadores","saka","Bukayo Saka"],["jugadores","haaland","Erling Haaland"],["jugadores","oyarzabal","Mikel Oyarzabal"],["jugadores","wirtz","Florian Wirtz"],["jugadores","rodri","Rodri"],["jugadores","musiala","Jamal Musiala"],["jugadores","courtois","Thibaut Courtois"],["jugadores","salah","Mohamed Salah"],["jugadores","raphinha","Raphinha"],["jugadores","lamine","Lamine Yamal"],["equipos","betis","Real Betis"],["equipos","real betis","Real Betis"],["equipos","barcelona","Barcelona"],["equipos","atletico","Atlético"],
     ["equipos","sevilla","Sevilla"],["equipos","aberdeen","Aberdeen"]
   ];
   const r={cases:[],dupes:[],fails:[]};
