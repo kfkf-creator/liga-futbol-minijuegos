@@ -190,6 +190,7 @@ textarea{width:100%;background:var(--bg);color:var(--text);border:1px solid var(
 .linkbtn{background:none;border:0;color:var(--muted);text-decoration:underline;padding:4px 0;font-size:14px}
 .linkbtn:hover{color:var(--text)}
 .rep{margin-top:18px}
+.rev-toggle{margin:14px 0 0}
 .rep .panel,#revPanel,#revBar{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--panel)}
 #revPanel{margin-top:16px;display:grid;gap:10px}
 #revPanel[hidden],#revBar[hidden]{display:none}
@@ -251,6 +252,7 @@ textarea{width:100%;background:var(--bg);color:var(--text);border:1px solid var(
           <p class="hint" id="bkMsg" aria-live="polite"></p>
         </div>
       </details>
+      <p class="rev-toggle"><button class="linkbtn" id="revToggle" type="button"></button></p>
       <p class="foot">Datos revisados hasta septiembre de 2026. Cada nivel indica el periodo que cubre.</p>
     </section>
 
@@ -17423,6 +17425,7 @@ function revMode(){
     return localStorage.getItem(REV_MODE_KEY)==="1";
   }catch(e){ return false; }
 }
+function revSetMode(on){ try{ if(on) localStorage.setItem(REV_MODE_KEY,"1"); else localStorage.removeItem(REV_MODE_KEY); }catch(e){} renderMenu(); }
 function revLoad(){ if(!window.__rev){ try{ window.__rev=JSON.parse(localStorage.getItem(REV_KEY))||{}; }catch(e){ window.__rev={}; } } return window.__rev; }
 function revSave(){ try{ localStorage.setItem(REV_KEY,JSON.stringify(revLoad())); }catch(e){} }
 function revDone(r){ return !!(r&&r.d&&r.q); }
@@ -17473,6 +17476,7 @@ function revText(){
   return out.join("\n");
 }
 function renderRevBar(){
+  $("revToggle").textContent=revMode()?"Desactivar modo revisión":"Activar modo revisión";
   const box=$("revBar"); if(!revMode()){ box.hidden=true; return; }
   const all=revLoad(), n=LEVELS.filter(L=>revDone(all[L.key])).length;
   box.hidden=false; box.innerHTML="";
@@ -17489,6 +17493,8 @@ function renderRevBar(){
   });
   a.append(bShare,bCopy); box.append(h,a,msg);
 }
+
+$("revToggle").addEventListener("click",()=>revSetMode(!revMode()));
 
 /* ============ Reportar un problema (se comparte por WhatsApp, etc.) ============ */
 function repOpen(){ $("repPanel").hidden=false; $("repMsg").textContent=""; $("repText").focus(); }

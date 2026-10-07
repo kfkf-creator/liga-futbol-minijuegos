@@ -22,7 +22,10 @@ const {chromium}=require(require("child_process").execSync("npm root -g").toStri
   /* persiste tras recargar y el modo se mantiene sin el parametro */
   await p.goto(process.env.URL); r.persist=await p.evaluate(()=>({bar:!document.getElementById("revBar").hidden,n:Object.keys(JSON.parse(localStorage.getItem("top10futbol.review"))).length}));
   await p.goto(process.env.URL+"?revisar=0"); r.off=await p.evaluate(()=>document.getElementById("revBar").hidden);
+  /* sin parametro (app instalada): el boton del menu lo activa */
+  await p.evaluate(()=>{ localStorage.removeItem("top10futbol.revmode"); }); await p.goto(process.env.URL);
+  r.toggleBefore=await p.textContent("#revToggle"); await p.click("#revToggle"); r.toggleAfter=await p.textContent("#revToggle"); r.barViaToggle=await p.evaluate(()=>!document.getElementById("revBar").hidden);
   r.hscroll=await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth); r.errs=errs;
   console.log(JSON.stringify(r,null,1)); await b.close();
-  if(errs.length||!r.bar||!r.panel||!r.offByDefault||!r.persist.bar||!r.off||r.persist.n<3) process.exit(1);
+  if(errs.length||!r.bar||!r.panel||!r.offByDefault||!r.persist.bar||!r.off||r.persist.n<3||!r.barViaToggle) process.exit(1);
 })();
