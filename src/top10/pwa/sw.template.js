@@ -34,7 +34,7 @@ self.addEventListener("fetch",e=>{
   e.respondWith((async()=>{
     const cache=await caches.open(CORE);
     try{
-      const r=await Promise.race([fetch(req),timeout(4000)]);
+      const r=await Promise.race([fetch(req,{cache:"no-cache"}),timeout(4000)]);   /* revalida siempre: GitHub Pages sirve con max-age=600 y se quedaba la versión vieja */
       if(r&&r.ok) cache.put(req,r.clone());
       return r;
     }catch(err){

@@ -1,7 +1,7 @@
 /* Service worker del Top 10 Fútbol. VERSION se sustituye al compilar (hash del juego).
    - Juego y página: red primero (con tiempo límite) y caché si no hay conexión, así las actualizaciones llegan rápido.
    - Ficheros de nombres (entidades/*.json): caché primero y se refrescan por detrás. */
-const VERSION="a194efd6be";
+const VERSION="e628062cf9";
 const CORE="top10-core-"+VERSION;
 const DATA="top10-data";
 const CORE_FILES=["./","index.html","manifest.webmanifest","icon-192.png","icon-512.png","apple-touch-icon.png"];
@@ -34,7 +34,7 @@ self.addEventListener("fetch",e=>{
   e.respondWith((async()=>{
     const cache=await caches.open(CORE);
     try{
-      const r=await Promise.race([fetch(req),timeout(4000)]);
+      const r=await Promise.race([fetch(req,{cache:"no-cache"}),timeout(4000)]);   /* revalida siempre: GitHub Pages sirve con max-age=600 y se quedaba la versión vieja */
       if(r&&r.ok) cache.put(req,r.clone());
       return r;
     }catch(err){
