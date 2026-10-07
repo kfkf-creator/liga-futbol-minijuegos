@@ -8,9 +8,7 @@ const {chromium}=require(require("child_process").execSync("npm root -g").toStri
   await p.locator(".lvl").nth(10).click(); r.panel=await p.evaluate(()=>!document.getElementById("revPanel").hidden);
   r.opts=await p.locator("#revPanel .chipbtn").allTextContents();
   await p.click("#revPanel .chipbtn:text-is('Nivel bien')"); await p.click("#revPanel .chipbtn:text-is('Se queda')");
-  await p.click("#menuBtn",{force:true}).catch(()=>{});
-  await p.evaluate(()=>showMenu());
-  await p.locator(".lvl").nth(11).click();
+  await p.click("#revNext"); r.next=await p.textContent("#lvlPill"); r.panelAbove=await p.evaluate(()=>{ const pn=document.getElementById("revPanel").getBoundingClientRect().top, inp=document.getElementById("input").getBoundingClientRect().top; return pn<inp; });
   const o2=await p.locator("#revPanel .chipbtn").allTextContents(); r.opts2=o2;
   await p.click("#revPanel .chipbtn:has-text('Subir a')");
   await p.click("#revPanel .chipbtn:text-is('Quitar')"); await p.fill("#revPanel textarea","muy obscuro");

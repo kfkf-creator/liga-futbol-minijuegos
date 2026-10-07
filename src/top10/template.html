@@ -192,7 +192,10 @@ textarea{width:100%;background:var(--bg);color:var(--text);border:1px solid var(
 .rep{margin-top:18px}
 .rev-toggle{margin:14px 0 0;color:var(--muted);font-size:13px}
 .rep .panel,#revPanel,#revBar{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--panel)}
-#revPanel{margin-top:16px;display:grid;gap:10px}
+#revPanel{margin:12px 0 16px;display:grid;gap:10px}
+#revPanel .revnav{display:flex;flex-wrap:wrap;gap:8px}
+#revPanel .revans{margin:8px 0 0;padding-left:22px;color:var(--muted);font-size:14px}
+#revPanel summary{cursor:pointer;color:var(--muted)}
 #revPanel[hidden],#revBar[hidden]{display:none}
 #revBar{margin:12px 0}
 #revBar .actions{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0}
@@ -270,6 +273,7 @@ textarea{width:100%;background:var(--bg);color:var(--text);border:1px solid var(
 
       <h2 class="q" id="title"></h2>
       <p class="desc" id="desc"></p>
+      <div class="panel" id="revPanel" hidden></div>
 
       <form class="guess" id="form" autocomplete="off">
         <div class="acwrap">
@@ -324,7 +328,6 @@ textarea{width:100%;background:var(--bg);color:var(--text);border:1px solid var(
         </div>
         <p class="hint" id="shareMsg" aria-live="polite"></p>
       </div>
-      <div class="panel" id="revPanel" hidden></div>
     </section>
   </main>
 </div>
@@ -709,6 +712,7 @@ function startLevel(i,list){
   $("title").textContent=L.title;
   $("desc").textContent=L.desc;
   renderRev();
+  if(revMode()) window.scrollTo(0,0);
   $("result").hidden=true;
   say("","");
   $("input").value="";
@@ -1070,6 +1074,13 @@ function renderRev(){
   const L=LEVELS[state.idx], all=revLoad(), r=all[L.key]||(all[L.key]={});
   box.hidden=false; box.innerHTML="";
   const mk=(t,cls)=>{ const e=document.createElement(t); if(cls) e.className=cls; return e; };
+  const pos=state.list.indexOf(state.idx);
+  const nav=mk("div","revnav");
+  const go=(d)=>{ const j=pos+d; if(j>=0&&j<state.list.length) startLevel(state.list[j],state.list); };
+  const bPrev=mk("button","btn"); bPrev.type="button"; bPrev.textContent="‹ Anterior"; bPrev.disabled=pos<=0; bPrev.addEventListener("click",()=>go(-1));
+  const bNext=mk("button","btn primary"); bNext.type="button"; bNext.id="revNext"; bNext.textContent="Siguiente ›"; bNext.disabled=pos<0||pos>=state.list.length-1; bNext.addEventListener("click",()=>go(1));
+  const bMenu=mk("button","btn"); bMenu.type="button"; bMenu.textContent="Menú"; bMenu.addEventListener("click",()=>showMenu());
+  nav.append(bPrev,bNext,bMenu); box.appendChild(nav);
   const h=mk("p","hint"); h.textContent="Revisión del nivel "+L.id+" · dificultad actual: "+DIFF_NAME[L.diff]; box.appendChild(h);
   const row=(label,items)=>{ const rr=mk("div","frow"); const l=mk("span","flabel"); l.textContent=label; rr.appendChild(l); items.forEach(c=>rr.appendChild(c)); box.appendChild(rr); };
   const order=DIFFS.map(x=>x[0]), cur=order.indexOf(L.diff);
@@ -1088,6 +1099,11 @@ function renderRev(){
   const st=mk("p","hint"); st.setAttribute("aria-live","polite");
   st.textContent=revDone(r)?"Guardado.":"Elige una opción en cada fila.";
   box.appendChild(st);
+  const bNext2=mk("button","btn primary"); bNext2.type="button"; bNext2.textContent="Guardar y siguiente ›"; bNext2.disabled=bNext.disabled; bNext2.addEventListener("click",()=>go(1));
+  box.appendChild(bNext2);
+  const det=mk("details"); const sm=mk("summary"); sm.textContent="Ver las respuestas"; det.appendChild(sm);
+  const ol=mk("ol","revans"); L.answers.forEach(a=>{ const li=mk("li"); li.textContent=a.n+(a.d?" · "+a.d:""); ol.appendChild(li); }); det.appendChild(ol);
+  box.appendChild(det);
 }
 function revText(){
   const all=revLoad(), by=k=>LEVELS.find(L=>L.key===k);
