@@ -141,7 +141,7 @@ td.n,th.n{text-align:right}
 .sec{display:flex;align-items:baseline;justify-content:space-between;margin:24px 2px 6px}
 .sec h2{margin:0}
 .sec span{font-size:12.5px;color:var(--mut)}
-.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:7px 11px;font-size:13.5px;font-weight:700}
+.chip{min-height:44px;min-width:44px;justify-content:center;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:7px 11px;font-size:13.5px;font-weight:700}
 .chip.ok{border-color:color-mix(in srgb,var(--c) 45%,var(--line))}
 .chip.new{opacity:.7;padding:7px 10px;border-style:dashed}
 .chip svg{width:16px;height:16px;stroke:var(--c);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
@@ -596,6 +596,43 @@ function shareText(){
   const played=GAMES.filter(g=>r[g.id]!=null);
   return "Falso Nueve "+today()+"\n"+played.map(g=>g.ic+" "+g.name+" "+r[g.id]+"/"+100+" "+sq(r[g.id])).join("\n")+"\nRacha: "+streak()+" 🔥";
 }
+function resultCard(){
+  return new Promise((res,rej)=>{
+    const W=1080,H=1350,c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d");
+    const r=S.days[today()]||{},M=MAINS();
+    const F="system-ui,-apple-system,Segoe UI,Roboto,sans-serif";
+    const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,"#16224a");g.addColorStop(.45,"#090e1b");g.addColorStop(1,"#090e1b");x.fillStyle=g;x.fillRect(0,0,W,H);
+    x.textBaseline="alphabetic";
+    x.fillStyle="#f2c14e";x.font="800 84px "+F;x.fillText("FALSO NUEVE",80,170);
+    x.fillStyle="#8f9bc2";x.font="500 38px "+F;
+    x.fillText(NOW().toLocaleDateString("es-ES",{weekday:"long",day:"numeric",month:"long"}),80,232);
+    let y=330,total=0;
+    M.forEach(gm=>{
+      const v=r[gm.id],has=v!=null;if(has)total+=v;
+      x.fillStyle="#131c33";x.beginPath();x.roundRect(80,y-62,W-160,150,28);x.fill();
+      x.fillStyle="#eef2ff";x.font="700 44px "+F;x.fillText(gm.name,116,y+4);
+      x.textAlign="right";x.fillStyle=has?"#f2c14e":"#5a6690";x.font="800 56px "+F;x.fillText(has?String(v):"-",W-116,y+8);x.textAlign="left";
+      const k=has?Math.round(v/20):0;
+      for(let i=0;i<5;i++){x.fillStyle=i<k?"#3ddc84":"#243053";x.beginPath();x.roundRect(116+i*74,y+26,62,26,8);x.fill();}
+      y+=176;
+    });
+    x.fillStyle="#eef2ff";x.font="800 120px "+F;x.fillText(String(total),80,1110);
+    const tw=x.measureText(String(total)).width;
+    x.fillStyle="#8f9bc2";x.font="600 48px "+F;x.fillText("/ "+(M.length*100)+" puntos",80+tw+24,1110);
+    x.fillStyle="#f2c14e";x.font="700 48px "+F;x.fillText("Racha: "+streak()+" "+(streak()===1?"día":"días"),80,1190);
+    x.fillStyle="#8f9bc2";x.font="500 34px "+F;x.fillText("Cuatro retos al día. Una liga con tus amigos.",80,1290);
+    c.toBlob(b=>b?res(b):rej(new Error("png")),"image/png");
+  });
+}
+async function shareResult(){
+  const text=shareText();
+  try{
+    const blob=await resultCard();
+    const f=new File([blob],"falso-nueve-"+today()+".png",{type:"image/png"});
+    if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],text});return;}
+  }catch(e){if(e&&e.name==="AbortError")return;}
+  share(text);
+}
 async function share(text){
   try{if(navigator.share){await navigator.share({text});return;}}catch(e){if(e&&e.name==="AbortError")return;}
   try{await navigator.clipboard.writeText(text);toast("Copiado");}catch(e){prompt("Copia el texto:",text);}
@@ -639,7 +676,7 @@ function renderHoy(){
   const onb=$("#onbok");if(onb)onb.onclick=()=>{S.seen=true;save();renderHoy();};
   const unl=$("#unl");if(unl)unl.onclick=async()=>{if(await Rewards.request("Desbloquear los opcionales de hoy")){S.unlock=S.unlock||{};S.unlock[today()]=true;save();renderHoy();}};
   const resc=$("#resc");if(resc)resc.onclick=async()=>{const q=streakRescue();if(!q)return;if(await Rewards.request("Salvar tu racha")){S.saved=S.saved||{};S.saved[q.day]=true;S.lastSave=today();save();checkStreak();toast("Racha salvada: "+streak()+" días");renderHoy();}};
-  const sh=$("#sh");if(sh)sh.onclick=()=>share(shareText());
+  const sh=$("#sh");if(sh)sh.onclick=()=>shareResult();
 }
 function top10Stats(){
   try{
@@ -732,7 +769,7 @@ function renderPerfil(){
   <tr><td>Racha actual / mejor</td><td class="n"><b>${t10.cur} / ${t10.best}</b></td></tr></table>
   <div class="mut" style="font-size:13px;margin-top:8px">Es el progreso guardado en esta app. El Top 10 instalado por separado tiene el suyo.</div></div>`;
   $("#v-perfil").insertAdjacentHTML("beforeend",`<details class="card" id="cred"><summary style="font-weight:700;cursor:pointer">Créditos de las fotos</summary><div class="mut" style="font-size:13px;margin-top:8px">Las fotos de jugadores proceden de Wikimedia Commons con licencias libres. Cada foto enlaza a su página con autor y licencia. Cargando...</div></details>`);
-  loadPhotos().then(()=>{const d=$("#cred");if(!d)return;d.innerHTML=`<summary style="font-weight:700;cursor:pointer">Créditos de las fotos (${PHOTOS.list.length})</summary><div class="mut" style="font-size:12.5px;margin-top:8px;line-height:1.5">Fotos de Wikimedia Commons con licencias libres (Creative Commons y dominio público). Autor y licencia de cada una:<br>${PHOTOS.list.map(e=>`${esc(e.n)}: ${esc(e.artist||"autor desconocido")}, <a href="${esc(e.page)}" target="_blank" rel="noopener" style="color:var(--mut)">${esc(e.lic)}</a>`).join("<br>")}</div>`;});
+  loadPhotos().then(()=>{const d=$("#cred");if(!d)return;d.innerHTML=`<summary style="font-weight:700;cursor:pointer">Créditos de las fotos (${PHOTOS.list.length})</summary><div class="mut" style="font-size:12.5px;margin-top:8px;line-height:1.5">Fotos de Wikimedia Commons con licencias libres (Creative Commons y dominio público). Autor y licencia de cada una:<br>${PHOTOS.list.map(e=>`${esc(e.n)}: ${esc(e.artist||"autor desconocido")}, <a href="${esc(e.page)}" target="_blank" rel="noopener" style="color:var(--mut);display:inline-block;padding:9px 3px">${esc(e.lic)}</a>`).join("<br>")}</div>`;});
   bindAccount();
   $("#bk-c").onclick=()=>share(backupCode());
   $("#bk-r").onclick=()=>{const c=prompt("Pega aquí tu código de copia de seguridad:");if(!c)return;try{restoreCode(c.trim());toast("Progreso restaurado");renderPerfil();}catch(e){toast(e.message);}};
@@ -881,7 +918,7 @@ function showDone(id,day){
   openGame(g.name+(hoy?"":" · "+dayLabel(day)),g.c);
   $("#gb").innerHTML=`<div class="mut" style="text-align:center;margin-top:30px">${hoy?"Tu resultado de hoy":"Tu resultado de ese día"}</div><div class="big">${sc}/100</div>
   ${hoy?`<button class="btn block" id="dsh">Compartir</button>`:""}<button class="btn block ghost" style="margin-top:10px" id="dcl">Cerrar</button>`;
-  const d=$("#dsh");if(d)d.onclick=()=>share(shareText());
+  const d=$("#dsh");if(d)d.onclick=()=>shareResult();
   $("#dcl").onclick=closeGame;
 }
 
@@ -946,7 +983,7 @@ function playMM(day){
     $("#gsc").textContent="";
     $("#gb").innerHTML=`<div class="mut" style="text-align:center;margin-top:30px">${timeout?"Se acabó el tiempo. ":""}Has acertado ${hits} de ${N}${hoy?" · bonus de velocidad +"+bonus:""}</div><div class="big">${score}/100</div>
     ${hoy?`<button class="btn block" id="e1">Compartir</button>`:""}<button class="btn block ghost" style="margin-top:10px" id="e2">Cerrar</button>`;
-    const a=$("#e1");if(a)a.onclick=()=>share(shareText());
+    const a=$("#e1");if(a)a.onclick=()=>shareResult();
     $("#e2").onclick=closeGame;
   }
   if(i>=N)end(false);
@@ -1052,7 +1089,7 @@ function playOnce(day){
     $("#endbox").innerHTML=`<div class="mut" style="text-align:center">${timedOut?"Se acabó el tiempo. ":""}${found.size} de 10${hoy?" · bonus de velocidad +"+bonus:""}</div><div class="big">${score}/100</div>
     ${hoy?`<button class="btn block" id="e1">Compartir</button>`:""}
     <button class="btn block ghost" style="margin-top:10px" id="e2">Cerrar</button>`;
-    const a=$("#e1");if(a)a.onclick=()=>share(shareText());
+    const a=$("#e1");if(a)a.onclick=()=>shareResult();
     funAttach(funOf(null,L.k));$("#e2").onclick=closeGame;
   }
   draw(timedOut?"Se acabó el tiempo":"");

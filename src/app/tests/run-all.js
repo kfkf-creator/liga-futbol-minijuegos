@@ -3,7 +3,7 @@
    Los tests imprimen estado en JSON, no tienen aserciones propias: esto es una comprobacion de humo.
    Uso: (servidor en :8123 desde la raiz del repo)  node src/app/tests/run-all.js */
 const {spawnSync}=require("child_process"),path=require("path");
-const names=["app","games","sb-mock","pwa","resume","timer","rewards","ads","accounts"];
+const names=["app","games","sb-mock","pwa","resume","timer","rewards","ads","accounts","share"];
 let bad=0;
 for(const n of names){
   const r=spawnSync("node",[path.join(__dirname,n+"-test.js")],{encoding:"utf8",timeout:240000});

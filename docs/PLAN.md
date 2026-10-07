@@ -185,3 +185,13 @@ Solo diseño; nada de esto esta en el codigo todavia salvo lo indicado en seccio
 - Pendiente: comprobar dominio, handles (Instagram, TikTok) y marca (OEPM clases 9 y 41) antes de monetizar. "Tercer Hombre" descartado (colisión con la película, jerga menos conocida); se guarda como idea para un modo.
 - Decisión (2026-10-07): se mantiene **Falso Nueve** (forma corta "Falso 9"). TMview (ES + EUIPO): sin marcas registradas con ese nombre; solo una solicitud argentina clase 41 (2019) con estado "Finalizada". Riesgo restante: conflicto de USO con el canal Falso Nueve TV y una banda del mismo nombre (handles ocupados). Descartados tras investigar: Taconazo, Prórroga, Rabona, Líbero, Línea de Cuatro (programa de TUDN), Último Hombre (podcast uruguayo; marca argentina clase 33), Doble Pivote, Segundo Palo. Alternativa de menor riesgo si hiciera falta cambiar: Gol Fantasma.
 - Pendiente: handles (probar @falso9, @falsonueve9), dominio, búsqueda de variantes en TMview ("Falso 9", similitud, clases 9, 28, 41) y valorar registro de marca en OEPM antes de monetizar.
+
+## Mejoras autónomas (2026-10-07)
+- Compartir: etiquetas Open Graph y `app/og.png` (vista previa en WhatsApp), tarjeta de resultado en imagen (`resultCard` y `shareResult`, con caída a texto si no hay soporte de archivos).
+- Primera vez: tarjeta "Así funciona Falso Nueve" en Hoy (`S.seen`, no bloquea la pantalla). La banda de "versión nueva" ya existía.
+- Portada raíz con la marca nueva.
+- CI: `.github/workflows/ci.yml` compila, exige que `app/` esté al día y ejecuta `src/app/tests/run-all.js` (comprobación de humo: sin excepciones, sin errores de consola, sin scroll horizontal). Sin probar aún en Actions.
+- Contenido: `mm3.js` con 20 sets nuevos (36 en total). Auditoría con fuentes de ca-15 a ca-40 (2 correcciones de prórroga en ca-38 y ca-40) y de ta-15 a ta-40 (sin errores). Descartados de mm3: Messi y Cristiano en partidos de Mundial (cifras 2026 sin confirmar) y un set duplicado de entrenadores de Premier.
+- Accesibilidad: contraste comprobado (texto secundario 6,15 a 1, dorado 11,5 a 1), todos los botones con nombre, objetivos táctiles de 44 px en el archivo.
+- Legal: borradores en `docs/legal/` (privacidad, aviso legal, cookies), sin publicar.
+
