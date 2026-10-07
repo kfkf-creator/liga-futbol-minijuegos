@@ -194,4 +194,6 @@ Solo diseño; nada de esto esta en el codigo todavia salvo lo indicado en seccio
 - Contenido: `mm3.js` con 20 sets nuevos (36 en total). Auditoría con fuentes de ca-15 a ca-40 (2 correcciones de prórroga en ca-38 y ca-40) y de ta-15 a ta-40 (sin errores). Descartados de mm3: Messi y Cristiano en partidos de Mundial (cifras 2026 sin confirmar) y un set duplicado de entrenadores de Premier.
 - Accesibilidad: contraste comprobado (texto secundario 6,15 a 1, dorado 11,5 a 1), todos los botones con nombre, objetivos táctiles de 44 px en el archivo.
 - Legal: borradores en `docs/legal/` (privacidad, aviso legal, cookies), sin publicar.
+- Panel de racha (2026-10-07): la llama de Hoy es ahora un botón que abre una hoja con la racha, la mejor racha, el estado de hoy, la escalera de premios (conseguidos, siguiente con barra, bloqueados), comodines, medallas y la regla del salvavidas. Test: `streak-test.js`.
+- Corregido: la plantilla tenía duplicadas `streakRescue`, `checkStreak`, `backupCode` y `restoreCode`; las copias antiguas pisaban a las nuevas y el código de copia de seguridad perdía `saved`, `paid` y `lastSave`. Test: `backup-test.js`.
 

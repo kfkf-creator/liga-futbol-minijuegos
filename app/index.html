@@ -32,6 +32,13 @@ h2{font-size:15px;letter-spacing:.01em;font-weight:700;color:var(--mut);margin:2
 .streak{display:inline-flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:7px 12px;font-weight:800;white-space:nowrap}
 .streak svg{width:17px;height:17px;color:var(--gold);fill:rgba(242,193,78,.18);stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r2);padding:16px;margin:12px 0;box-shadow:var(--sh)}
+.streak{cursor:pointer}.streak:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.stkb{text-align:center;margin:4px 0 14px}.stkb b{font-size:56px;line-height:1;color:var(--gold)}.stkb small{display:block;color:var(--mut);font-size:14px;margin-top:6px}
+.lad{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:var(--card);margin:8px 0}
+.lad .n{min-width:48px;font-weight:800;font-size:17px}.lad .tx{flex:1;font-size:14px}.lad .tx small{display:block;color:var(--mut);font-size:12.5px}
+.lad svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;color:var(--mut);flex:none}
+.lad.done{border-color:color-mix(in srgb,var(--ok) 45%,var(--line))}.lad.done svg{color:var(--ok)}.lad.next{border-color:var(--gold)}
+.pbar{height:8px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:7px}.pbar i{display:block;height:100%;background:var(--gold);border-radius:99px}
 .onb ul.onbl{margin:8px 0 12px;padding-left:18px;color:var(--mut);font-size:14px}.onb ul.onbl li{margin:6px 0}.onb ul.onbl b{color:var(--txt)}
 .gcard{display:flex;gap:14px;align-items:center;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:var(--r2);padding:12px 14px 12px 12px;margin:8px 0;box-shadow:var(--sh);transition:transform .12s,border-color .12s;text-decoration:none;color:inherit}
 .gcard:active{transform:scale(.985)}
@@ -335,42 +342,6 @@ const Cloud={
       if(acc)await this.pull();}catch(e){}
   }
 };
-/* racha en peligro: ayer no se jugo pero antes de ayer si; se puede salvar con un video, como mucho una vez cada 7 dias */
-function streakRescue(){
-  const n=dayNum(today()),y=dstrUTC(n-1);
-  if(dayCounts(y)||!dayCounts(dstrUTC(n-2)))return null;
-  if(S.lastSave&&n-dayNum(S.lastSave)<7)return null;
-  let d=n-2,len=0;while(dayCounts(dstrUTC(d))){len++;d--;}
-  return len>=3?{day:y,len}:null;
-}
-function checkStreak(){
-  const cur=streak(),got=[];
-  S.claimed=S.claimed||{};S.medals=S.medals||{};
-  for(const L of LADDER){
-    if(cur<L.n||S.claimed[L.n])continue;
-    S.claimed[L.n]=today();
-    if(L.medal)S.medals["streak"+L.n]={t:"streak",n:L.n,name:L.medal,day:today()};
-    if(L.hint)tokGive("hint",L.hint);if(L.life)tokGive("life",L.life);
-    got.push(L);
-  }
-  if(got.length){save();const L=got[got.length-1];setTimeout(()=>{try{toast("¡Racha de "+L.n+" días! "+L.txt);}catch(e){}},400);}
-}
-/* copia de seguridad en texto para pasar el progreso a otro movil */
-function backupCode(){
-  const o={v:1,days:S.days,arch:S.arch,medals:S.medals,claimed:S.claimed,tokens:S.tokens,alias:S.alias,avatar:S.avatar};
-  return "MJ1:"+btoa(unescape(encodeURIComponent(JSON.stringify(o))));
-}
-function restoreCode(c){
-  if(!/^MJ1:/.test(c))throw new Error("Código no válido");
-  let o;try{o=JSON.parse(decodeURIComponent(escape(atob(c.slice(4)))));}catch(e){throw new Error("Código no válido");}
-  if(!o||o.v!==1||typeof o.days!=="object")throw new Error("Código no válido");
-  for(const d in o.days){S.days[d]=S.days[d]||{};for(const g in o.days[d])if(S.days[d][g]==null)S.days[d][g]=o.days[d][g];}
-  for(const d in (o.arch||{})){S.arch[d]=S.arch[d]||{};for(const g in o.arch[d])if(S.arch[d][g]==null)S.arch[d][g]=o.arch[d][g];}
-  Object.assign(S.medals,o.medals||{});Object.assign(S.claimed,o.claimed||{});
-  for(const k of ["hint","life"])S.tokens[k]=Math.max(tokN(k),(o.tokens&&o.tokens[k])||0);
-  if(!S.alias&&o.alias)S.alias=o.alias;if(!S.avatar&&o.avatar)S.avatar=o.avatar;
-  save();
-}
 function dstrUTC(n){const d=new Date(n*86400000);return d.getUTCFullYear()+"-"+pad(d.getUTCMonth()+1)+"-"+pad(d.getUTCDate());}
 
 /* ================= capa de ligas (servidor intercambiable) ================= */
@@ -476,6 +447,8 @@ function recordDaily(game,score){
 
 /* ================= vistas principales ================= */
 const ICONS={
+check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+lock:'<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
 mm:'<path d="M12 4v16M6 20h12M5 7h14"/><path d="M5 7l-3 6a3 3 0 0 0 6 0L5 7zM19 7l-3 6a3 3 0 0 0 6 0l-3-6z"/>',
 once:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M12 5v14"/><circle cx="12" cy="12" r="2.6"/><path d="M3 9.5h3v5H3M21 9.5h-3v5h3"/>',
 tray:'<circle cx="6" cy="18" r="2"/><circle cx="18" cy="6" r="2"/><path d="M8 18h5a4 4 0 0 0 0-8h-2a4 4 0 0 1 0-4h5"/>',
@@ -648,6 +621,38 @@ const isReq=(game,day)=>requiredOf(day||today()).includes(game);
 const MAINS=()=>GAMES.filter(g=>isReq(g.id));
 function nextIn(){const d=NOW(),m=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1),mins=Math.max(1,Math.round((m-d)/60000)),h=Math.floor(mins/60);return "retos nuevos en "+(h?h+" h "+(mins%60)+" min":mins+" min");}
 function gameCard(g,r){const sc=r[g.id];return `<button class="gcard" style="--c:${g.c}" data-play="${g.id}"><span class="ic">${svg(g.id)}</span><span class="tx"><b>${g.name}</b><small>${g.desc}</small></span>${sc!=null?`<span class="pill done">${sc}<i>/100</i></span>`:`<span class="pill">Jugar</span>`}</button>`;}
+function streakBest(){
+  const ks=Object.keys(S.days||{}).concat(Object.keys(S.saved||{})).filter(k=>/^\d{4}-\d\d-\d\d$/.test(k)).sort();
+  if(!ks.length)return 0;
+  let best=0,run=0;
+  for(let n=dayNum(ks[0]),e=dayNum(today());n<=e;n++){if(dayCounts(dstrUTC(n))){run++;if(run>best)best=run;}else run=0;}
+  return best;
+}
+function streakSheet(){
+  const cur=streak(),n=dayNum(today()),best=Math.max(cur,streakBest()),ok=dayCounts(today()),cl=S.claimed||{};
+  const next=LADDER.find(L=>!cl[L.n]&&L.n>cur);
+  const lastSave=S.lastSave&&n-dayNum(S.lastSave)<7?7-(n-dayNum(S.lastSave)):0;
+  const ms=Object.values(S.medals||{}).sort((a,b)=>String(a.day).localeCompare(String(b.day)));
+  const state=ok?"Hoy ya cuenta para tu racha.":cur?"Juega un reto obligatorio hoy para no perderla.":"Juega un reto obligatorio hoy para empezar tu racha.";
+  const rows=LADDER.map(L=>{
+    const got=!!cl[L.n],isNext=next&&next.n===L.n,left=L.n-cur;
+    return `<div class="lad ${got?"done":""} ${isNext?"next":""}">${svg(got?"check":"lock")}<span class="n">${L.n} días</span><span class="tx">${esc(L.txt)}${got?"<small>Conseguido</small>":isNext?`<small>Te ${left===1?"falta 1 día":"faltan "+left+" días"}</small><div class="pbar"><i style="width:${Math.min(100,Math.round(cur/L.n*100))}%"></i></div>`:""}</span></div>`;
+  }).join("");
+  const el=document.createElement("div");el.className="sheet";el.setAttribute("role","dialog");el.setAttribute("aria-label","Tu racha");
+  el.innerHTML=`<div class="sh"><div class="shh"><b>Tu racha</b><button class="x2" id="skx" type="button" aria-label="Cerrar">${svg("x")}</button></div>
+  <div class="stkb"><b>${cur}</b><small>${cur===1?"día seguido":"días seguidos"} jugando al menos un reto obligatorio${best>cur?` · mejor racha: ${best}`:""}</small></div>
+  <div class="mut" style="text-align:center;font-size:13.5px;margin-bottom:6px">${state}</div>
+  <h2 style="margin:16px 0 4px">Premios de racha</h2>${rows}
+  <div class="mut" style="font-size:12.5px;margin:8px 0 0">Cada premio se gana una sola vez. Los comodines se acumulan hasta 2 de cada tipo.</div>
+  <div class="toks" style="margin-top:12px"><div class="tok"><b>${tokN("hint")}</b><span>Comodín de pista</span></div><div class="tok"><b>${tokN("life")}</b><span>Comodín de vida extra</span></div></div>
+  ${ms.length?`<h2 style="margin:16px 0 0">Tus medallas</h2><div class="medals">${ms.map(medalIcon).join("")}</div>`:""}
+  <div class="mut" style="font-size:12.5px;margin-top:14px">Si fallas un día teniendo una racha de 3 o más, un vídeo puede salvarla.${lastSave?` Podrás volver a usarlo en ${lastSave} ${lastSave===1?"día":"días"}.`:" Se puede una vez cada 7 días."}</div></div>`;
+  const close=()=>{el.remove();document.removeEventListener("keydown",esc2);};
+  const esc2=e=>{if(e.key==="Escape")close();};
+  document.addEventListener("keydown",esc2);
+  el.querySelector("#skx").onclick=close;el.onclick=e=>{if(e.target===el)close();};
+  document.body.appendChild(el);el.querySelector("#skx").focus();
+}
 function onbCard(){
   if(S.seen)return "";
   if(Object.keys(S.days||{}).length){S.seen=true;return "";}
@@ -660,7 +665,7 @@ function renderHoy(){
   const xtra=B.reduce((a,g)=>a+(r[g.id]||0),0),xn=B.filter(g=>r[g.id]!=null).length;
   const total=M.reduce((a,g)=>a+(r[g.id]||0),0),n=M.filter(g=>r[g.id]!=null).length,any=GAMES.some(g=>r[g.id]!=null);
   const fecha=NOW().toLocaleDateString("es-ES",{weekday:"long",day:"numeric",month:"long"});
-  $("#v-hoy").innerHTML=`<div class="top"><h1>Hoy</h1><div class="streak" title="Racha de días jugados">${svg("flame")}${streak()}</div></div>
+  $("#v-hoy").innerHTML=`<div class="top"><h1>Hoy</h1><button class="streak" id="stk" type="button" title="Racha de días jugados" aria-label="Mi racha: ${streak()} ${streak()===1?"día":"días"}. Ver detalle y premios">${svg("flame")}${streak()}</button></div>
   <div class="mut" style="margin:-4px 0 10px;font-size:13px">Cuatro retos al día. Una liga con tus amigos.</div>
   ${onbCard()}
   ${(()=>{const q=streakRescue();return q?`<button class="gcard rescue" style="--c:#ff6b4a" id="resc"><span class="ic">${svg("flame")}</span><span class="tx"><b>Tu racha de ${q.len} días está en peligro</b><small>Ayer no jugaste. Mira un vídeo para salvarla.</small></span><span class="pill">Salvar</span></button>`:"";})()}
@@ -673,6 +678,7 @@ function renderHoy(){
   ${any?`<button class="btn block" style="margin-top:6px" id="sh">Compartir resultado</button>`:""}${window.installBarHtml?window.installBarHtml():""}`;
   if(window.bindInstallBar)window.bindInstallBar();
   document.querySelectorAll("[data-play]").forEach(b=>b.onclick=()=>startGame(b.dataset.play,today()));
+  const stk=$("#stk");if(stk)stk.onclick=streakSheet;
   const onb=$("#onbok");if(onb)onb.onclick=()=>{S.seen=true;save();renderHoy();};
   const unl=$("#unl");if(unl)unl.onclick=async()=>{if(await Rewards.request("Desbloquear los opcionales de hoy")){S.unlock=S.unlock||{};S.unlock[today()]=true;save();renderHoy();}};
   const resc=$("#resc");if(resc)resc.onclick=async()=>{const q=streakRescue();if(!q)return;if(await Rewards.request("Salvar tu racha")){S.saved=S.saved||{};S.saved[q.day]=true;S.lastSave=today();save();checkStreak();toast("Racha salvada: "+streak()+" días");renderHoy();}};
