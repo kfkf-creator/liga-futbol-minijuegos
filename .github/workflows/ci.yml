@@ -1,0 +1,28 @@
+name: CI
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Instalar Playwright y Chromium
+        run: |
+          npm install -g playwright
+          playwright install --with-deps chromium
+      - name: Compilar y comprobar que app/ esta al dia
+        run: |
+          cd src/app && node build.js
+          cd ../..
+          git diff --exit-code -- app/index.html app/sw.js app/manifest.webmanifest app/classic || (echo "app/ no coincide con src/. Ejecuta: cd src/app && node build.js y sube los cambios." && exit 1)
+      - name: Servidor local y tests
+        run: |
+          export CHROMIUM="$(node -e "console.log(require(require('child_process').execSync('npm root -g').toString().trim()+'/playwright').chromium.executablePath())")"
+          python3 -m http.server 8123 >/dev/null 2>&1 &
+          sleep 2
+          node src/app/tests/run-all.js

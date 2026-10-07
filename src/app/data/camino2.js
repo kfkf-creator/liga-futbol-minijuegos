@@ -143,7 +143,7 @@ module.exports = [
     { r: "Cuartos de final", opp: "España", s: "2-1" },
     { r: "Semifinal", opp: "Portugal", s: "2-1", note: "Tras prórroga (gol de oro)" },
     { r: "Final", opp: "Italia", s: "2-1", note: "Tras prórroga (gol de oro)" }
-  ], fun: "Wiltord empató en el minuto 94 de la final y Trezeguet dio el título con un gol de oro en la prórroga.", src: [W + "UEFA_Euro_2000"] },
+  ], fun: "Wiltord empató en el descuento de la final y Trezeguet dio el título con un gol de oro en la prórroga.", src: [W + "UEFA_Euro_2000"] },
 
   { id: "ca-30", team: "España", alias: ["Espana","Spain"], year: 2008, comp: "Eurocopa", matches: [
     { r: "Fase de grupos", opp: "Rusia", s: "4-1" },
@@ -225,7 +225,7 @@ module.exports = [
     { r: "Fase de grupos", opp: "Bolivia", s: "5-0" },
     { r: "Cuartos de final", opp: "Uruguay", s: "1-0" },
     { r: "Semifinal", opp: "Perú", s: "2-1" },
-    { r: "Final", opp: "Argentina", s: "0-0", pen: "4-1" }
+    { r: "Final", opp: "Argentina", s: "0-0", pen: "4-1", note: "Tras prórroga" }
   ], fun: "Chile ganó en casa su primera Copa América venciendo a Argentina en los penaltis, y en 2016 repitió final, rival y desenlace por penaltis.", src: [W + "2015_Copa_Am%C3%A9rica", W + "2015_Copa_Am%C3%A9rica_Group_A", W + "Chile_at_the_Copa_Am%C3%A9rica"] },
 
   { id: "ca-39", team: "Brasil", alias: ["Brazil"], year: 2019, comp: "Copa América", matches: [
@@ -241,7 +241,7 @@ module.exports = [
     { r: "Fase de grupos", opp: "Perú", s: "1-1" },
     { r: "Fase de grupos", opp: "Chile", s: "1-1" },
     { r: "Fase de grupos", opp: "México", s: "1-0" },
-    { r: "Cuartos de final", opp: "Argentina", s: "1-1", pen: "5-4" },
+    { r: "Cuartos de final", opp: "Argentina", s: "1-1", pen: "5-4", note: "Tras prórroga" },
     { r: "Semifinal", opp: "Perú", s: "2-0" },
     { r: "Final", opp: "Paraguay", s: "3-0" }
   ], fun: "Uruguay ganó su 15ª Copa América, récord en aquel momento, y Luis Suárez fue elegido mejor jugador del torneo.", src: [W + "2011_Copa_Am%C3%A9rica", W + "Uruguay_at_the_Copa_Am%C3%A9rica"] }

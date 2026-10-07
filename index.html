@@ -3,26 +3,38 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#090e1b">
+<link rel="icon" href="app/favicon-48.png">
+<link rel="apple-touch-icon" href="app/apple-touch-icon.png">
 <title>Falso Nueve</title>
+<meta name="description" content="Cuatro retos de fútbol al día. Una liga con tus amigos.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Falso Nueve">
+<meta property="og:title" content="Falso Nueve">
+<meta property="og:description" content="Cuatro retos al día. Una liga con tus amigos.">
+<meta property="og:image" content="https://kfkf-creator.github.io/liga-futbol-minijuegos/app/og.png">
+<meta name="twitter:card" content="summary_large_image">
 <style>
-:root{--bg:#0e1a14;--card:#16281f;--line:#2b4a3a;--txt:#eaf3ec;--mut:#93b09f;--acc:#3ddc84}
+:root{--bg:#090e1b;--card:#131c33;--line:#243053;--txt:#eef2ff;--mut:#8f9bc2;--gold:#f2c14e}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-main{max-width:720px;margin:0 auto;padding:28px 16px}
-h1{margin:0 0 6px}
-p{color:var(--mut);margin:0 0 20px}
-a.card{display:block;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;color:var(--txt);text-decoration:none}
-a.card:hover{border-color:var(--acc)}
+body{margin:0;background:radial-gradient(120% 60% at 50% -10%,#16224a 0,rgba(9,14,27,0) 60%) no-repeat,var(--bg);color:var(--txt);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;min-height:100vh}
+main{max-width:560px;margin:0 auto;padding:28px 16px}
+.brand{display:flex;align-items:center;gap:14px;margin-bottom:6px}
+.brand img{width:56px;height:56px;border-radius:14px}
+h1{margin:0;font-size:28px;letter-spacing:-.02em}
+p{color:var(--mut);margin:0 0 22px}
+a.card{display:block;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;color:var(--txt);text-decoration:none;margin-top:12px}
+a.card:hover,a.card:focus-visible{border-color:var(--gold);outline:none}
 a.card b{display:block;font-size:18px;margin-bottom:4px}
 a.card span{color:var(--mut);font-size:14px}
 </style>
 </head>
 <body>
 <main>
-<h1>Falso Nueve</h1>
-<p>Retos de futbol en castellano.</p>
-<a class="card" href="top10/"><b>Top 10 Futbol</b><span>162 niveles: nombra el top 10 con 5 vidas y sin tiempo.</span></a>
-<a class="card" href="app/" style="margin-top:12px"><b>Minijuegos diarios</b><span>Más o menos, Once oculto, reto del día y ligas privadas con tus amigos.</span></a>
+<div class="brand"><img src="app/icon-192.png" alt="" width="56" height="56"><h1>Falso Nueve</h1></div>
+<p>Cuatro retos al día. Una liga con tus amigos.</p>
+<a class="card" href="app/"><b>Retos diarios</b><span>Más o menos, Once oculto, reto del día y ligas privadas con tus amigos.</span></a>
+<a class="card" href="top10/"><b>Top 10 Fútbol</b><span>162 niveles: nombra el top 10 con 5 vidas y sin tiempo.</span></a>
 </main>
 </body>
 </html>

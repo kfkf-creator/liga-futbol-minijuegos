@@ -5,7 +5,7 @@ const root=path.join(__dirname,"..","..");
 const read=f=>fs.readFileSync(path.join(__dirname,f),"utf8");
 
 /* Más o menos */
-const MM=[].concat(require("./data/mm1.js"),require("./data/mm2.js"));
+const MM=[].concat(require("./data/mm1.js"),require("./data/mm2.js"),require("./data/mm3.js"));
 const ids=new Set();
 MM.forEach(s=>{
   if(ids.has(s.id)) throw new Error("id repetido "+s.id); ids.add(s.id);

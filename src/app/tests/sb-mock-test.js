@@ -3,7 +3,7 @@ const {chromium}=require(require("child_process").execSync("npm root -g").toStri
 const URL=process.env.URL||"http://localhost:8123/app/index.html";
 const MOCK="https://mock.supabase.test";
 (async()=>{
- const b=await chromium.launch({executablePath:"/opt/pw-browsers/chromium",args:["--no-sandbox"]});
+ const b=await chromium.launch({executablePath:process.env.CHROMIUM||"/opt/pw-browsers/chromium",args:["--no-sandbox"]});
  const p=await (await b.newContext({viewport:{width:390,height:800}})).newPage();
  const errs=[],calls=[];
  p.on("pageerror",e=>errs.push(String(e)));
