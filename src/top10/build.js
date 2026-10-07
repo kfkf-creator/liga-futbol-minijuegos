@@ -25,7 +25,11 @@ levels.forEach((L,i)=>{ L.id=i+1; });
 const YEARS=require("./data/years.js");
 levels.forEach(L=>{ L.yrs=YEARS[L.title]||L.yrs; if(!L.yrs) throw new Error("Sin rango de años: "+L.title); });
 const extra=require("./data/extra.js");
-const data="const LEVELS = "+JSON.stringify(levels,null,1)+";\nconst EXTRA = "+JSON.stringify(extra)+";";
+/* revision de Marc (data/review.json: clave -> [opinion, dificultad, comentario]). No me gusta e indiferente no salen a los jugadores; la dificultad propia sustituye a la estimada */
+const REVF="data/review.json", REV=fs.existsSync(REVF)?JSON.parse(fs.readFileSync(REVF,"utf8")):{};
+const HIDDEN=[];
+levels.forEach(L=>{ const r=REV[L.key]; if(!r) return; if(r[0]==="no"||r[0]==="ind") HIDDEN.push(L.key); if(r[1]&&["facil","medio","dificil","leyenda"].includes(r[1])) L.diff=r[1]; });
+const data="const HIDDEN = "+JSON.stringify(HIDDEN)+";\nconst LEVELS = "+JSON.stringify(levels,null,1)+";\nconst EXTRA = "+JSON.stringify(extra)+";";
 const tpl=fs.readFileSync("template.html","utf8").replace("/*__DATA__*/",()=>data);
 const build=require("crypto").createHash("sha1").update(tpl).digest("hex").slice(0,6);
 const out=tpl.replace("__BUILD__",build);

@@ -3,16 +3,11 @@ const {chromium}=require(require("child_process").execSync("npm root -g").toStri
   const b=await chromium.launch({executablePath:process.env.CHROMIUM||"/opt/pw-browsers/chromium"});
   const p=await b.newPage({viewport:{width:900,height:900}});
   const errs=[]; p.on("pageerror",e=>errs.push(e.message)); p.on("console",m=>{if(m.type()==="error")errs.push(m.text())});
-  await p.addInitScript(()=>{ try{ localStorage.setItem("top10futbol.revmode","1"); }catch(e){} });
   await p.goto((process.env.URL||"file://"+process.cwd()+"/../../top10/index.html"));
   const cards=await p.locator(".lvl").count();
-  await p.click("button.chipbtn:text-is(\"Leyenda\")");
-  const legend=await p.locator(".lvl").count();
-  await p.click("button.chipbtn:text-is(\"Todas\")");
-  await p.click("button.chipbtn:text-is(\"Curiosidades\")");
-  const cur=await p.locator(".lvl").count();
-  const ci=await p.evaluate(()=>LEVELS.filter(L=>L.cur).findIndex(L=>/asiáticos/.test(L.title)));
-  await p.locator(".lvl").nth(ci).click();
+  const legend=0, cur=await p.evaluate(()=>LEVELS.filter(L=>L.cur).length);
+  const ci=await p.evaluate(()=>LEVELS.findIndex(L=>L.cur&&/asiáticos/.test(L.title)));
+  await p.evaluate(i=>startLevel(i,visible()),ci);
   // Curiosidad: escribir "son h" y ver desplegable
   await p.fill("#input","hun");
   const acAfter=await p.locator("#ac li").allTextContents();

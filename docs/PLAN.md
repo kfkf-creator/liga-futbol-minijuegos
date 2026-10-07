@@ -209,3 +209,9 @@ Solo diseño; nada de esto esta en el codigo todavia salvo lo indicado en seccio
 - Top 10 (2026-10-07): ya no se corrige una respuesta que es otra entidad real (Estonia no es errata de Escocia) y la sugerencia '¿Querías decir?' solo salta con 1 letra de diferencia (2 en nombres de 10+). 69 descripciones de nivel reescritas: no nombran respuestas, suplentes, lesionados ni sancionados (si el portero excluido). typo-test.js lo vigila.
 - Top 10: modo revision (?revisar=1): por nivel 'Nivel bien / Bajar a X / Subir a X' y 'Se queda / Quitar / Comentar' con texto; se guarda en localStorage (top10futbol.review) y 'Compartir revision' exporta el resumen. Se desactiva con ?revisar=0. Test: review-test.js.
 - Top 10: la dificultad (Facil/Medio/Dificil/Leyenda) se oculta a los jugadores (etiqueta, filtro, pildora); sigue visible en modo revision. Se conserva el campo y el orden interno. Futuro: calcular la dificultad real con el porcentaje de aciertos de jugadores.
+
+## Top 10 como repertorio (2026-10-07)
+- Sin filtros ni categorias para el jugador: los niveles salen mezclados (reparto proporcional por tipo, nunca dos del mismo tipo seguidos, los 5 primeros accesibles). Orden fijo para todos los dispositivos. No hay nivel diario ni tiempo.
+- Revision de Marc (modo revision): orden mezclado sin categorias; Me gusta / Indiferente / No me gusta, dificultad propia (solo si gusta o es indiferente) y comentario opcional. Se exporta con "Compartir revision" (resumen + bloque DATOS en JSON).
+- Pipeline: pegar el DATOS en src/top10/data/review.json; build.js oculta "no me gusta" e "indiferente" (HIDDEN) y aplica la dificultad propia. No se borra nada del codigo.
+- Pendiente: informe estadistico de reparto (tipo, epoca, competicion, dificultad) tras la revision; verificacion de datos de los "me gusta"; posicion en el ranking de quienes han respondido (requiere recoger resultados anonimos); videos para ver respuestas (con consentimiento publicitario).
