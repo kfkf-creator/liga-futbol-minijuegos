@@ -215,3 +215,8 @@ Solo diseño; nada de esto esta en el codigo todavia salvo lo indicado en seccio
 - Revision de Marc (modo revision): orden mezclado sin categorias; Me gusta / Indiferente / No me gusta, dificultad propia (solo si gusta o es indiferente) y comentario opcional. Se exporta con "Compartir revision" (resumen + bloque DATOS en JSON).
 - Pipeline: pegar el DATOS en src/top10/data/review.json; build.js oculta "no me gusta" e "indiferente" (HIDDEN) y aplica la dificultad propia. No se borra nada del codigo.
 - Pendiente: informe estadistico de reparto (tipo, epoca, competicion, dificultad) tras la revision; verificacion de datos de los "me gusta"; posicion en el ranking de quienes han respondido (requiere recoger resultados anonimos); videos para ver respuestas (con consentimiento publicitario).
+
+## Idea para el futuro: monetizacion y hosting (2026-10-12, solo anotada)
+- Netlify (visto en TikTok): hosting con Functions y deploy previews. No monetiza por si mismo; hoy no hace falta, GitHub Pages basta.
+- Orden sensato: 1) jugadores recurrentes (repertorio, calidad, compartir), 2) anuncios con consentimiento RGPD y politica de privacidad, 3) backend solo si hay pagos, ranking por pregunta o validacion de puntuaciones.
+- Cuando llegue el paso 3, comparar con requisitos concretos (volumen, coste, privacidad): quedarse en Pages + Supabase/Firebase, Netlify, o Cloudflare Pages/Workers. Comprobar entonces los limites de los planes gratuitos.
