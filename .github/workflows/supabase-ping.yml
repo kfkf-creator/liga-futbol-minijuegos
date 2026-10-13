@@ -15,9 +15,9 @@ jobs:
       - uses: actions/checkout@v4
       - name: Consulta ligera a la base de datos
         run: |
-          # La clave anon es publica por diseno (src/app/config.js). Con RLS sin politicas devuelve [] y HTTP 200.
+          # La clave anon es publica por diseno (src/app/config.js). Las tablas no dan permisos a anon, asi que la base responde 401 con codigo 42501: eso prueba que Postgres ha atendido la peticion.
           URL=$(node -p 'require("./src/app/config.js").supabaseUrl')
           KEY=$(node -p 'require("./src/app/config.js").supabaseKey')
           code=$(curl -s -o /tmp/out.json -w "%{http_code}" -H "apikey: $KEY" -H "Authorization: Bearer $KEY" "$URL/rest/v1/leagues?select=id&limit=1")
           echo "HTTP $code"; head -c 200 /tmp/out.json; echo
-          [ "$code" = "200" ] || { echo "::error::Ping a Supabase fallido: HTTP $code $(head -c 160 /tmp/out.json | tr -d '\n')"; exit 1; }
+          { [ "$code" = "200" ] || grep -q 42501 /tmp/out.json; } || { echo "::error::Ping a Supabase fallido: HTTP $code $(head -c 160 /tmp/out.json | tr -d '\n')"; exit 1; }
