@@ -20,4 +20,4 @@ jobs:
           KEY=$(node -p 'require("./src/app/config.js").supabaseKey')
           code=$(curl -s -o /tmp/out.json -w "%{http_code}" -H "apikey: $KEY" -H "Authorization: Bearer $KEY" "$URL/rest/v1/leagues?select=id&limit=1")
           echo "HTTP $code"; head -c 200 /tmp/out.json; echo
-          [ "$code" = "200" ] || { echo "El ping a Supabase ha fallado"; exit 1; }
+          [ "$code" = "200" ] || { echo "::error::Ping a Supabase fallido: HTTP $code $(head -c 160 /tmp/out.json | tr -d '\n')"; exit 1; }
