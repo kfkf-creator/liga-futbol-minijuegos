@@ -1,0 +1,23 @@
+name: Ping a Supabase (evitar la pausa por inactividad)
+
+on:
+  schedule:
+    - cron: "17 6 */3 * *"   # cada 3 dias a las 06:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Consulta ligera a la base de datos
+        run: |
+          # La clave anon es publica por diseno (src/app/config.js). Con RLS sin politicas devuelve [] y HTTP 200.
+          URL=$(node -p 'require("./src/app/config.js").supabaseUrl')
+          KEY=$(node -p 'require("./src/app/config.js").supabaseKey')
+          code=$(curl -s -o /tmp/out.json -w "%{http_code}" -H "apikey: $KEY" -H "Authorization: Bearer $KEY" "$URL/rest/v1/leagues?select=id&limit=1")
+          echo "HTTP $code"; head -c 200 /tmp/out.json; echo
+          [ "$code" = "200" ] || { echo "El ping a Supabase ha fallado"; exit 1; }
