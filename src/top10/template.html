@@ -524,8 +524,17 @@ function buildGroups(al){
     /* una clave solo une si es exclusiva de esa respuesta ("ronaldo" la comparten dos jugadores: no une nada) */
     const freq=new Map(); pool.forEach(e=>e.keys.forEach(k=>freq.set(k,(freq.get(k)||0)+1)));
     pool.forEach(e=>e.keys.forEach(k=>{ if(k!==e.nk && pset.has(k) && freq.get(k)===1 && !GLOBAL_AMBIG.includes(k)) union(e.nk,k); }));
+    /* alias mutuos ("Betis" lista "real betis" y "Real Betis" lista "betis"): la clave la comparten las dos entradas y la regla anterior no las une.
+       Que cada una cite a la otra basta, salvo en selecciones (Unión Soviética y Rusia, Checoslovaquia y República Checa son selecciones distintas). */
+    if(t!=="selecciones"){
+      const byNk=new Map(pool.map(e=>[e.nk,e]));
+      pool.forEach(e=>e.keys.forEach(k=>{ const o=byNk.get(k); if(o && k!==e.nk && o.keys.includes(e.nk) && !GLOBAL_AMBIG.includes(k) && !GLOBAL_AMBIG.includes(e.nk)) union(e.nk,k); }));
+    }
+    const use=new Map();   /* cuántas respuestas de niveles usan cada nombre: entre sinónimos se muestra el más usado */
+    LEVELS.forEach(L=>{ if(L.type===t) L.answers.forEach(a=>{ const k=norm(a.n); use.set(k,(use.get(k)||0)+1); }); });
     const names=new Map();   /* raíz -> nombre a mostrar */
-    const pick=(root,n,rank)=>{ const cur=names.get(root); if(!cur||rank>cur.rank||(rank===cur.rank&&n.length>cur.n.length)) names.set(root,{n,rank}); };
+    const pick=(root,n,rank)=>{ const cur=names.get(root), u=use.get(norm(n))||0;
+      if(!cur||rank>cur.rank||(rank===cur.rank&&(u>cur.u||(u===cur.u&&n.length>cur.n.length)))) names.set(root,{n,rank,u}); };
     pool.forEach(e=>{ if(parent.has(e.nk)) pick(find(e.nk),e.n,curated.has(e.nk)?2:1); });
     Object.keys(al[t]||{}).forEach(c=>{ const nc=norm(c); if(parent.has(nc)) pick(find(nc),c,3); });
     GROUPS[t]={find,name:r=>names.has(r)?names.get(r).n:null};
@@ -537,6 +546,7 @@ function buildGroups(al){
     }); });
   });
 }
+buildGroups({});   /* sin la base de nombres también se agrupan los sinónimos de las reservas de los niveles */
 loadEntities();
 
 function suggest(L, raw, found){
